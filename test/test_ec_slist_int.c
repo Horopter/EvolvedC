@@ -130,15 +130,12 @@ void test_slist_int_remove(void *mp)
     TEST_ASSERT(add_status_b == EC_OK);
     TEST_ASSERT(add_status_c == EC_OK);
 
-    void *out = NULL;
     int v = 20;
 
-    ec_status_t s = l.remove_fn(&l, &v, &out);  // Assuming the correct function is 'remove'
+    ec_status_t s = l.remove_fn(&l, &v);
 
     // Verify status code and pointer before dereferencing
     TEST_ASSERT(s == EC_OK);
-    TEST_ASSERT(out != NULL);
-    TEST_ASSERT(*(int *)out == 20);
     TEST_ASSERT(l.size_fn(&l) == 2);  // List should now have 2 elements
 
     l.free_fn(&l);
@@ -154,9 +151,8 @@ void test_slist_int_remove_first(void *mp)
     int a = 11, b = 22;
     l.add(&l, &a);
     l.add(&l, &b);
-    void *out = NULL;
-    ec_status_t s = l.remove_first(&l, &out);
-    TEST_ASSERT(s == EC_OK && *(int *)out == 11 && l.size_fn(&l) == 1);
+    ec_status_t s = l.remove_first(&l);
+    TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 1);
     l.free_fn(&l);
     printf("pass: test_slist_int_remove_first\n");
 }
@@ -170,9 +166,8 @@ void test_slist_int_remove_last(void *mp)
     int a = 33, b = 44;
     l.add(&l, &a);
     l.add(&l, &b);
-    void *out = NULL;
-    ec_status_t s = l.remove_last(&l, &out);
-    TEST_ASSERT(s == EC_OK && *(int *)out == 44 && l.size_fn(&l) == 1);
+    ec_status_t s = l.remove_last(&l);
+    TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 1);
     l.free_fn(&l);
     printf("pass: test_slist_int_remove_last\n");
 }
@@ -187,9 +182,8 @@ void test_slist_int_remove_at(void *mp)
     l.add(&l, &a);
     l.add(&l, &b);
     l.add(&l, &c);
-    void *out = NULL;
-    ec_status_t s = l.remove_at(&l, 1, &out);
-    TEST_ASSERT(s == EC_OK && *(int *)out == 20 && l.size_fn(&l) == 2);
+    ec_status_t s = l.remove_at(&l, 1);
+    TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 2);
     l.free_fn(&l);
     printf("pass: test_slist_int_remove_at\n");
 }
@@ -322,22 +316,71 @@ void test_slist_int_sublist(void *mp)
 {
     stamp();
     printf("test_slist_int_sublist\n");
+
     ec_slist_int_t l;
-    ec_slist_int_init(&l, mp);
+    ec_status_t init_status = ec_slist_int_init(&l, mp);
+    if (init_status != EC_OK) {
+        printf("ERROR: Failed to initialize the list. Status: %d\n", init_status);
+        TEST_ASSERT(0);  // Force failure
+    }
+
+    // Adding elements: 10, 20, 30, 40, 50
     for (int i = 0; i < 5; i++)
     {
         int v = (i + 1) * 10;
-        l.add(&l, &v);
+        ec_status_t add_status = l.add(&l, &v);
+        if (add_status != EC_OK) {
+            printf("ERROR: Failed to add value %d to list. Status: %d\n", v, add_status);
+            TEST_ASSERT(0);  // Force failure
+        }
     }
+
+    // Creating sublist from index 1 to 4 (should contain 20, 30, 40)
     ec_slist_int_t *sub = NULL;
-    ec_status_t s = l.sublist(&l, 1, 4, &sub);
-    TEST_ASSERT(s == EC_OK && sub->size_fn(sub) == 3);
-    void *out;
-    sub->get_at(sub, 0, &out);
-    TEST_ASSERT(*(int *)out == 20);
-    sub->free_fn(sub);
+    ec_status_t sublist_status = l.sublist(&l, 1, 4, &sub);
+    if (sublist_status != EC_OK) {
+        printf("ERROR: Failed to create sublist from index 1 to 4. Status: %d\n", sublist_status);
+        TEST_ASSERT(0);  // Force failure
+    }
+
+    // Verify sublist size
+    size_t sublist_size = sub->size_fn(sub);
+    if (sublist_size != 3) {
+        printf("ERROR: Sublist size incorrect. Expected 3, got %zu\n", sublist_size);
+        TEST_ASSERT(0);
+    }
+
+    // Verify sublist content
+    int expected_values[] = {20, 30, 40};
+    for (size_t i = 0; i < 3; i++) {
+        void *out = NULL;
+        ec_status_t get_status = sub->get_at(sub, i, &out);
+        if (get_status != EC_OK) {
+            printf("ERROR: Failed to get value at sublist index %zu. Status: %d\n", i, get_status);
+            TEST_ASSERT(0);
+        }
+        if (*(int *)out != expected_values[i]) {
+            printf("ERROR: Sublist value mismatch at index %zu. Expected %d, got %d\n",
+                   i, expected_values[i], *(int *)out);
+            TEST_ASSERT(0);
+        }
+    }
+
+    // Cleanup
+    ec_status_t free_sub_status = sub->free_fn(sub);
+    if (free_sub_status != EC_OK) {
+        printf("ERROR: Failed to free sublist. Status: %d\n", free_sub_status);
+        TEST_ASSERT(0);
+    }
+
     free(sub);
-    l.free_fn(&l);
+
+    ec_status_t free_list_status = l.free_fn(&l);
+    if (free_list_status != EC_OK) {
+        printf("ERROR: Failed to free original list. Status: %d\n", free_list_status);
+        TEST_ASSERT(0);
+    }
+
     printf("pass: test_slist_int_sublist\n");
 }
 
@@ -354,7 +397,7 @@ void test_slist_int_copy_shallow(void *mp)
     }
     ec_slist_int_t *cp = NULL;
     ec_status_t s = l.copy_shallow(&l, &cp);
-    TEST_ASSERT(s == EC_OK && cp->size_fn(cp) == 3);
+    TEST_ASSERT(s == EC_OK && cp->size == 3);
     cp->free_fn(cp);
     free(cp);
     l.free_fn(&l);
@@ -399,8 +442,8 @@ void test_slist_int_replace_at(void *mp)
     void *out = NULL;
     l.add(&l, &a);
     l.add(&l, &b);
-    ec_status_t s = l.replace_at(&l, &c, 1, &out);
-    TEST_ASSERT(s == EC_OK && *(int *)out == 10);
+    ec_status_t s = l.replace_at(&l, &c, 1);
+    TEST_ASSERT(s == EC_OK);
     l.get_at(&l, 1, &out);
     TEST_ASSERT(*(int *)out == 99);
     l.free_fn(&l);
@@ -591,32 +634,57 @@ void test_slist_int_iterators(void *mp)
 {
     stamp();
     printf("test_slist_int_iterators\n");
+
     ec_slist_int_t l;
     ec_slist_int_init(&l, mp);
+
+    // Add initial values to the list: 100, 101, 102, 103, 104
     for (int i = 0; i < 5; i++)
     {
         int v = i + 100;
         l.add(&l, &v);
     }
+
     ec_slist_int_iter_t it;
-    l.iter_init(&it, &l);
+    l.iter_init(&it, &l);  // Initialize the iterator
+
     void *out;
-    size_t c = 0;
+    size_t count = 0;
+
+    // Iterate through the list to verify all elements are >= 100
     while (l.iter_next(&it, &out) == EC_OK)
     {
         TEST_ASSERT(*(int *)out >= 100);
-        c++;
+        count++;
     }
-    TEST_ASSERT(c == 5);
-    ec_status_t s = l.iter_remove(&it, NULL);
-    TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 4);
+    TEST_ASSERT(count == 5);  // Ensure all 5 elements were traversed
+
+    /**
+     * Correct Usage: `iter_remove` can only be called after `iter_next`
+     * has successfully moved the iterator to a valid node (`current != NULL`).
+     * So, we need to reinitialize the iterator and advance it before removing.
+     */
+
+    l.iter_init(&it, &l);            // Reinitialize iterator
+    TEST_ASSERT(l.iter_next(&it, &out) == EC_OK); // Move to the first element
+
+    // Remove the current node (which is now pointing to the first element, 100)
+    ec_status_t s = l.iter_remove(&it);
+    TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 4);  // List size should be reduced to 4
+
+    // Add a new element (999) at the current iterator position
     int x = 999;
     s = l.iter_add(&it, &x);
-    TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 5);
+    TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 5);  // List size should now be back to 5
+
+    // Replace the current node's value with 777
     int y = 777;
     s = l.iter_replace(&it, &y, NULL);
-    TEST_ASSERT(s == EC_OK);
+    TEST_ASSERT(s == EC_OK);  // Replacement should succeed
+
+    // Free the list after test completion
     l.free_fn(&l);
+
     printf("pass: test_slist_int_iterators\n");
 }
 

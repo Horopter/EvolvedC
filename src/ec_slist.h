@@ -20,6 +20,7 @@
         struct ec_slist_##NAME##_node_s *next;                                                                                                                                     \
     } ec_slist_##NAME##_node_t;                                                                                                                                                    \
     typedef struct ec_slist_##NAME##_s ec_slist_##NAME##_t;                                                                                                                        \
+    static inline ec_status_t ec_slist_##NAME##_init(ec_slist_##NAME##_t *l, void *mempool);                                                                                       \
     static inline void ec_slist_##NAME##_init_functions(ec_slist_##NAME##_t *l);                                                                                                   \
     typedef struct ec_slist_##NAME##_iter_s                                                                                                                                        \
     {                                                                                                                                                                              \
@@ -54,10 +55,10 @@
         ec_status_t (*add_all_at)(ec_slist_##NAME##_t *, ec_slist_##NAME##_t *, size_t);                                                                                           \
         ec_status_t (*add_first)(ec_slist_##NAME##_t *, void *);                                                                                                                   \
         ec_status_t (*add_last)(ec_slist_##NAME##_t *, void *);                                                                                                                    \
-        ec_status_t (*remove_fn)(ec_slist_##NAME##_t *, void *, void **);                                                                                                             \
-        ec_status_t (*remove_first)(ec_slist_##NAME##_t *, void **);                                                                                                               \
-        ec_status_t (*remove_last)(ec_slist_##NAME##_t *, void **);                                                                                                                \
-        ec_status_t (*remove_at)(ec_slist_##NAME##_t *, size_t, void **);                                                                                                          \
+        ec_status_t (*remove_fn)(ec_slist_##NAME##_t *, void *);                                                                                                                   \
+        ec_status_t (*remove_first)(ec_slist_##NAME##_t *);                                                                                                                        \
+        ec_status_t (*remove_last)(ec_slist_##NAME##_t *);                                                                                                                         \
+        ec_status_t (*remove_at)(ec_slist_##NAME##_t *, size_t);                                                                                                                   \
         ec_status_t (*remove_all)(ec_slist_##NAME##_t *);                                                                                                                          \
         ec_status_t (*remove_all_cb)(ec_slist_##NAME##_t *, void (*)(void *));                                                                                                     \
         ec_status_t (*get_at)(ec_slist_##NAME##_t *, size_t, void **);                                                                                                             \
@@ -66,7 +67,7 @@
         ec_status_t (*sublist)(ec_slist_##NAME##_t *, size_t, size_t, ec_slist_##NAME##_t **);                                                                                     \
         ec_status_t (*copy_shallow)(ec_slist_##NAME##_t *, ec_slist_##NAME##_t **);                                                                                                \
         ec_status_t (*copy_deep)(ec_slist_##NAME##_t *, void *(*)(void *), ec_slist_##NAME##_t **);                                                                                \
-        ec_status_t (*replace_at)(ec_slist_##NAME##_t *, void *, size_t, void **);                                                                                                 \
+        ec_status_t (*replace_at)(ec_slist_##NAME##_t *, void *, size_t);                                                                                                          \
         size_t (*contains)(ec_slist_##NAME##_t *, void *);                                                                                                                         \
         size_t (*contains_value)(ec_slist_##NAME##_t *, void *, int (*)(const void *, const void *));                                                                              \
         ec_status_t (*index_of)(ec_slist_##NAME##_t *, void *, int (*)(const void *, const void *), size_t *);                                                                     \
@@ -80,7 +81,7 @@
         ec_status_t (*filter_mut)(ec_slist_##NAME##_t *, bool (*)(const void *));                                                                                                  \
         ec_status_t (*filter)(ec_slist_##NAME##_t *, bool (*)(const void *), ec_slist_##NAME##_t **);                                                                              \
         void (*iter_init)(ec_slist_##NAME##_iter_t *, ec_slist_##NAME##_t *);                                                                                                      \
-        ec_status_t (*iter_remove)(ec_slist_##NAME##_iter_t *, void **);                                                                                                           \
+        ec_status_t (*iter_remove)(ec_slist_##NAME##_iter_t *);                                                                                                                    \
         ec_status_t (*iter_add)(ec_slist_##NAME##_iter_t *, void *);                                                                                                               \
         ec_status_t (*iter_replace)(ec_slist_##NAME##_iter_t *, void *, void **);                                                                                                  \
         size_t (*iter_index)(ec_slist_##NAME##_iter_t *);                                                                                                                          \
@@ -361,7 +362,7 @@
     }                                                                                                                                                                              \
     static inline ec_status_t ec_slist_##NAME##_add_first(ec_slist_##NAME##_t *l, void *e) { return ec_slist_##NAME##_add_at(l, e, 0); }                                           \
     static inline ec_status_t ec_slist_##NAME##_add_last(ec_slist_##NAME##_t *l, void *e) { return ec_slist_##NAME##_add(l, e); }                                                  \
-    static inline ec_status_t ec_slist_##NAME##_remove_fn(ec_slist_##NAME##_t *l, void *e, void **out)                                                                                \
+    static inline ec_status_t ec_slist_##NAME##_remove_fn(ec_slist_##NAME##_t *l, void *e)                                                                                         \
     {                                                                                                                                                                              \
         if (!l)                                                                                                                                                                    \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
@@ -372,10 +373,6 @@
         {                                                                                                                                                                          \
             if (c->data == val)                                                                                                                                                    \
             {                                                                                                                                                                      \
-                if (out)                                                                                                                                                           \
-                {                                                                                                                                                                  \
-                    *out = &c->data;                                                                                                                                               \
-                }                                                                                                                                                                  \
                 if (!p)                                                                                                                                                            \
                 {                                                                                                                                                                  \
                     l->head = c->next;                                                                                                                                             \
@@ -399,7 +396,7 @@
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         return EC_ERR_NOT_FOUND;                                                                                                                                                   \
     }                                                                                                                                                                              \
-    static inline ec_status_t ec_slist_##NAME##_remove_first(ec_slist_##NAME##_t *l, void **out)                                                                                   \
+    static inline ec_status_t ec_slist_##NAME##_remove_first(ec_slist_##NAME##_t *l)                                                                                               \
     {                                                                                                                                                                              \
         if (!l)                                                                                                                                                                    \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
@@ -410,8 +407,6 @@
             return EC_ERR_OUT_OF_BOUNDS;                                                                                                                                           \
         }                                                                                                                                                                          \
         ec_slist_##NAME##_node_t *h = l->head;                                                                                                                                     \
-        if (out)                                                                                                                                                                   \
-            *out = &h->data;                                                                                                                                                       \
         l->head = h->next;                                                                                                                                                         \
         if (h == l->tail)                                                                                                                                                          \
             l->tail = NULL;                                                                                                                                                        \
@@ -420,7 +415,7 @@
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         return EC_OK;                                                                                                                                                              \
     }                                                                                                                                                                              \
-    static inline ec_status_t ec_slist_##NAME##_remove_last(ec_slist_##NAME##_t *l, void **out)                                                                                    \
+    static inline ec_status_t ec_slist_##NAME##_remove_last(ec_slist_##NAME##_t *l)                                                                                                \
     {                                                                                                                                                                              \
         if (!l)                                                                                                                                                                    \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
@@ -432,8 +427,6 @@
         }                                                                                                                                                                          \
         if (l->head == l->tail)                                                                                                                                                    \
         {                                                                                                                                                                          \
-            if (out)                                                                                                                                                               \
-                *out = &l->head->data;                                                                                                                                             \
             EC_FREE(l->head);                                                                                                                                                      \
             l->head = NULL;                                                                                                                                                        \
             l->tail = NULL;                                                                                                                                                        \
@@ -444,8 +437,6 @@
         ec_slist_##NAME##_node_t *c = l->head;                                                                                                                                     \
         while (c->next != l->tail)                                                                                                                                                 \
             c = c->next;                                                                                                                                                           \
-        if (out)                                                                                                                                                                   \
-            *out = &l->tail->data;                                                                                                                                                 \
         EC_FREE(l->tail);                                                                                                                                                          \
         l->tail = c;                                                                                                                                                               \
         c->next = NULL;                                                                                                                                                            \
@@ -453,7 +444,7 @@
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         return EC_OK;                                                                                                                                                              \
     }                                                                                                                                                                              \
-    static inline ec_status_t ec_slist_##NAME##_remove_at(ec_slist_##NAME##_t *l, size_t idx, void **out)                                                                          \
+    static inline ec_status_t ec_slist_##NAME##_remove_at(ec_slist_##NAME##_t *l, size_t idx)                                                                                      \
     {                                                                                                                                                                              \
         if (!l)                                                                                                                                                                    \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
@@ -469,8 +460,6 @@
             p = c;                                                                                                                                                                 \
             c = c->next;                                                                                                                                                           \
         }                                                                                                                                                                          \
-        if (out)                                                                                                                                                                   \
-            *out = &c->data;                                                                                                                                                       \
         if (!p)                                                                                                                                                                    \
         {                                                                                                                                                                          \
             l->head = c->next;                                                                                                                                                     \
@@ -577,23 +566,29 @@
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
         if (f > t)                                                                                                                                                                 \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_lock(l);                                                                                                                                                 \
+                                                                                                                                                                                   \
         if (t > l->size)                                                                                                                                                           \
         {                                                                                                                                                                          \
             ec_slist_##NAME##_unlock(l);                                                                                                                                           \
             return EC_ERR_OUT_OF_BOUNDS;                                                                                                                                           \
         }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_t *sub = EC_SLIST_ALLOC(ec_slist_##NAME##_t, l->mempool);                                                                                                \
         if (!sub)                                                                                                                                                                  \
         {                                                                                                                                                                          \
             ec_slist_##NAME##_unlock(l);                                                                                                                                           \
             return EC_ERR_ALLOC;                                                                                                                                                   \
         }                                                                                                                                                                          \
-        EC_MUTEX_INIT(sub->lock);                                                                                                                                                  \
-        sub->head = NULL;                                                                                                                                                          \
-        sub->tail = NULL;                                                                                                                                                          \
-        sub->size = 0;                                                                                                                                                             \
-        sub->mempool = l->mempool;                                                                                                                                                 \
+        ec_status_t status = ec_slist_##NAME##_init(sub, l->mempool);                                                                                                              \
+        if (status != EC_OK)                                                                                                                                                       \
+        {                                                                                                                                                                          \
+            EC_FREE(sub);                                                                                                                                                          \
+            ec_slist_##NAME##_unlock(l);                                                                                                                                           \
+            return status;                                                                                                                                                         \
+        }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         for (size_t i = f; i < t; i++)                                                                                                                                             \
         {                                                                                                                                                                          \
             ec_slist_##NAME##_node_t *c = l->head;                                                                                                                                 \
@@ -601,21 +596,28 @@
             {                                                                                                                                                                      \
                 c = c->next;                                                                                                                                                       \
             }                                                                                                                                                                      \
+                                                                                                                                                                                   \
             ec_slist_##NAME##_node_t *n = ec_slist_##NAME##_make_node(sub, c->data);                                                                                               \
             if (!n)                                                                                                                                                                \
             {                                                                                                                                                                      \
-                ec_slist_##NAME##_unlock(l); /* free partial sub */                                                                                                                \
-                ec_slist_##NAME##_node_t *xx = sub->head;                                                                                                                          \
-                while (xx)                                                                                                                                                         \
+                ec_slist_##NAME##_unlock(l);                                                                                                                                       \
+                ec_slist_##NAME##_node_t *current = sub->head;                                                                                                                     \
+                while (current)                                                                                                                                                    \
                 {                                                                                                                                                                  \
-                    ec_slist_##NAME##_node_t *yy = xx->next;                                                                                                                       \
-                    EC_FREE(xx);                                                                                                                                                   \
-                    xx = yy;                                                                                                                                                       \
+                    ec_slist_##NAME##_node_t *next = current->next;                                                                                                                \
+                    EC_FREE(current);                                                                                                                                              \
+                    current = next;                                                                                                                                                \
                 }                                                                                                                                                                  \
-                EC_MUTEX_DESTROY(sub->lock);                                                                                                                                       \
+                                                                                                                                                                                   \
+                sub->head = NULL;                                                                                                                                                  \
+                sub->tail = NULL;                                                                                                                                                  \
+                sub->size = 0;                                                                                                                                                     \
+                sub->free_fn(sub);                                                                                                                                                 \
                 EC_FREE(sub);                                                                                                                                                      \
+                                                                                                                                                                                   \
                 return EC_ERR_ALLOC;                                                                                                                                               \
             }                                                                                                                                                                      \
+                                                                                                                                                                                   \
             if (!sub->head)                                                                                                                                                        \
             {                                                                                                                                                                      \
                 sub->head = n;                                                                                                                                                     \
@@ -628,6 +630,7 @@
             }                                                                                                                                                                      \
             sub->size++;                                                                                                                                                           \
         }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         *out = sub;                                                                                                                                                                \
         return EC_OK;                                                                                                                                                              \
@@ -636,36 +639,36 @@
     {                                                                                                                                                                              \
         if (!l || !out)                                                                                                                                                            \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_lock(l);                                                                                                                                                 \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_t *cp = EC_SLIST_ALLOC(ec_slist_##NAME##_t, l->mempool);                                                                                                 \
         if (!cp)                                                                                                                                                                   \
         {                                                                                                                                                                          \
             ec_slist_##NAME##_unlock(l);                                                                                                                                           \
             return EC_ERR_ALLOC;                                                                                                                                                   \
         }                                                                                                                                                                          \
-        EC_MUTEX_INIT(cp->lock);                                                                                                                                                   \
-        cp->head = NULL;                                                                                                                                                           \
-        cp->tail = NULL;                                                                                                                                                           \
-        cp->size = 0;                                                                                                                                                              \
-        cp->mempool = l->mempool;                                                                                                                                                  \
+                                                                                                                                                                                   \
+        ec_status_t init_status = ec_slist_##NAME##_init(cp, l->mempool);                                                                                                          \
+        if (init_status != EC_OK)                                                                                                                                                  \
+        {                                                                                                                                                                          \
+            EC_FREE(cp);                                                                                                                                                           \
+            ec_slist_##NAME##_unlock(l);                                                                                                                                           \
+            return init_status;                                                                                                                                                    \
+        }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_node_t *c = l->head;                                                                                                                                     \
         while (c)                                                                                                                                                                  \
         {                                                                                                                                                                          \
             ec_slist_##NAME##_node_t *n = ec_slist_##NAME##_make_node(cp, c->data);                                                                                                \
             if (!n)                                                                                                                                                                \
-            { /*free partial*/                                                                                                                                                     \
-                ec_slist_##NAME##_node_t *x = cp->head;                                                                                                                            \
-                while (x)                                                                                                                                                          \
-                {                                                                                                                                                                  \
-                    ec_slist_##NAME##_node_t *y = x->next;                                                                                                                         \
-                    EC_FREE(x);                                                                                                                                                    \
-                    x = y;                                                                                                                                                         \
-                }                                                                                                                                                                  \
-                EC_MUTEX_DESTROY(cp->lock);                                                                                                                                        \
+            {                                                                                                                                                                      \
+                cp->free_fn(cp);                                                                                                                                                   \
                 EC_FREE(cp);                                                                                                                                                       \
                 ec_slist_##NAME##_unlock(l);                                                                                                                                       \
                 return EC_ERR_ALLOC;                                                                                                                                               \
             }                                                                                                                                                                      \
+                                                                                                                                                                                   \
             if (!cp->head)                                                                                                                                                         \
             {                                                                                                                                                                      \
                 cp->head = n;                                                                                                                                                      \
@@ -679,6 +682,7 @@
             cp->size++;                                                                                                                                                            \
             c = c->next;                                                                                                                                                           \
         }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         *out = cp;                                                                                                                                                                 \
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         return EC_OK;                                                                                                                                                              \
@@ -687,38 +691,45 @@
     {                                                                                                                                                                              \
         if (!l || !cpfn || !out)                                                                                                                                                   \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_lock(l);                                                                                                                                                 \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_t *cp = EC_SLIST_ALLOC(ec_slist_##NAME##_t, l->mempool);                                                                                                 \
         if (!cp)                                                                                                                                                                   \
         {                                                                                                                                                                          \
             ec_slist_##NAME##_unlock(l);                                                                                                                                           \
             return EC_ERR_ALLOC;                                                                                                                                                   \
         }                                                                                                                                                                          \
-        EC_MUTEX_INIT(cp->lock);                                                                                                                                                   \
-        cp->head = NULL;                                                                                                                                                           \
-        cp->tail = NULL;                                                                                                                                                           \
-        cp->size = 0;                                                                                                                                                              \
-        cp->mempool = l->mempool;                                                                                                                                                  \
+        ec_status_t init_status = ec_slist_##NAME##_init(cp, l->mempool);                                                                                                          \
+        if (init_status != EC_OK)                                                                                                                                                  \
+        {                                                                                                                                                                          \
+            EC_FREE(cp);                                                                                                                                                           \
+            ec_slist_##NAME##_unlock(l);                                                                                                                                           \
+            return init_status;                                                                                                                                                    \
+        }                                                                                                                                                                          \
         ec_slist_##NAME##_node_t *c = l->head;                                                                                                                                     \
         while (c)                                                                                                                                                                  \
         {                                                                                                                                                                          \
             void *dup = cpfn(&c->data);                                                                                                                                            \
-            ec_slist_##NAME##_node_t *n = ec_slist_##NAME##_make_node(cp, *(TYPE *)dup);                                                                                           \
-            EC_FREE(dup);                                                                                                                                                          \
-            if (!n)                                                                                                                                                                \
+            if (!dup)                                                                                                                                                              \
             {                                                                                                                                                                      \
-                ec_slist_##NAME##_node_t *x = cp->head;                                                                                                                            \
-                while (x)                                                                                                                                                          \
-                {                                                                                                                                                                  \
-                    ec_slist_##NAME##_node_t *y = x->next;                                                                                                                         \
-                    EC_FREE(x);                                                                                                                                                    \
-                    x = y;                                                                                                                                                         \
-                }                                                                                                                                                                  \
-                EC_MUTEX_DESTROY(cp->lock);                                                                                                                                        \
+                cp->free_fn(cp);                                                                                                                                                   \
                 EC_FREE(cp);                                                                                                                                                       \
                 ec_slist_##NAME##_unlock(l);                                                                                                                                       \
                 return EC_ERR_ALLOC;                                                                                                                                               \
             }                                                                                                                                                                      \
+                                                                                                                                                                                   \
+            ec_slist_##NAME##_node_t *n = ec_slist_##NAME##_make_node(cp, *(TYPE *)dup);                                                                                           \
+            EC_FREE(dup);                                                                                                                                                          \
+                                                                                                                                                                                   \
+            if (!n)                                                                                                                                                                \
+            {                                                                                                                                                                      \
+                cp->free_fn(cp);                                                                                                                                                   \
+                EC_FREE(cp);                                                                                                                                                       \
+                ec_slist_##NAME##_unlock(l);                                                                                                                                       \
+                return EC_ERR_ALLOC;                                                                                                                                               \
+            }                                                                                                                                                                      \
+                                                                                                                                                                                   \
             if (!cp->head)                                                                                                                                                         \
             {                                                                                                                                                                      \
                 cp->head = n;                                                                                                                                                      \
@@ -732,11 +743,12 @@
             cp->size++;                                                                                                                                                            \
             c = c->next;                                                                                                                                                           \
         }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         *out = cp;                                                                                                                                                                 \
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         return EC_OK;                                                                                                                                                              \
     }                                                                                                                                                                              \
-    static inline ec_status_t ec_slist_##NAME##_replace_at(ec_slist_##NAME##_t *l, void *e, size_t idx, void **out)                                                                \
+    static inline ec_status_t ec_slist_##NAME##_replace_at(ec_slist_##NAME##_t *l, void *e, size_t idx)                                                                            \
     {                                                                                                                                                                              \
         if (!l)                                                                                                                                                                    \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
@@ -751,8 +763,6 @@
         {                                                                                                                                                                          \
             c = c->next;                                                                                                                                                           \
         }                                                                                                                                                                          \
-        if (out)                                                                                                                                                                   \
-            *out = &c->data;                                                                                                                                                       \
         c->data = *(TYPE *)e;                                                                                                                                                      \
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         return EC_OK;                                                                                                                                                              \
@@ -972,18 +982,24 @@
     {                                                                                                                                                                              \
         if (!l || !p || !out)                                                                                                                                                      \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_lock(l);                                                                                                                                                 \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_t *fl = EC_SLIST_ALLOC(ec_slist_##NAME##_t, l->mempool);                                                                                                 \
         if (!fl)                                                                                                                                                                   \
         {                                                                                                                                                                          \
             ec_slist_##NAME##_unlock(l);                                                                                                                                           \
             return EC_ERR_ALLOC;                                                                                                                                                   \
         }                                                                                                                                                                          \
-        EC_MUTEX_INIT(fl->lock);                                                                                                                                                   \
-        fl->head = NULL;                                                                                                                                                           \
-        fl->tail = NULL;                                                                                                                                                           \
-        fl->size = 0;                                                                                                                                                              \
-        fl->mempool = l->mempool;                                                                                                                                                  \
+                                                                                                                                                                                   \
+        ec_status_t init_status = ec_slist_##NAME##_init(fl, l->mempool);                                                                                                          \
+        if (init_status != EC_OK)                                                                                                                                                  \
+        {                                                                                                                                                                          \
+            EC_FREE(fl);                                                                                                                                                           \
+            ec_slist_##NAME##_unlock(l);                                                                                                                                           \
+            return init_status;                                                                                                                                                    \
+        }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         ec_slist_##NAME##_node_t *c = l->head;                                                                                                                                     \
         while (c)                                                                                                                                                                  \
         {                                                                                                                                                                          \
@@ -992,14 +1008,7 @@
                 ec_slist_##NAME##_node_t *n = ec_slist_##NAME##_make_node(fl, c->data);                                                                                            \
                 if (!n)                                                                                                                                                            \
                 {                                                                                                                                                                  \
-                    ec_slist_##NAME##_node_t *x = fl->head;                                                                                                                        \
-                    while (x)                                                                                                                                                      \
-                    {                                                                                                                                                              \
-                        ec_slist_##NAME##_node_t *y = x->next;                                                                                                                     \
-                        EC_FREE(x);                                                                                                                                                \
-                        x = y;                                                                                                                                                     \
-                    }                                                                                                                                                              \
-                    EC_MUTEX_DESTROY(fl->lock);                                                                                                                                    \
+                    fl->free_fn(fl);                                                                                                                                               \
                     EC_FREE(fl);                                                                                                                                                   \
                     ec_slist_##NAME##_unlock(l);                                                                                                                                   \
                     return EC_ERR_ALLOC;                                                                                                                                           \
@@ -1018,10 +1027,12 @@
             }                                                                                                                                                                      \
             c = c->next;                                                                                                                                                           \
         }                                                                                                                                                                          \
+                                                                                                                                                                                   \
         *out = fl;                                                                                                                                                                 \
         ec_slist_##NAME##_unlock(l);                                                                                                                                               \
         return EC_OK;                                                                                                                                                              \
     }                                                                                                                                                                              \
+                                                                                                                                                                                   \
     static inline void ec_slist_##NAME##_iter_init(ec_slist_##NAME##_iter_t *it, ec_slist_##NAME##_t *l)                                                                           \
     {                                                                                                                                                                              \
         it->list = l;                                                                                                                                                              \
@@ -1030,7 +1041,7 @@
         it->idx = 0;                                                                                                                                                               \
         it->dinit = false;                                                                                                                                                         \
     }                                                                                                                                                                              \
-    static inline ec_status_t ec_slist_##NAME##_iter_remove(ec_slist_##NAME##_iter_t *it, void **out)                                                                              \
+    static inline ec_status_t ec_slist_##NAME##_iter_remove(ec_slist_##NAME##_iter_t *it)                                                                                          \
     {                                                                                                                                                                              \
         if (!it)                                                                                                                                                                   \
             return EC_ERR_INVALID_ARG;                                                                                                                                             \
@@ -1039,8 +1050,6 @@
         ec_slist_##NAME##_lock(it->list);                                                                                                                                          \
         ec_slist_##NAME##_node_t *rm = it->current;                                                                                                                                \
         TYPE *d = &rm->data;                                                                                                                                                       \
-        if (out)                                                                                                                                                                   \
-            *out = d;                                                                                                                                                              \
         if (!it->prev)                                                                                                                                                             \
         {                                                                                                                                                                          \
             it->list->head = rm->next;                                                                                                                                             \
@@ -1147,7 +1156,7 @@
         return EC_OK;                                                                                                                                                              \
     }                                                                                                                                                                              \
     static inline void ec_slist_##NAME##_diter_init(ec_slist_##NAME##_iter_t *it, ec_slist_##NAME##_t *l) { ec_slist_##NAME##_iter_init(it, l); }                                  \
-    static inline ec_status_t ec_slist_##NAME##_diter_remove(ec_slist_##NAME##_iter_t *it, void **out) { return ec_slist_##NAME##_iter_remove(it, out); }                          \
+    static inline ec_status_t ec_slist_##NAME##_diter_remove(ec_slist_##NAME##_iter_t *it, void **out) { return ec_slist_##NAME##_iter_remove(it); }                               \
     static inline ec_status_t ec_slist_##NAME##_diter_add(ec_slist_##NAME##_iter_t *it, void *e) { return ec_slist_##NAME##_iter_add(it, e); }                                     \
     static inline ec_status_t ec_slist_##NAME##_diter_replace(ec_slist_##NAME##_iter_t *it, void *e, void **out) { return ec_slist_##NAME##_iter_replace(it, e, out); }            \
     static inline size_t ec_slist_##NAME##_diter_index(ec_slist_##NAME##_iter_t *it) { return ec_slist_##NAME##_iter_index(it); }                                                  \
@@ -1239,7 +1248,7 @@
         l->add_all_at = ec_slist_##NAME##_add_all_at;                                                                                                                              \
         l->add_first = ec_slist_##NAME##_add_first;                                                                                                                                \
         l->add_last = ec_slist_##NAME##_add_last;                                                                                                                                  \
-        l->remove_fn = ec_slist_##NAME##_remove_fn;                                                                                                                                      \
+        l->remove_fn = ec_slist_##NAME##_remove_fn;                                                                                                                                \
         l->remove_first = ec_slist_##NAME##_remove_first;                                                                                                                          \
         l->remove_last = ec_slist_##NAME##_remove_last;                                                                                                                            \
         l->remove_at = ec_slist_##NAME##_remove_at;                                                                                                                                \
