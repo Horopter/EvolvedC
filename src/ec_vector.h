@@ -17,23 +17,6 @@
 #define EC_VECTOR_ALLOCATE(TYPE, CAP, MEMPOOL) (TYPE *)EC_MALLOC((CAP) * sizeof(TYPE))
 #endif
 
-/* When mempool support is disabled, ensure that no non-NULL mempool pointer is passed. */
-#ifndef EC_USE_MEMPOOL
-#define EC_CHECK_MEMPOOL(MEMPOOL)      \
-    do                                 \
-    {                                  \
-        if ((MEMPOOL) != NULL)         \
-        {                              \
-            return EC_ERR_INVALID_ARG; \
-        }                              \
-    } while (0)
-#else
-#define EC_ARRAY_CHECK_MEMPOOL(MEMPOOL) \
-    do                                  \
-    {                                   \
-    } while (0)
-#endif
-
 /*
  * EC_VECTOR_DEF(TYPE, NAME)
  *

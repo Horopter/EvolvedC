@@ -11,6 +11,7 @@ extern "C" {
 typedef enum {
     EC_OK = 0,             /* Operation succeeded */
     EC_ERR_NOT_FOUND,      /* Requested entry not found */
+    EC_ERR_NOT_SUPPORTED,  /* Operation not supported */
     EC_ERR_INVALID_OP,     /* Invalid Operation */
     EC_ERR_ALLOC,          /* Memory allocation failed */
     EC_ERR_INVALID_ARG,    /* Invalid argument provided */

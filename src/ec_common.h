@@ -54,5 +54,21 @@
 #define EC_GET_MEMPOOL(BODY) NULL
 #endif
 
+/* When mempool support is disabled, ensure that no non-NULL mempool pointer is passed. */
+#ifndef EC_USE_MEMPOOL
+#define EC_CHECK_MEMPOOL(MEMPOOL)      \
+    do                                 \
+    {                                  \
+        if ((MEMPOOL) != NULL)         \
+        {                              \
+            return EC_ERR_INVALID_ARG; \
+        }                              \
+    } while (0)
+#else
+#define EC_CHECK_MEMPOOL(MEMPOOL) \
+    do                            \
+    {                             \
+    } while (0)
+#endif
 
 #endif /* EC_COMMON_H */
