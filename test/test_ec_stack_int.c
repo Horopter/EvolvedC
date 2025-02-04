@@ -77,8 +77,9 @@ void test_stack_int_push(void *mp)
     TEST_ASSERT(peek_val != NULL);
     st = s.peek(&s, (void **)&peek_val);
     TEST_ASSERT(st == EC_OK && *peek_val == 20);
-    free(peek_val);
     s.free_fn(&s);
+
+    EC_FREE(peek_val);
     printf("pass: test_stack_int_push\n");
 }
 
@@ -96,8 +97,9 @@ void test_stack_int_peek(void *mp)
     TEST_ASSERT(peek_val != NULL);
     st = s.peek(&s, (void **)&peek_val);
     TEST_ASSERT(st == EC_OK && *peek_val == 42);
-    free(peek_val);
     s.free_fn(&s);
+
+    EC_FREE(peek_val);
     printf("pass: test_stack_int_peek\n");
 }
 
@@ -131,9 +133,9 @@ void test_stack_int_pop(void *mp)
 
     st = s.pop(&s, (void **)&pop_val);
     TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
-
-    free(pop_val);
     s.free_fn(&s);
+
+    EC_FREE(pop_val);
     printf("pass: test_stack_int_pop\n");
 }
 
@@ -187,8 +189,9 @@ void test_stack_int_iterators(void *mp)
     TEST_ASSERT(peek_val != NULL);
     s.peek(&s, (void **)&peek_val);
     TEST_ASSERT(*(int *)peek_val == 99);
-    free(peek_val);
     s.free_fn(&s);
+
+    EC_FREE(peek_val);
     printf("pass: test_stack_int_iterators\n");
 }
 

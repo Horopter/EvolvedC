@@ -106,7 +106,7 @@
             return EC_ERR_OUT_OF_BOUNDS;                                                                                                          \
         }                                                                                                                                         \
         ec_stack_##NAME##_node_t *n = s->top;                                                                                                     \
-        *out = &n->data;                                                                                                                          \
+        memcpy(*out, &n->data, sizeof(n->data));                                                                                                                          \
         s->top = n->next;                                                                                                                         \
         s->size--;                                                                                                                                \
         EC_FREE(n);                                                                                                                               \

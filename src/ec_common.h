@@ -21,7 +21,15 @@
 #define EC_MALLOC  malloc
 #define EC_CALLOC  calloc
 #define EC_REALLOC realloc
-#define EC_FREE    free
+#define EC_FREE(ptr)       \
+    do                     \
+    {                      \
+        if ((ptr) != NULL) \
+        {                  \
+            free(ptr);     \
+            (ptr) = NULL;  \
+        }                  \
+    } while (0)
 #endif
 
 /* Thread-Safety */
