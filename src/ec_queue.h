@@ -10,20 +10,6 @@
 #define EC_QUEUE_ALLOC(TYPE, MPOOL) (TYPE *)EC_MALLOC(sizeof(TYPE))
 #endif
 
-#define EC_MEMCPY_SAFE(DEST, SRC, SIZE) \
-    do                                  \
-    {                                   \
-        if ((DEST) == NULL)             \
-        {                               \
-            (DEST) = malloc((SIZE));    \
-            if ((DEST) == NULL)         \
-            {                           \
-                return EC_ERR_ALLOC;    \
-            }                           \
-        }                               \
-        memcpy((DEST), (SRC), (SIZE));  \
-    } while (0)
-
 #define EC_QUEUE_DEF(TYPE, NAME)                                                                                                                  \
     typedef struct ec_queue_##NAME##_node_s ec_queue_##NAME##_node_t;                                                                             \
     typedef struct ec_queue_##NAME##_s ec_queue_##NAME##_t;                                                                                       \

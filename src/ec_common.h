@@ -79,4 +79,18 @@
     } while (0)
 #endif
 
+#define EC_MEMCPY_SAFE(DEST, SRC, SIZE) \
+    do                                  \
+    {                                   \
+        if ((DEST) == NULL)             \
+        {                               \
+            (DEST) = malloc((SIZE));    \
+            if ((DEST) == NULL)         \
+            {                           \
+                return EC_ERR_ALLOC;    \
+            }                           \
+        }                               \
+        memcpy((DEST), (SRC), (SIZE));  \
+    } while (0)
+
 #endif /* EC_COMMON_H */
