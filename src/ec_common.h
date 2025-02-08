@@ -87,7 +87,8 @@
             (DEST) = malloc((SIZE));    \
             if ((DEST) == NULL)         \
             {                           \
-                return EC_ERR_ALLOC;    \
+                fprintf(stderr, "Memory allocation failed at %s:%d\n", __FILE__, __LINE__); \
+                return false;           \
             }                           \
         }                               \
         memcpy((DEST), (SRC), (SIZE));  \
