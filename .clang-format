@@ -1,0 +1,11 @@
+BasedOnStyle: GNU
+UseTab: ForIndentation
+IndentWidth: 4
+TabWidth: 4
+BreakBeforeBraces: GNU
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+ColumnLimit: 0
+SpaceBeforeParens: ControlStatements
+PointerAlignment: Left

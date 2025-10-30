@@ -50,3 +50,19 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Build artifacts
+build/
+**/build/
+*.out
+
+# Editors/IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+
+# Tooling
+compile_commands.json

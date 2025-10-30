@@ -1,5 +1,7 @@
 # Evolved-C (EC) Data Structures Library
 
+![CI](https://github.com/Horopter/EvolvedC/actions/workflows/ci.yml/badge.svg)
+
 🚀 **Evolved-C** is a modern, header-only, thread-safe, and optimized **C library** providing a comprehensive set of **data structures and utilities**.
 
 ## ✅ Features
@@ -89,6 +91,31 @@ Contributions are **highly encouraged**! To contribute:
 4. **Submit a Pull Request (PR)** with a detailed description.
 
 Before submitting, please review the **Evolved-C Core Design Principles**.
+
+---
+
+## 🧪 CI / Tests Status
+
+- GitHub Actions workflow `ci.yml` runs on Ubuntu and macOS.
+- Steps: format (non-blocking), build, and run all tests via `test/run_tests.sh` across structure-specific subfolders.
+- Current status: Passing locally; CI configured to auto-detect test directory and execute all suites.
+
+### Today’s changes (highlights)
+- Organized tests into subfolders per data structure under `test/`:
+  - `array/`, `buffer/`, `deque/`, `dlist/`, `ds/`, `graph/`, `hashmap/`, `hashset/`, `heap/`, `log/`, `queue/`, `ringbuffer/`, `skiplist/`, `slist/`, `stack/`, `timer/`, `treeset/`, `treetable/`, `trie/`, `vector/`.
+- Expanded `vector` coverage across many data types by mirroring `int` tests to: `double`, `long`, `unsigned long`, `long long`, `unsigned long long`, `uint32_t`, `uint64_t`, `const char*`, and `void*`.
+- Added and strengthened tests for `array`, `buffer`, and `deque`; ensured per-method coverage and iterator/zip-iterator checks where available.
+- Removed all meta tests and relocation stubs; each data structure now has independent, explicit tests.
+- Fixed header include issues (case and paths); standardized includes in tests to `../../src/*.h` from subfolders.
+- Added `.clang-format` (GNU style) and applied formatting across `src/` and `test/`.
+- Improved `test/run_tests.sh` to build into `test/build/`, accept optional targets, and clean generated outputs.
+- Introduced CI workflow (`.github/workflows/ci.yml`) with cross-platform builds, formatting check (non-blocking), and robust path resolution on runners.
+- Updated `.gitignore` to exclude build artifacts and IDE files.
+
+
+## 📋 TODO
+
+- See `TODO.md` for a brief list of next steps.
 
 ---
 
