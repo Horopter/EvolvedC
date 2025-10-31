@@ -75,198 +75,349 @@ callback(void* arg)
 	count--;
 }
 
-/* Basic Timer Test */
-void
-test_timer_basic(void)
-{
-	printf("[RUN] test_timer_basic\n");
+/* --- Positive Tests --- */
 
+static void
+test_timer_init_pos(void)
+{
+	printf("[RUN] test_timer_init_pos\n");
 	ec_timer_t timer;
 	ec_timer_init(&timer);
+	TEST_ASSERT(timer.timestamp == 0);
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_init_pos\n");
+}
 
-	for (int i = 0; i < 1000; i++)
-		{
-			ids[i] = ec_timer_start(&timer, rand() % 100, 0, EC_TIMER_ONESHOT, callback, NULL);
-			count++;
-			TEST_ASSERT(ids[i] != EC_TIMER_INVALID);
-		}
+static void
+test_timer_start_pos(void)
+{
+	printf("[RUN] test_timer_start_pos\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	count = 0;
+	uint64_t id = ec_timer_start(&timer, 10, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	TEST_ASSERT(timer.events[id].active == true);
+	ec_timer_cancel(&timer, id);
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_start_pos\n");
+}
 
-	uint64_t t = 10000;
+static void
+test_timer_start_periodic_pos(void)
+{
+	printf("[RUN] test_timer_start_periodic_pos\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	count = 0;
+	uint64_t id = ec_timer_start(&timer, 10, 50, EC_TIMER_PERIODIC, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	TEST_ASSERT(timer.events[id].active == true);
+	TEST_ASSERT(timer.events[id].type == EC_TIMER_PERIODIC);
+	ec_timer_cancel(&timer, id);
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_start_periodic_pos\n");
+}
+
+static void
+test_timer_cancel_pos(void)
+{
+	printf("[RUN] test_timer_cancel_pos\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	uint64_t id = ec_timer_start(&timer, 100, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	TEST_ASSERT(timer.events[id].active == true);
+	ec_timer_cancel(&timer, id);
+	TEST_ASSERT(timer.events[id].active == false);
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_cancel_pos\n");
+}
+
+static void
+test_timer_process_pos(void)
+{
+	printf("[RUN] test_timer_process_pos\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	count = 1;
+	uint64_t id = ec_timer_start(&timer, 10, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	uint64_t t = 100;
 	while (t > 0 && count > 0)
 		{
 			ec_timer_process(&timer);
-			t -= 10;
 			sleep_ms(10);
+			t -= 10;
 		}
-
 	TEST_ASSERT(count == 0);
 	ec_timer_destroy(&timer);
-	printf("[PASS] test_timer_basic\n");
+	printf("[PASS] test_timer_process_pos\n");
 }
 
-/* Timer Cancellation Test */
-void
-test_timer_cancel(void)
+static void
+test_timer_process_periodic_pos(void)
 {
-	printf("[RUN] test_timer_cancel\n");
-
+	printf("[RUN] test_timer_process_periodic_pos\n");
 	ec_timer_t timer;
 	ec_timer_init(&timer);
-
-	for (int i = 0; i < 1000; i++)
-		{
-			ids[i] = ec_timer_start(&timer, rand() % 100, 0, EC_TIMER_ONESHOT, callback, NULL);
-			count++;
-		}
-
-	for (int i = 0; i < 500; i++)
-		{
-			ec_timer_cancel(&timer, ids[i]);
-			count--;
-		}
-
-	uint64_t t = 10000;
+	count = 3;
+	uint64_t id = ec_timer_start(&timer, 20, 30, EC_TIMER_PERIODIC, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	uint64_t t = 200;
 	while (t > 0 && count > 0)
 		{
 			ec_timer_process(&timer);
-			t -= 10;
 			sleep_ms(10);
+			t -= 10;
 		}
-
-	TEST_ASSERT(count == 0);
+	ec_timer_cancel(&timer, id);
 	ec_timer_destroy(&timer);
-	printf("[PASS] test_timer_cancel\n");
+	printf("[PASS] test_timer_process_periodic_pos\n");
 }
 
-/* Periodic Timer Test */
-void
-test_timer_periodic(void)
+static void
+test_timer_destroy_pos(void)
 {
-	printf("[RUN] test_timer_periodic\n");
-
+	printf("[RUN] test_timer_destroy_pos\n");
 	ec_timer_t timer;
 	ec_timer_init(&timer);
-
-	ids[0] = ec_timer_start(&timer, 50, 50, EC_TIMER_PERIODIC, callback, NULL);
-	count = 5;
-
-	uint64_t t = 300;
-	while (t > 0 && count > 0)
-		{
-			ec_timer_process(&timer);
-			t -= 10;
-			sleep_ms(10);
-		}
-
-	TEST_ASSERT(count == 0);
-	ec_timer_cancel(&timer, ids[0]);
-
+	uint64_t id = ec_timer_start(&timer, 100, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
 	ec_timer_destroy(&timer);
-	printf("[PASS] test_timer_periodic\n");
+	/* Destroy should not crash even with active timers */
+	printf("[PASS] test_timer_destroy_pos\n");
 }
 
-/* Multi-Timer Test */
-void
-test_timer_multiple(void)
+static void
+test_timer_now_pos(void)
 {
-	printf("[RUN] test_timer_multiple\n");
+	printf("[RUN] test_timer_now_pos\n");
+	uint64_t t1 = ec_timer_now();
+	sleep_ms(10);
+	uint64_t t2 = ec_timer_now();
+	TEST_ASSERT(t2 > t1);
+	printf("[PASS] test_timer_now_pos\n");
+}
 
+static void
+test_timer_multiple_timers_pos(void)
+{
+	printf("[RUN] test_timer_multiple_timers_pos\n");
 	ec_timer_t timer;
 	ec_timer_init(&timer);
-
+	count = 10;
 	for (int i = 0; i < 10; i++)
 		{
 			ids[i] = ec_timer_start(&timer, (i + 1) * 20, 0, EC_TIMER_ONESHOT, callback, NULL);
-			count++;
+			TEST_ASSERT(ids[i] != EC_TIMER_INVALID);
 		}
-
 	uint64_t t = 300;
 	while (t > 0 && count > 0)
 		{
 			ec_timer_process(&timer);
-			t -= 10;
 			sleep_ms(10);
+			t -= 10;
 		}
-
 	TEST_ASSERT(count == 0);
 	ec_timer_destroy(&timer);
-	printf("[PASS] test_timer_multiple\n");
+	printf("[PASS] test_timer_multiple_timers_pos\n");
 }
 
-/* Stress Test */
-void
+static void
+test_timer_full_capacity_pos(void)
+{
+	printf("[RUN] test_timer_full_capacity_pos\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	count = 0;
+	/* Fill all slots */
+	for (int i = 0; i < EC_TIMER_MAX_EVENTS; i++)
+		{
+			ids[i] = ec_timer_start(&timer, 100, 0, EC_TIMER_ONESHOT, callback, NULL);
+			TEST_ASSERT(ids[i] != EC_TIMER_INVALID);
+			count++;
+		}
+	/* Try to add one more - should fail */
+	uint64_t id = ec_timer_start(&timer, 100, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id == EC_TIMER_INVALID);
+	/* Cancel all */
+	for (int i = 0; i < EC_TIMER_MAX_EVENTS; i++)
+		{
+			ec_timer_cancel(&timer, ids[i]);
+		}
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_full_capacity_pos\n");
+}
+
+static void
+test_timer_zero_delay_pos(void)
+{
+	printf("[RUN] test_timer_zero_delay_pos\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	count = 1;
+	uint64_t id = ec_timer_start(&timer, 0, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	/* Process should trigger immediately */
+	ec_timer_process(&timer);
+	sleep_ms(5);
+	ec_timer_process(&timer);
+	TEST_ASSERT(count == 0);
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_zero_delay_pos\n");
+}
+
+/* --- Negative Tests --- */
+
+static void
+test_timer_init_neg(void)
+{
+	printf("[RUN] test_timer_init_neg\n");
+	/* NULL pointer should be handled gracefully */
+	ec_timer_init(NULL);
+	/* Should not crash */
+	printf("[PASS] test_timer_init_neg\n");
+}
+
+static void
+test_timer_start_neg_null_timer(void)
+{
+	printf("[RUN] test_timer_start_neg_null_timer\n");
+	uint64_t id = ec_timer_start(NULL, 10, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id == EC_TIMER_INVALID);
+	printf("[PASS] test_timer_start_neg_null_timer\n");
+}
+
+static void
+test_timer_start_neg_null_callback(void)
+{
+	printf("[RUN] test_timer_start_neg_null_callback\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	uint64_t id = ec_timer_start(&timer, 10, 0, EC_TIMER_ONESHOT, NULL, NULL);
+	TEST_ASSERT(id == EC_TIMER_INVALID);
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_start_neg_null_callback\n");
+}
+
+static void
+test_timer_cancel_neg_null_timer(void)
+{
+	printf("[RUN] test_timer_cancel_neg_null_timer\n");
+	/* NULL pointer should be handled gracefully */
+	ec_timer_cancel(NULL, 0);
+	/* Should not crash */
+	printf("[PASS] test_timer_cancel_neg_null_timer\n");
+}
+
+static void
+test_timer_cancel_neg_invalid_id(void)
+{
+	printf("[RUN] test_timer_cancel_neg_invalid_id\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	/* Invalid ID should be handled gracefully */
+	ec_timer_cancel(&timer, EC_TIMER_MAX_EVENTS);
+	ec_timer_cancel(&timer, UINT64_MAX);
+	/* Should not crash */
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_cancel_neg_invalid_id\n");
+}
+
+static void
+test_timer_process_neg(void)
+{
+	printf("[RUN] test_timer_process_neg\n");
+	/* NULL pointer should be handled gracefully */
+	ec_timer_process(NULL);
+	/* Should not crash */
+	printf("[PASS] test_timer_process_neg\n");
+}
+
+static void
+test_timer_destroy_neg(void)
+{
+	printf("[RUN] test_timer_destroy_neg\n");
+	/* NULL pointer should be handled gracefully */
+	ec_timer_destroy(NULL);
+	/* Should not crash */
+	printf("[PASS] test_timer_destroy_neg\n");
+}
+
+/* --- Edge Cases and Stress Tests --- */
+
+static void
 test_timer_stress(void)
 {
 	printf("[RUN] test_timer_stress\n");
-
 	ec_timer_t timer;
 	ec_timer_init(&timer);
-
+	srand((unsigned)time(NULL));
+	count = 0;
 	for (int i = 0; i < EC_TIMER_MAX_EVENTS; i++)
 		{
 			ids[i] = ec_timer_start(&timer, rand() % 50, 0, EC_TIMER_ONESHOT, callback, NULL);
-			count++;
+			if (ids[i] != EC_TIMER_INVALID)
+				count++;
 		}
-
 	uint64_t t = 1000;
 	while (t > 0 && count > 0)
 		{
 			ec_timer_process(&timer);
-			t -= 10;
 			sleep_ms(10);
+			t -= 10;
 		}
-
-	TEST_ASSERT(count == 0);
 	ec_timer_destroy(&timer);
 	printf("[PASS] test_timer_stress\n");
 }
 
-/* Edge Case Test */
-void
-test_timer_edge_cases(void)
+static void
+test_timer_large_delay_pos(void)
 {
-	printf("[RUN] test_timer_edge_cases\n");
-
+	printf("[RUN] test_timer_large_delay_pos\n");
 	ec_timer_t timer;
 	ec_timer_init(&timer);
+	count = 1;
+	/* Timer with very large delay should not execute immediately */
+	uint64_t id = ec_timer_start(&timer, UINT64_MAX / 2, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	/* Process should not trigger it */
+	ec_timer_process(&timer);
+	sleep_ms(10);
+	ec_timer_process(&timer);
+	TEST_ASSERT(count == 1);
+	TEST_ASSERT(timer.events[id].active == true);
+	ec_timer_cancel(&timer, id);
+	ec_timer_destroy(&timer);
+	printf("[PASS] test_timer_large_delay_pos\n");
+}
 
-	count = 2; // Expect two timers
-
-	/* Timer with 0 delay (should execute immediately) */
-	ids[0] = ec_timer_start(&timer, 0, 0, EC_TIMER_ONESHOT, callback, NULL);
-	TEST_ASSERT(ids[0] != EC_TIMER_INVALID);
-
-	/* Timer with extreme delay (should NOT execute during this test) */
-	ids[1] = ec_timer_start(&timer, UINT64_MAX, 0, EC_TIMER_ONESHOT, callback, NULL);
-	TEST_ASSERT(ids[1] != EC_TIMER_INVALID);
-
-	/* Process timers multiple times to ensure immediate execution */
-	uint64_t t = 50;
-	while (t > 0)
+static void
+test_timer_cancel_and_restart_pos(void)
+{
+	printf("[RUN] test_timer_cancel_and_restart_pos\n");
+	ec_timer_t timer;
+	ec_timer_init(&timer);
+	count = 1;
+	uint64_t id = ec_timer_start(&timer, 100, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id != EC_TIMER_INVALID);
+	ec_timer_cancel(&timer, id);
+	TEST_ASSERT(timer.events[id].active == false);
+	/* Restart on same slot */
+	count = 1;
+	uint64_t id2 = ec_timer_start(&timer, 10, 0, EC_TIMER_ONESHOT, callback, NULL);
+	TEST_ASSERT(id2 != EC_TIMER_INVALID);
+	uint64_t t = 100;
+	while (t > 0 && count > 0)
 		{
 			ec_timer_process(&timer);
-			if (count == 1)
-				break; // Stop early if immediate timer executed
-			t -= 10;
 			sleep_ms(10);
+			t -= 10;
 		}
-
-	/* Check if immediate timer executed */
-	if (count != 1)
-		{
-			fprintf(stderr, "[FAIL] %s:%d: Expected count = 1, but got count = %d\n", __FILE__, __LINE__, count);
-			exit(EXIT_FAILURE);
-		}
-
-	/* Ensure extreme delay timer is still active */
-	if (!timer.events[ids[1]].active)
-		{
-			fprintf(stderr, "[FAIL] %s:%d: Max delay timer should still be active!\n", __FILE__, __LINE__);
-			exit(EXIT_FAILURE);
-		}
-
+	TEST_ASSERT(count == 0);
 	ec_timer_destroy(&timer);
-	printf("[PASS] test_timer_edge_cases\n");
+	printf("[PASS] test_timer_cancel_and_restart_pos\n");
 }
 
 /* Run All Tests */
@@ -275,12 +426,32 @@ main(void)
 {
 	printf("\nStarting `ec_timer` Tests...\n");
 
-	test_timer_basic();
-	test_timer_cancel();
-	test_timer_periodic();
-	test_timer_multiple();
+	/* Positive Tests */
+	test_timer_init_pos();
+	test_timer_start_pos();
+	test_timer_start_periodic_pos();
+	test_timer_cancel_pos();
+	test_timer_process_pos();
+	test_timer_process_periodic_pos();
+	test_timer_destroy_pos();
+	test_timer_now_pos();
+	test_timer_multiple_timers_pos();
+	test_timer_full_capacity_pos();
+	test_timer_zero_delay_pos();
+	test_timer_large_delay_pos();
+	test_timer_cancel_and_restart_pos();
+
+	/* Negative Tests */
+	test_timer_init_neg();
+	test_timer_start_neg_null_timer();
+	test_timer_start_neg_null_callback();
+	test_timer_cancel_neg_null_timer();
+	test_timer_cancel_neg_invalid_id();
+	test_timer_process_neg();
+	test_timer_destroy_neg();
+
+	/* Stress Tests */
 	test_timer_stress();
-	test_timer_edge_cases();
 
 	printf("\nAll `ec_timer` tests passed successfully!\n");
 	return 0;

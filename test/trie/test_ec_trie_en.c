@@ -248,6 +248,109 @@ test_big_random(void* mp)
 	printf("pass:test_big_random\n");
 }
 
+static void
+test_add_null_args(void* mp)
+{
+	stamp();
+	printf("test_add_null_args\n");
+	ec_trie_en_t trie;
+	ec_trie_en_init(&trie, mp, NULL);
+	const char* k = "test";
+	TASSERT(trie.add(NULL, &k) == EC_ERR_INVALID_ARG);
+	TASSERT(trie.add(&trie, NULL) == EC_ERR_INVALID_ARG);
+	trie.clear(&trie);
+	printf("pass:test_add_null_args\n");
+}
+
+static void
+test_contains_null_args(void* mp)
+{
+	stamp();
+	printf("test_contains_null_args\n");
+	ec_trie_en_t trie;
+	ec_trie_en_init(&trie, mp, NULL);
+	const char* k = "test";
+	TASSERT(trie.contains(NULL, &k) == EC_ERR_INVALID_ARG);
+	TASSERT(trie.contains(&trie, NULL) == EC_ERR_INVALID_ARG);
+	trie.clear(&trie);
+	printf("pass:test_contains_null_args\n");
+}
+
+static void
+test_remove_null_args(void* mp)
+{
+	stamp();
+	printf("test_remove_null_args\n");
+	ec_trie_en_t trie;
+	ec_trie_en_init(&trie, mp, NULL);
+	const char* k = "test";
+	TASSERT(trie.remove(NULL, &k) == EC_ERR_INVALID_ARG);
+	TASSERT(trie.remove(&trie, NULL) == EC_ERR_INVALID_ARG);
+	trie.clear(&trie);
+	printf("pass:test_remove_null_args\n");
+}
+
+static void
+test_prefix_operations(void* mp)
+{
+	stamp();
+	printf("test_prefix_operations\n");
+	ec_trie_en_t trie;
+	ec_trie_en_init(&trie, mp, NULL);
+	const char* k1 = "abc";
+	const char* k2 = "abcd";
+	const char* k3 = "abcde";
+	trie.add(&trie, &k1);
+	trie.add(&trie, &k2);
+	trie.add(&trie, &k3);
+	TASSERT(trie.contains(&trie, &k1) == EC_OK);
+	TASSERT(trie.contains(&trie, &k2) == EC_OK);
+	TASSERT(trie.contains(&trie, &k3) == EC_OK);
+	// Remove middle one
+	TASSERT(trie.remove(&trie, &k2) == EC_OK);
+	TASSERT(trie.contains(&trie, &k1) == EC_OK);
+	TASSERT(trie.contains(&trie, &k2) == EC_ERR_NOT_FOUND);
+	TASSERT(trie.contains(&trie, &k3) == EC_OK);
+	trie.clear(&trie);
+	printf("pass:test_prefix_operations\n");
+}
+
+static void
+test_empty_string(void* mp)
+{
+	stamp();
+	printf("test_empty_string\n");
+	ec_trie_en_t trie;
+	ec_trie_en_init(&trie, mp, NULL);
+	const char* empty = "";
+	// Empty string should be addable
+	ec_status_t s = trie.add(&trie, &empty);
+	TASSERT(s == EC_OK);
+	TASSERT(trie.contains(&trie, &empty) == EC_OK);
+	TASSERT(trie.remove(&trie, &empty) == EC_OK);
+	TASSERT(trie.contains(&trie, &empty) == EC_ERR_NOT_FOUND);
+	trie.clear(&trie);
+	printf("pass:test_empty_string\n");
+}
+
+static void
+test_foreach_null(void* mp)
+{
+	stamp();
+	printf("test_foreach_null\n");
+	ec_trie_en_t trie;
+	ec_trie_en_init(&trie, mp, NULL);
+	const char* k = "test";
+	trie.add(&trie, &k);
+	// NULL trie should return error
+	TASSERT(trie.foreach (NULL, fstr) == EC_ERR_INVALID_ARG);
+	// NULL callback might be invalid, but let's test it
+	ec_status_t s = trie.foreach (&trie, NULL);
+	// Depending on implementation, this might be OK or error
+	trie.clear(&trie);
+	printf("pass:test_foreach_null\n");
+}
+
 int
 main(void)
 {
@@ -270,6 +373,13 @@ main(void)
 	test_clear(mp);
 	test_custom_compare(mp);
 	test_big_random(mp);
+	// Additional negative tests
+	test_add_null_args(mp);
+	test_contains_null_args(mp);
+	test_remove_null_args(mp);
+	test_prefix_operations(mp);
+	test_empty_string(mp);
+	test_foreach_null(mp);
 
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);

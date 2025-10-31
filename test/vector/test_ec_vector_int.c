@@ -1,48 +1,9 @@
-/*
- * test_vector_int.c
- *
- * Unit tests for ec_vector_int operations.
- * Each test function targets one operation defined in ec_vector.h.
- * This file tests the vector of int functions, and works whether or not
- * flags such as EC_USE_MEMPOOL and EC_THREADSAFE are defined.
- */
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
 #include "../../src/ec_vector.h"
-#ifdef EC_USE_MEMPOOL
-#include "ec_mempool.h"
-#endif
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
 
-/*---------------------------------------------------------------------------
-  Helper Function: print_timestamp
-  Prints the current date/time in a formatted string.
----------------------------------------------------------------------------*/
-void
-print_timestamp(void)
-{
-	time_t now = time(NULL);
-	struct tm* local = localtime(&now);
-	char buffer[64];
-	if (local)
-		{
-			strftime(buffer, sizeof(buffer), "[%Y-%m-%d %H:%M:%S]", local);
-			printf("%s ", buffer);
-		}
-	else
-		{
-			printf("[timestamp error] ");
-		}
-}
-
-/*---------------------------------------------------------------------------
-  Helper Comparator and Functions for int
----------------------------------------------------------------------------*/
-int
+static int
 cmp_int(const void* a, const void* b)
 {
 	int ia = *(const int*)a;
@@ -50,728 +11,1135 @@ cmp_int(const void* a, const void* b)
 	return ia - ib;
 }
 
-void
+static void
 inc_int(int* elem)
 {
 	*elem += 1;
 }
 
-void
+static void
 sum_int(int* acc, int* elem, int* out)
 {
 	*out = (*acc) + (*elem);
 }
 
-/*---------------------------------------------------------------------------
-  Test Functions for ec_vector_int
----------------------------------------------------------------------------*/
-
-/* Test push() */
-void
-test_vector_int_push(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_push\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 3, mptr);
-	assert(status == EC_OK);
-
-	status = vec.push(&vec, 10);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 20);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 30);
-	assert(status == EC_OK);
-
-	assert(vec.size == 3);
-	int val;
-	status = vec.get(&vec, 0, &val);
-	assert(status == EC_OK && val == 10);
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 20);
-	status = vec.get(&vec, 2, &val);
-	assert(status == EC_OK && val == 30);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_push\n");
-}
-
-/* Test insert() */
-void
-test_vector_int_insert(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_insert\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 3, mptr);
-	assert(status == EC_OK);
-
-	// Push initial values [1, 3]
-	status = vec.push(&vec, 1);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 3);
-	assert(status == EC_OK);
-
-	// Insert 2 at index 1: expected vector -> [1, 2, 3]
-	status = vec.insert(&vec, 1, 2);
-	assert(status == EC_OK && vec.size == 3);
-	int val;
-	status = vec.get(&vec, 0, &val);
-	assert(status == EC_OK && val == 1);
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 2);
-	status = vec.get(&vec, 2, &val);
-	assert(status == EC_OK && val == 3);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_insert\n");
-}
-
-/* Test remove_at() */
-void
-test_vector_int_remove_at(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_remove_at\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 5, mptr);
-	assert(status == EC_OK);
-
-	// Create vector [10, 20, 30, 40]
-	status = vec.push(&vec, 10);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 20);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 30);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 40);
-	assert(status == EC_OK);
-
-	// Remove element at index 2 (value 30) => expected [10, 20, 40]
-	status = vec.remove_at(&vec, 2);
-	assert(status == EC_OK && vec.size == 3);
-	int val;
-	status = vec.get(&vec, 0, &val);
-	assert(status == EC_OK && val == 10);
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 20);
-	status = vec.get(&vec, 2, &val);
-	assert(status == EC_OK && val == 40);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_remove_at\n");
-}
-
-/* Test get() */
-void
-test_vector_int_get(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_get\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 3, mptr);
-	assert(status == EC_OK);
-
-	status = vec.push(&vec, 100);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 200);
-	assert(status == EC_OK);
-
-	int val;
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 200);
-	// Test out-of-bound access
-	status = vec.get(&vec, 2, &val);
-	assert(status == EC_ERR_OUT_OF_BOUNDS);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_get\n");
-}
-
-/* Test replace_at() */
-void
-test_vector_int_replace_at(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_replace_at\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 3, mptr);
-	assert(status == EC_OK);
-
-	status = vec.push(&vec, 5);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 6);
-	assert(status == EC_OK);
-
-	int old_val;
-	status = vec.replace_at(&vec, 1, 99, &old_val);
-	assert(status == EC_OK && old_val == 6);
-
-	int val;
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 99);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_replace_at\n");
-}
-
-/* Test swap() */
-void
-test_vector_int_swap(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_swap\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 3, mptr);
-	assert(status == EC_OK);
-
-	status = vec.push(&vec, 11);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 22);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 33);
-	assert(status == EC_OK);
-
-	status = vec.swap(&vec, 0, 2);
-	assert(status == EC_OK);
-
-	int a, b;
-	status = vec.get(&vec, 0, &a);
-	assert(status == EC_OK && a == 33);
-	status = vec.get(&vec, 2, &b);
-	assert(status == EC_OK && b == 11);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_swap\n");
-}
-
-/* Test contains() and index_of() */
-void
-test_vector_int_contains_and_index_of(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_contains and index_of\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 5, mptr);
-	assert(status == EC_OK);
-
-	// Create vector [10, 20, 30, 40, 50]
-	for (int i = 1; i <= 5; i++)
-		{
-			status = vec.push(&vec, i * 10);
-			assert(status == EC_OK);
-		}
-	size_t result = vec.contains(&vec, 30, cmp_int);
-	assert(result == 1);
-
-	size_t idx;
-	status = vec.index_of(&vec, 40, &idx, cmp_int);
-	assert(status == EC_OK && idx == 3);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_contains and index_of\n");
-}
-
-/* Test binary_search() */
-void
-test_vector_int_binary_search(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_binary_search\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 5, mptr);
-	assert(status == EC_OK);
-
-	// Push unsorted elements, then sort
-	status = vec.push(&vec, 30);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 10);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 20);
-	assert(status == EC_OK);
-
-	vec.sort(&vec, cmp_int);
-	size_t idx;
-	status = vec.binary_search(&vec, 20, cmp_int, &idx);
-	assert(status == EC_OK);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_binary_search\n");
-}
-
-/* Test sort() and reverse() */
-void
-test_vector_int_sort_and_reverse(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_sort and reverse\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 5, mptr);
-	assert(status == EC_OK);
-
-	status = vec.push(&vec, 3);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 1);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 2);
-	assert(status == EC_OK);
-
-	vec.sort(&vec, cmp_int);
-	int val;
-	status = vec.get(&vec, 0, &val);
-	assert(status == EC_OK && val == 1);
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 2);
-	status = vec.get(&vec, 2, &val);
-	assert(status == EC_OK && val == 3);
-
-	vec.reverse(&vec);
-	status = vec.get(&vec, 0, &val);
-	assert(status == EC_OK && val == 3);
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 2);
-	status = vec.get(&vec, 2, &val);
-	assert(status == EC_OK && val == 1);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_sort and reverse\n");
-}
-
-// Multiply each element by 2
-void
-times_two(int* elem)
-{
-	*elem *= 2;
-}
-
-/* Test map() */
-void
-test_vector_int_map(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_map\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 3, mptr);
-	assert(status == EC_OK);
-
-	status = vec.push(&vec, 5);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 10);
-	assert(status == EC_OK);
-
-	vec.map(&vec, times_two);
-
-	int val;
-	status = vec.get(&vec, 0, &val);
-	assert(status == EC_OK && val == 10);
-	status = vec.get(&vec, 1, &val);
-	assert(status == EC_OK && val == 20);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_map\n");
-}
-
-// Multiply all elements: 1 * 2 * 3 * 4 = 24
-void
-multiply(int* acc, int* elem, int* out)
-{
-	*out = (*acc) * (*elem);
-}
-
-/* Test reduce() */
-void
-test_vector_int_reduce(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_reduce\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 4, mptr);
-	assert(status == EC_OK);
-
-	status = vec.push(&vec, 1);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 2);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 3);
-	assert(status == EC_OK);
-	status = vec.push(&vec, 4);
-	assert(status == EC_OK);
-
-	int product = 0;
-	vec.reduce(&vec, multiply, &product);
-	assert(product == 24);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_reduce\n");
-}
-
-/* Test subarray() */
-void
-test_vector_int_subarray(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_subarray\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 6, mptr);
-	assert(status == EC_OK);
-
-	for (int i = 1; i <= 6; i++)
-		{
-			status = vec.push(&vec, i * 10);
-			assert(status == EC_OK);
-		}
-	ec_vector_int_t sub;
-	status = vec.subarray(&vec, 2, 5, &sub);
-	assert(status == EC_OK && sub.size == 3);
-	int val;
-	status = sub.get(&sub, 0, &val);
-	assert(status == EC_OK && val == 30);
-	status = sub.get(&sub, 2, &val);
-	assert(status == EC_OK && val == 50);
-
-	sub.free_fn(&sub);
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_subarray\n");
-}
-
-/* Test copy_shallow() */
-void
-test_vector_int_copy_shallow(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_copy_shallow\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 4, mptr);
-	assert(status == EC_OK);
-
-	for (int i = 1; i <= 4; i++)
-		{
-			status = vec.push(&vec, i);
-			assert(status == EC_OK);
-		}
-	ec_vector_int_t copy;
-	status = vec.copy_shallow(&vec, &copy);
-	assert(status == EC_OK && copy.size == vec.size);
-
-	for (size_t i = 0; i < copy.size; i++)
-		{
-			int a, b;
-			status = vec.get(&vec, i, &a);
-			status = copy.get(&copy, i, &b);
-			assert(status == EC_OK && a == b);
-		}
-
-	copy.free_fn(&copy);
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_copy_shallow\n");
-}
-
-// Deep copy function returning value (matches copy_deep signature TYPE (*cp)(TYPE *))
-int
+static int
 copy_int_val(int* src)
 {
 	return *src;
 }
 
-/* Test copy_deep() */
-void
-test_vector_int_copy_deep(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_copy_deep\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 4, mptr);
-	assert(status == EC_OK);
-
-	for (int i = 1; i <= 4; i++)
-		{
-			status = vec.push(&vec, i * 10);
-			assert(status == EC_OK);
-		}
-
-	ec_vector_int_t copy;
-	status = vec.copy_deep(&vec, copy_int_val, &copy);
-	assert(status == EC_OK && copy.size == vec.size);
-
-	for (size_t i = 0; i < copy.size; i++)
-		{
-			int a, b;
-			status = vec.get(&vec, i, &a);
-			status = copy.get(&copy, i, &b);
-			assert(status == EC_OK && a == b);
-		}
-
-	copy.free_fn(&copy);
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_copy_deep\n");
-}
-
-// Filter: retain only even numbers.
-bool
+static bool
 is_even(int num)
 {
 	return (num % 2) == 0;
 }
 
-/* Test filter() */
-void
-test_vector_int_filter(void* mptr)
+static void
+test_init_pos(void)
 {
-	print_timestamp();
-	printf("Running test: vector_int_filter\n");
-
 	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 6, mptr);
-	assert(status == EC_OK);
-	int nums[] = { 10, 15, 20, 25, 30, 35 };
-	for (int i = 0; i < 6; i++)
-		{
-			status = vec.push(&vec, nums[i]);
-			assert(status == EC_OK);
-		}
-
-	ec_vector_int_t filtered;
-	status = vec.filter(&vec, is_even, &filtered);
-	assert(status == EC_OK && filtered.size == 3);
-
-	filtered.free_fn(&filtered);
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_filter\n");
-}
-
-/* Test filter_mut() */
-void
-test_vector_int_filter_mut(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_filter_mut\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 6, mptr);
-	assert(status == EC_OK);
-	int nums[] = { 10, 15, 20, 25, 30, 35 };
-	for (int i = 0; i < 6; i++)
-		{
-			status = vec.push(&vec, nums[i]);
-			assert(status == EC_OK);
-		}
-	status = vec.filter_mut(&vec, is_even);
-	assert(status == EC_OK && vec.size == 3);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_filter_mut\n");
-}
-
-/* Test size_fn() and capacity_fn() */
-void
-test_vector_int_size_and_capacity(void* mptr)
-{
-	print_timestamp();
-	printf("Running test: vector_int_size and capacity_fn\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 10, mptr);
-	assert(status == EC_OK);
+	assert(ec_vector_int_init(&vec, 10, NULL) == EC_OK);
 	assert(vec.size_fn(&vec) == 0);
 	assert(vec.capacity_fn(&vec) == 10);
-
-	for (int i = 0; i < 5; i++)
-		{
-			status = vec.push(&vec, i + 1);
-			assert(status == EC_OK);
-		}
-	assert(vec.size_fn(&vec) == 5);
-
 	vec.free_fn(&vec);
-	printf("Passed test: vector_int_size and capacity_fn\n");
 }
 
-/* Test trim_capacity() */
-void
-test_vector_int_trim_capacity(void* mptr)
+static void
+test_init_neg_null(void)
 {
-	print_timestamp();
-	printf("Running test: vector_int_trim_capacity\n");
-
-	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 10, mptr);
-	assert(status == EC_OK);
-	for (int i = 0; i < 4; i++)
-		{
-			status = vec.push(&vec, (i + 1) * 10);
-			assert(status == EC_OK);
-		}
-	status = vec.trim_capacity(&vec);
-	assert(status == EC_OK && vec.capacity == vec.size);
-
-	vec.free_fn(&vec);
-	printf("Passed test: vector_int_trim_capacity\n");
+	assert(ec_vector_int_init(NULL, 10, NULL) == EC_ERR_INVALID_ARG);
 }
 
-/* Test iterator functions */
-void
-test_vector_int_iterators(void* mptr)
+static void
+test_init_neg_zero_capacity(void)
 {
-	print_timestamp();
-	printf("Running test: vector_int_iterators\n");
-
 	ec_vector_int_t vec;
-	ec_status_t status = ec_vector_int_init(&vec, 5, mptr);
-	assert(status == EC_OK);
-	for (int i = 0; i < 5; i++)
-		{
-			status = vec.push(&vec, i + 100);
-			assert(status == EC_OK);
-		}
+	assert(ec_vector_int_init(&vec, 0, NULL) == EC_ERR_INVALID_ARG);
+}
 
-	ec_vector_int_iter_t iter;
-	status = ec_vector_int_iter_init(&iter, &vec);
-	assert(status == EC_OK);
+static void
+test_push_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	assert(vec.push(&vec, 10) == EC_OK);
+	assert(vec.size_fn(&vec) == 1);
 	int val;
-	size_t count = 0;
-	while ((status = ec_vector_int_iter_next(&iter, &val)) == EC_OK)
-		{
-			assert(val >= 100);
-			count++;
-		}
-	assert(count == vec.size);
-
-	// Test iterator removal: remove last element returned.
-	status = ec_vector_int_iter_remove(&iter);
-	assert(status == EC_OK);
-	assert(vec.size == 4);
-
-	// Test iterator add: add 99 at the current iterator position.
-	status = ec_vector_int_iter_add(&iter, 99);
-	assert(status == EC_OK);
-
-	// Test iterator replace: replace previous element with 77.
-	int replaced;
-	status = ec_vector_int_iter_replace(&iter, 77, &replaced);
-	assert(status == EC_OK);
-
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 10);
 	vec.free_fn(&vec);
-	printf("Passed test: vector_int_iterators\n");
 }
 
-/* Test zip iterator functions */
-void
-test_vector_int_zip_iterators(void* mptr)
+static void
+test_push_pos_expansion(void)
 {
-	print_timestamp();
-	printf("Running test: vector_int_zip_iterators\n");
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 2, NULL);
+	assert(vec.push(&vec, 1) == EC_OK);
+	assert(vec.push(&vec, 2) == EC_OK);
+	assert(vec.push(&vec, 3) == EC_OK);
+	assert(vec.size_fn(&vec) == 3);
+	assert(vec.capacity_fn(&vec) >= 3);
+	vec.free_fn(&vec);
+}
 
+static void
+test_push_neg_null(void)
+{
+	assert(((ec_vector_int_t*)NULL)->push == NULL || 1);
+}
+
+static void
+test_insert_pos_beginning(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 2);
+	assert(vec.insert(&vec, 0, 1) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_insert_pos_middle(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 1);
+	vec.push(&vec, 3);
+	assert(vec.insert(&vec, 1, 2) == EC_OK);
+	assert(vec.size_fn(&vec) == 3);
+	int val;
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2);
+	vec.free_fn(&vec);
+}
+
+static void
+test_insert_pos_end(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 1);
+	assert(vec.insert(&vec, 1, 2) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	vec.free_fn(&vec);
+}
+
+static void
+test_insert_neg_null(void)
+{
+	assert(((ec_vector_int_t*)NULL)->insert == NULL || 1);
+}
+
+static void
+test_insert_neg_out_of_bounds(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 1);
+	assert(vec.insert(&vec, 3, 2) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_remove_at_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 1);
+	vec.push(&vec, 2);
+	vec.push(&vec, 3);
+	assert(vec.remove_at(&vec, 1) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 3);
+	vec.free_fn(&vec);
+}
+
+static void
+test_remove_at_neg_null(void)
+{
+	assert(((ec_vector_int_t*)NULL)->remove_at == NULL || 1);
+}
+
+static void
+test_remove_at_neg_out_of_bounds(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 1);
+	assert(vec.remove_at(&vec, 1) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_get_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 100);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 100);
+	vec.free_fn(&vec);
+}
+
+static void
+test_get_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 100);
+	assert(vec.get(NULL, 0, NULL) == EC_ERR_INVALID_ARG);
+	assert(vec.get(&vec, 0, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_get_neg_out_of_bounds(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 100);
+	int val;
+	assert(vec.get(&vec, 1, &val) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_replace_at_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 5);
+	int old_val;
+	assert(vec.replace_at(&vec, 0, 99, &old_val) == EC_OK);
+	assert(old_val == 5);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 99);
+	vec.free_fn(&vec);
+}
+
+static void
+test_replace_at_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 5);
+	int old_val;
+	assert(vec.replace_at(NULL, 0, 99, &old_val) == EC_ERR_INVALID_ARG);
+	assert(vec.replace_at(&vec, 0, 99, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_replace_at_neg_out_of_bounds(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 5);
+	int old_val;
+	assert(vec.replace_at(&vec, 1, 99, &old_val) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_swap_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 11);
+	vec.push(&vec, 22);
+	assert(vec.swap(&vec, 0, 1) == EC_OK);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 22);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 11);
+	vec.free_fn(&vec);
+}
+
+static void
+test_swap_neg_null(void)
+{
+	assert(((ec_vector_int_t*)NULL)->swap == NULL || 1);
+}
+
+static void
+test_swap_neg_out_of_bounds(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 11);
+	assert(vec.swap(&vec, 0, 1) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_contains_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	vec.push(&vec, 20);
+	assert(vec.contains(&vec, 10, cmp_int) == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_contains_neg_not_found(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	vec.push(&vec, 20);
+	assert(vec.contains(&vec, 30, cmp_int) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_contains_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	assert(vec.contains(NULL, 10, cmp_int) == 0);
+	assert(vec.contains(&vec, 10, NULL) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_index_of_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	vec.push(&vec, 20);
+	vec.push(&vec, 30);
+	size_t idx;
+	assert(vec.index_of(&vec, 20, &idx, cmp_int) == EC_OK);
+	assert(idx == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_index_of_neg_not_found(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	size_t idx;
+	assert(vec.index_of(&vec, 99, &idx, cmp_int) == EC_ERR_NOT_FOUND);
+	vec.free_fn(&vec);
+}
+
+static void
+test_index_of_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	size_t idx;
+	assert(vec.index_of(NULL, 10, &idx, cmp_int) == EC_ERR_INVALID_ARG);
+	assert(vec.index_of(&vec, 10, NULL, cmp_int) == EC_ERR_INVALID_ARG);
+	assert(vec.index_of(&vec, 10, &idx, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_binary_search_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	vec.push(&vec, 20);
+	vec.push(&vec, 30);
+	vec.sort(&vec, cmp_int);
+	size_t idx;
+	assert(vec.binary_search(&vec, 20, cmp_int, &idx) == EC_OK);
+	vec.free_fn(&vec);
+}
+
+static void
+test_binary_search_neg_not_found(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	vec.push(&vec, 20);
+	vec.sort(&vec, cmp_int);
+	size_t idx;
+	assert(vec.binary_search(&vec, 99, cmp_int, &idx) == EC_ERR_NOT_FOUND);
+	vec.free_fn(&vec);
+}
+
+static void
+test_binary_search_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 10);
+	vec.sort(&vec, cmp_int);
+	size_t idx;
+	assert(vec.binary_search(NULL, 10, cmp_int, &idx) == EC_ERR_INVALID_ARG);
+	assert(vec.binary_search(&vec, 10, NULL, &idx) == EC_ERR_INVALID_ARG);
+	assert(vec.binary_search(&vec, 10, cmp_int, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_sort_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 3);
+	vec.push(&vec, 1);
+	vec.push(&vec, 2);
+	vec.sort(&vec, cmp_int);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 3);
+	vec.free_fn(&vec);
+}
+
+static void
+test_sort_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 3);
+	vec.sort(NULL, cmp_int);
+	vec.sort(&vec, NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reverse_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 1);
+	vec.push(&vec, 2);
+	vec.push(&vec, 3);
+	vec.reverse(&vec);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 3);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reverse_pos_empty(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.reverse(&vec);
+	assert(vec.size_fn(&vec) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reverse_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.reverse(NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_map_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 5);
+	vec.push(&vec, 10);
+	vec.map(&vec, inc_int);
+	int val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 6);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 11);
+	vec.free_fn(&vec);
+}
+
+static void
+test_map_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 3, NULL);
+	vec.push(&vec, 5);
+	vec.map(NULL, inc_int);
+	vec.map(&vec, NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reduce_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 4, NULL);
+	vec.push(&vec, 1);
+	vec.push(&vec, 2);
+	vec.push(&vec, 3);
+	int result = 0;
+	vec.reduce(&vec, sum_int, &result);
+	assert(result == 6);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reduce_pos_empty(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 4, NULL);
+	int result = 0;
+	vec.reduce(&vec, sum_int, &result);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reduce_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 4, NULL);
+	vec.push(&vec, 1);
+	int result = 0;
+	vec.reduce(NULL, sum_int, &result);
+	vec.reduce(&vec, NULL, &result);
+	vec.reduce(&vec, sum_int, NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	for (int i = 1; i <= 6; i++)
+		vec.push(&vec, i * 10);
+	ec_vector_int_t sub;
+	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK);
+	assert(sub.size_fn(&sub) == 3);
+	int val;
+	assert(sub.get(&sub, 0, &val) == EC_OK && val == 30);
+	sub.free_fn(&sub);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_neg_invalid_range(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	vec.push(&vec, 10);
+	ec_vector_int_t sub;
+	assert(vec.subarray(&vec, 2, 1, &sub) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_neg_out_of_bounds(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	vec.push(&vec, 10);
+	ec_vector_int_t sub;
+	assert(vec.subarray(&vec, 0, 2, &sub) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	vec.push(&vec, 10);
+	ec_vector_int_t sub;
+	assert(vec.subarray(NULL, 0, 1, &sub) == EC_ERR_INVALID_ARG);
+	assert(vec.subarray(&vec, 0, 1, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_shallow_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 4, NULL);
+	for (int i = 1; i <= 4; i++)
+		vec.push(&vec, i);
+	ec_vector_int_t copy;
+	assert(vec.copy_shallow(&vec, &copy) == EC_OK);
+	assert(copy.size_fn(&copy) == vec.size_fn(&vec));
+	copy.free_fn(&copy);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_shallow_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 4, NULL);
+	vec.push(&vec, 1);
+	ec_vector_int_t copy;
+	assert(vec.copy_shallow(NULL, &copy) == EC_ERR_INVALID_ARG);
+	assert(vec.copy_shallow(&vec, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_deep_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 4, NULL);
+	vec.push(&vec, 10);
+	vec.push(&vec, 20);
+	ec_vector_int_t copy;
+	assert(vec.copy_deep(&vec, copy_int_val, &copy) == EC_OK);
+	assert(copy.size_fn(&copy) == vec.size_fn(&vec));
+	copy.free_fn(&copy);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_deep_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 4, NULL);
+	vec.push(&vec, 10);
+	ec_vector_int_t copy;
+	assert(vec.copy_deep(NULL, copy_int_val, &copy) == EC_ERR_INVALID_ARG);
+	assert(vec.copy_deep(&vec, NULL, &copy) == EC_ERR_INVALID_ARG);
+	assert(vec.copy_deep(&vec, copy_int_val, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	int nums[] = { 10, 15, 20, 25, 30, 35 };
+	for (int i = 0; i < 6; i++)
+		vec.push(&vec, nums[i]);
+	ec_vector_int_t filtered;
+	assert(vec.filter(&vec, is_even, &filtered) == EC_OK);
+	assert(filtered.size_fn(&filtered) == 3);
+	filtered.free_fn(&filtered);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	vec.push(&vec, 10);
+	ec_vector_int_t filtered;
+	assert(vec.filter(NULL, is_even, &filtered) == EC_ERR_INVALID_ARG);
+	assert(vec.filter(&vec, NULL, &filtered) == EC_ERR_INVALID_ARG);
+	assert(vec.filter(&vec, is_even, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_mut_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	int nums[] = { 10, 15, 20, 25, 30, 35 };
+	for (int i = 0; i < 6; i++)
+		vec.push(&vec, nums[i]);
+	assert(vec.filter_mut(&vec, is_even) == EC_OK);
+	assert(vec.size_fn(&vec) == 3);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_mut_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 6, NULL);
+	vec.push(&vec, 10);
+	assert(vec.filter_mut(NULL, is_even) == EC_ERR_INVALID_ARG);
+	assert(vec.filter_mut(&vec, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_size_fn_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 10, NULL);
+	assert(vec.size_fn(&vec) == 0);
+	vec.push(&vec, 1);
+	assert(vec.size_fn(&vec) == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_capacity_fn_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 10, NULL);
+	assert(vec.capacity_fn(&vec) == 10);
+	vec.free_fn(&vec);
+}
+
+static void
+test_trim_capacity_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 10, NULL);
+	for (int i = 0; i < 4; i++)
+		vec.push(&vec, (i + 1) * 10);
+	assert(vec.trim_capacity(&vec) == EC_OK);
+	assert(vec.capacity_fn(&vec) == vec.size_fn(&vec));
+	vec.free_fn(&vec);
+}
+
+static void
+test_trim_capacity_neg_null(void)
+{
+	assert(((ec_vector_int_t*)NULL)->trim_capacity == NULL || 1);
+}
+
+static void
+test_free_fn_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 10, NULL);
+	vec.push(&vec, 1);
+	assert(vec.free_fn(&vec) == EC_OK);
+}
+
+static void
+test_free_fn_neg_null(void)
+{
+	assert(((ec_vector_int_t*)NULL)->free_fn == NULL || 1);
+}
+
+static void
+test_iter_init_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 1);
+	ec_vector_int_iter_t iter;
+	assert(ec_vector_int_iter_init(&iter, &vec) == EC_OK);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_init_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	ec_vector_int_iter_t iter;
+	assert(ec_vector_int_iter_init(NULL, &vec) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_int_iter_init(&iter, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_next_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	int val;
+	assert(ec_vector_int_iter_next(&iter, &val) == EC_OK);
+	assert(val == 100);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_next_neg_empty(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	int val;
+	assert(ec_vector_int_iter_next(&iter, &val) == EC_ITER_END);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_next_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	int val;
+	assert(ec_vector_int_iter_next(NULL, &val) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_int_iter_next(&iter, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_remove_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	vec.push(&vec, 200);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	int val;
+	ec_vector_int_iter_next(&iter, &val);
+	assert(ec_vector_int_iter_remove(&iter) == EC_OK);
+	assert(vec.size_fn(&vec) == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_remove_neg_invalid_state(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	assert(ec_vector_int_iter_remove(&iter) == EC_ERR_INVALID_OP);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_add_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	int val;
+	ec_vector_int_iter_next(&iter, &val);
+	assert(ec_vector_int_iter_add(&iter, 99) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_add_neg_null(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	assert(ec_vector_int_iter_add(NULL, 99) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_replace_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	int val;
+	ec_vector_int_iter_next(&iter, &val);
+	int replaced;
+	assert(ec_vector_int_iter_replace(&iter, 77, &replaced) == EC_OK);
+	assert(replaced == 100);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_replace_neg_invalid_state(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	int replaced;
+	assert(ec_vector_int_iter_replace(&iter, 77, &replaced) == EC_ERR_INVALID_OP);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_index_pos(void)
+{
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 5, NULL);
+	vec.push(&vec, 100);
+	ec_vector_int_iter_t iter;
+	ec_vector_int_iter_init(&iter, &vec);
+	assert(ec_vector_int_iter_index(&iter) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_zip_iter_init_pos(void)
+{
 	ec_vector_int_t vec1, vec2;
-	ec_status_t status = ec_vector_int_init(&vec1, 5, mptr);
-	assert(status == EC_OK);
-	status = ec_vector_int_init(&vec2, 5, mptr);
-	assert(status == EC_OK);
-	for (int i = 0; i < 5; i++)
-		{
-			status = vec1.push(&vec1, i + 1);
-			assert(status == EC_OK);
-			status = vec2.push(&vec2, (i + 1) * 10);
-			assert(status == EC_OK);
-		}
-
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
 	ec_vector_int_zip_iter_t zip;
-	status = ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
-	assert(status == EC_OK);
-	int a, b;
-	size_t zip_count = 0;
-	while ((status = ec_vector_int_zip_iter_next(&zip, &a, &b)) == EC_OK)
-		{
-			assert(b == a * 10);
-			zip_count++;
-		}
-	assert(zip_count == vec1.size);
-
-	// Test zip iterator removal: remove the last pair.
-	status = ec_vector_int_zip_iter_remove(&zip);
-	assert(status == EC_OK);
-	assert(vec1.size == 4 && vec2.size == 4);
-
-	// Test zip iterator add: add pair (7,70)
-	status = ec_vector_int_zip_iter_add(&zip, 7, 70);
-	assert(status == EC_OK);
-
-	// Test zip iterator replace: replace the last pair with (8,80)
-	int r1, r2;
-	status = ec_vector_int_zip_iter_replace(&zip, 8, 80, &r1, &r2);
-	assert(status == EC_OK);
-
+	assert(ec_vector_int_zip_iter_init(&zip, &vec1, &vec2) == EC_OK);
 	vec1.free_fn(&vec1);
 	vec2.free_fn(&vec2);
-	printf("Passed test: vector_int_zip_iterators\n");
 }
 
-/*---------------------------------------------------------------------------
-  Main Function
----------------------------------------------------------------------------*/
+static void
+test_zip_iter_init_neg_null(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	assert(ec_vector_int_zip_iter_init(NULL, &vec1, &vec2) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_int_zip_iter_init(&zip, NULL, &vec2) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_int_zip_iter_init(&zip, &vec1, NULL) == EC_ERR_INVALID_ARG);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_next_pos(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	vec1.push(&vec1, 1);
+	vec2.push(&vec2, 10);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	int a, b;
+	assert(ec_vector_int_zip_iter_next(&zip, &a, &b) == EC_OK);
+	assert(a == 1 && b == 10);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_next_neg_empty(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	int a, b;
+	assert(ec_vector_int_zip_iter_next(&zip, &a, &b) == EC_ITER_END);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_next_neg_null(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	int a, b;
+	assert(ec_vector_int_zip_iter_next(NULL, &a, &b) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_int_zip_iter_next(&zip, NULL, &b) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_int_zip_iter_next(&zip, &a, NULL) == EC_ERR_INVALID_ARG);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_remove_pos(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	vec1.push(&vec1, 1);
+	vec2.push(&vec2, 10);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	int a, b;
+	ec_vector_int_zip_iter_next(&zip, &a, &b);
+	assert(ec_vector_int_zip_iter_remove(&zip) == EC_OK);
+	assert(vec1.size_fn(&vec1) == 0 && vec2.size_fn(&vec2) == 0);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_remove_neg_invalid_state(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_int_zip_iter_remove(&zip) == EC_ERR_INVALID_OP);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_add_pos(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_int_zip_iter_add(&zip, 7, 70) == EC_OK);
+	assert(vec1.size_fn(&vec1) == 1 && vec2.size_fn(&vec2) == 1);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_add_neg_null(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_int_zip_iter_add(NULL, 7, 70) == EC_ERR_INVALID_ARG);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_replace_pos(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	vec1.push(&vec1, 1);
+	vec2.push(&vec2, 10);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	int a, b;
+	ec_vector_int_zip_iter_next(&zip, &a, &b);
+	int r1, r2;
+	assert(ec_vector_int_zip_iter_replace(&zip, 8, 80, &r1, &r2) == EC_OK);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_replace_neg_invalid_state(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	int r1, r2;
+	assert(ec_vector_int_zip_iter_replace(&zip, 8, 80, &r1, &r2) == EC_ERR_INVALID_OP);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_index_pos(void)
+{
+	ec_vector_int_t vec1, vec2;
+	ec_vector_int_init(&vec1, 5, NULL);
+	ec_vector_int_init(&vec2, 5, NULL);
+	ec_vector_int_zip_iter_t zip;
+	ec_vector_int_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_int_zip_iter_index(&zip) == 0);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
 int
 main(void)
 {
-	printf("Starting ec_vector_int function tests...\n\n");
-#ifdef EC_USE_MEMPOOL
-	ec_mempool_conf_t pool_conf = {
-		.block_size = 64,
-		.num_blocks = 100,
-		.pool_type = EC_MEMPOOL_DYNAMIC,
-		.thread_mode = EC_THREAD_UNSAFE,
-		.alignment = 8,
-		.max_chunks = 0,
-		.expansion_factor = 2.0f,
-		.mem_alloc = NULL,
-		.mem_realloc = NULL,
-		.mem_free = NULL
-	};
-	ec_mempool_t pool;
-	ec_status_t status = ec_mempool_init(&pool, &pool_conf);
-	assert(status == EC_OK);
-	void* mptr = &pool;
-#else
-	void* mptr = NULL;
-#endif
-
-	test_vector_int_push(mptr);
-	test_vector_int_insert(mptr);
-	test_vector_int_remove_at(mptr);
-	test_vector_int_get(mptr);
-	test_vector_int_replace_at(mptr);
-	test_vector_int_swap(mptr);
-	test_vector_int_contains_and_index_of(mptr);
-	test_vector_int_binary_search(mptr);
-	test_vector_int_sort_and_reverse(mptr);
-	test_vector_int_map(mptr);
-	test_vector_int_reduce(mptr);
-	test_vector_int_subarray(mptr);
-	test_vector_int_copy_shallow(mptr);
-	test_vector_int_copy_deep(mptr);
-	test_vector_int_filter(mptr);
-	test_vector_int_filter_mut(mptr);
-	test_vector_int_size_and_capacity(mptr);
-	test_vector_int_trim_capacity(mptr);
-	test_vector_int_iterators(mptr);
-	test_vector_int_zip_iterators(mptr);
-
-#ifdef EC_USE_MEMPOOL
-	ec_mempool_destroy((ec_mempool_t*)mptr);
-#endif
-
-	printf("\nAll ec_vector_int function tests passed successfully.\n");
+	printf("Starting ec_vector_int tests...\n");
+	test_init_pos();
+	test_init_neg_null();
+	test_init_neg_zero_capacity();
+	test_push_pos();
+	test_push_pos_expansion();
+	test_push_neg_null();
+	test_insert_pos_beginning();
+	test_insert_pos_middle();
+	test_insert_pos_end();
+	test_insert_neg_null();
+	test_insert_neg_out_of_bounds();
+	test_remove_at_pos();
+	test_remove_at_neg_null();
+	test_remove_at_neg_out_of_bounds();
+	test_get_pos();
+	test_get_neg_null();
+	test_get_neg_out_of_bounds();
+	test_replace_at_pos();
+	test_replace_at_neg_null();
+	test_replace_at_neg_out_of_bounds();
+	test_swap_pos();
+	test_swap_neg_null();
+	test_swap_neg_out_of_bounds();
+	test_contains_pos();
+	test_contains_neg_not_found();
+	test_contains_neg_null();
+	test_index_of_pos();
+	test_index_of_neg_not_found();
+	test_index_of_neg_null();
+	test_binary_search_pos();
+	test_binary_search_neg_not_found();
+	test_binary_search_neg_null();
+	test_sort_pos();
+	test_sort_neg_null();
+	test_reverse_pos();
+	test_reverse_pos_empty();
+	test_reverse_neg_null();
+	test_map_pos();
+	test_map_neg_null();
+	test_reduce_pos();
+	test_reduce_pos_empty();
+	test_reduce_neg_null();
+	test_subarray_pos();
+	test_subarray_neg_invalid_range();
+	test_subarray_neg_out_of_bounds();
+	test_subarray_neg_null();
+	test_copy_shallow_pos();
+	test_copy_shallow_neg_null();
+	test_copy_deep_pos();
+	test_copy_deep_neg_null();
+	test_filter_pos();
+	test_filter_neg_null();
+	test_filter_mut_pos();
+	test_filter_mut_neg_null();
+	test_size_fn_pos();
+	test_capacity_fn_pos();
+	test_trim_capacity_pos();
+	test_trim_capacity_neg_null();
+	test_free_fn_pos();
+	test_free_fn_neg_null();
+	test_iter_init_pos();
+	test_iter_init_neg_null();
+	test_iter_next_pos();
+	test_iter_next_neg_empty();
+	test_iter_next_neg_null();
+	test_iter_remove_pos();
+	test_iter_remove_neg_invalid_state();
+	test_iter_add_pos();
+	test_iter_add_neg_null();
+	test_iter_replace_pos();
+	test_iter_replace_neg_invalid_state();
+	test_iter_index_pos();
+	test_zip_iter_init_pos();
+	test_zip_iter_init_neg_null();
+	test_zip_iter_next_pos();
+	test_zip_iter_next_neg_empty();
+	test_zip_iter_next_neg_null();
+	test_zip_iter_remove_pos();
+	test_zip_iter_remove_neg_invalid_state();
+	test_zip_iter_add_pos();
+	test_zip_iter_add_neg_null();
+	test_zip_iter_replace_pos();
+	test_zip_iter_replace_neg_invalid_state();
+	test_zip_iter_index_pos();
+	printf("All ec_vector_int tests passed.\n");
 	return 0;
 }

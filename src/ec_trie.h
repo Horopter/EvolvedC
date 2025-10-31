@@ -291,6 +291,7 @@ EC_TRIE_DEF(const char*, zh)
 EC_TRIE_DEF(const char*, ko)
 EC_TRIE_DEF(const char*, te)
 EC_TRIE_DEF(const char*, hi)
+EC_TRIE_DEF(const char*, kn)
 EC_TRIE_DEF(const char*, any)
 
 #endif

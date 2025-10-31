@@ -20,7 +20,7 @@ extern "C"
 		EC_ERR_OUT_OF_BOUNDS, /* Index out of bounds */
 		EC_ERR_MAX_CAPACITY,  /* Exceeded maximum capacity */
 		EC_ITER_END,          /* Iterator reached end */
-		/* Add more codes as needed */
+		                      /* Add more codes as needed */
 	} ec_status_t;
 
 #ifdef __cplusplus

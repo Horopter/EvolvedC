@@ -260,6 +260,66 @@ test_stack_int_free(void* mp)
 	printf("pass: test_stack_int_free\n");
 }
 
+void
+test_stack_int_struct_size(void* mp)
+{
+	stamp();
+	printf("test_stack_int_struct_size\n");
+	ec_stack_int_t s;
+	ec_status_t st = ec_stack_int_init(&s, mp);
+	TEST_ASSERT(st == EC_OK);
+	size_t sz = s.struct_size(&s);
+	TEST_ASSERT(sz == sizeof(ec_stack_int_t));
+	s.free_fn(&s);
+	printf("pass: test_stack_int_struct_size\n");
+}
+
+void
+test_stack_int_empty_peek_pop_neg(void* mp)
+{
+	stamp();
+	printf("test_stack_int_empty_peek_pop_neg\n");
+	ec_stack_int_t s;
+	ec_status_t st = ec_stack_int_init(&s, mp);
+	TEST_ASSERT(st == EC_OK);
+	int* val = malloc(sizeof(int));
+	TEST_ASSERT(val != NULL);
+	st = s.peek(&s, (void**)&val);
+	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
+	st = s.pop(&s, (void**)&val);
+	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
+	s.free_fn(&s);
+	free(val);
+	printf("pass: test_stack_int_empty_peek_pop_neg\n");
+}
+
+void
+test_stack_int_invalid_args_neg(void* mp)
+{
+	stamp();
+	printf("test_stack_int_invalid_args_neg\n");
+	ec_stack_int_t s;
+	int val = 42;
+	int* out = malloc(sizeof(int));
+	TEST_ASSERT(out != NULL);
+
+	TEST_ASSERT(ec_stack_int_init(NULL, mp) == EC_ERR_INVALID_ARG);
+	ec_status_t st = ec_stack_int_init(&s, mp);
+	TEST_ASSERT(st == EC_OK);
+
+	TEST_ASSERT(s.push(NULL, &val) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(s.peek(NULL, (void**)&out) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(s.peek(&s, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(s.pop(NULL, (void**)&out) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(s.pop(&s, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(s.size_fn(NULL) == 0);
+	TEST_ASSERT(s.struct_size(NULL) == 0);
+
+	s.free_fn(&s);
+	free(out);
+	printf("pass: test_stack_int_invalid_args_neg\n");
+}
+
 int
 main(void)
 {
@@ -281,6 +341,9 @@ main(void)
 	test_stack_int_iterators(mp);
 	test_stack_int_zip_iterators(mp);
 	test_stack_int_free(mp);
+	test_stack_int_struct_size(mp);
+	test_stack_int_empty_peek_pop_neg(mp);
+	test_stack_int_invalid_args_neg(mp);
 
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);

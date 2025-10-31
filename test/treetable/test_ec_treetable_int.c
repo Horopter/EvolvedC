@@ -101,6 +101,35 @@ test_add_get_remove(void* mp)
 }
 
 static void
+test_get_first_last(void* mp)
+{
+	stamp();
+	printf("test_get_first_last\n");
+	ec_treetable_int_t t;
+	ec_treetable_int_init(&t, mp, NULL);
+	int k1 = 10, v1 = 100, k2 = 5, v2 = 50, k3 = 20, v3 = 200;
+	t.add(&t, &k1, &v1);
+	t.add(&t, &k2, &v2);
+	t.add(&t, &k3, &v3);
+
+	int first_k, first_v, last_k, last_v;
+	TASSERT(t.get_first_key(&t, &first_k) == EC_OK && first_k == 5);
+	TASSERT(t.get_first_value(&t, &first_v) == EC_OK && first_v == 50);
+	TASSERT(t.get_last_key(&t, &last_k) == EC_OK && last_k == 20);
+	TASSERT(t.get_last_value(&t, &last_v) == EC_OK && last_v == 200);
+
+	ec_treetable_int_t empty;
+	ec_treetable_int_init(&empty, mp, NULL);
+	TASSERT(empty.get_first_key(&empty, &first_k) == EC_ERR_NOT_FOUND);
+	TASSERT(empty.get_first_value(&empty, &first_v) == EC_ERR_NOT_FOUND);
+	TASSERT(empty.get_last_key(&empty, &last_k) == EC_ERR_NOT_FOUND);
+	TASSERT(empty.get_last_value(&empty, &last_v) == EC_ERR_NOT_FOUND);
+	empty.remove_all(&empty);
+	t.remove_all(&t);
+	printf("pass:test_get_first_last\n");
+}
+
+static void
 test_remove_first_last(void* mp)
 {
 	stamp();
@@ -117,6 +146,12 @@ test_remove_first_last(void* mp)
 	TASSERT(t.size_fn(&t) == 4);
 	t.remove_last(&t);
 	TASSERT(t.size_fn(&t) == 3);
+
+	ec_treetable_int_t empty;
+	ec_treetable_int_init(&empty, mp, NULL);
+	TASSERT(empty.remove_first(&empty) == EC_ERR_NOT_FOUND);
+	TASSERT(empty.remove_last(&empty) == EC_ERR_NOT_FOUND);
+	empty.remove_all(&empty);
 	t.remove_all(&t);
 	printf("pass:test_remove_first_last\n");
 }
@@ -278,6 +313,67 @@ test_big_random(void* mp)
 	printf("pass:test_big_random\n");
 }
 
+static void
+test_invalid_args(void* mp)
+{
+	stamp();
+	printf("test_invalid_args\n");
+	ec_treetable_int_t t;
+	ec_treetable_int_init(&t, mp, NULL);
+	int k = 10, v = 100, out_k, out_v;
+
+	TASSERT(ec_treetable_int_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.add(NULL, &k, &v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.add(&t, NULL, &v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.add(&t, &k, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.remove(NULL, &k) == EC_ERR_INVALID_ARG);
+	TASSERT(t.remove(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.remove_all(NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.remove_first(NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.remove_last(NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get(NULL, &k, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get(&t, NULL, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get(&t, &k, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_first_key(NULL, &out_k) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_first_key(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_first_value(NULL, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_first_value(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_last_key(NULL, &out_k) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_last_key(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_last_value(NULL, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_last_value(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_greater_than(NULL, &k, &out_k, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_greater_than(&t, NULL, &out_k, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_greater_than(&t, &k, NULL, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_greater_than(&t, &k, &out_k, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_lesser_than(NULL, &k, &out_k, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_lesser_than(&t, NULL, &out_k, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_lesser_than(&t, &k, NULL, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.get_lesser_than(&t, &k, &out_k, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.contains_key(NULL, &k) == EC_ERR_INVALID_ARG);
+	TASSERT(t.contains_key(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.contains_value(NULL, &v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.contains_value(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.foreach_key(NULL, fkey) == EC_ERR_INVALID_ARG);
+	TASSERT(t.foreach_key(&t, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.foreach_value(NULL, fval) == EC_ERR_INVALID_ARG);
+	TASSERT(t.foreach_value(&t, NULL) == EC_ERR_INVALID_ARG);
+
+	ec_treetable_int_iter_t it;
+	TASSERT(t.iter_init(NULL, &it) == EC_ERR_INVALID_ARG);
+	TASSERT(t.iter_init(&t, NULL) == EC_ERR_INVALID_ARG);
+	t.iter_init(&t, &it);
+	TASSERT(t.iter_next(NULL, &out_k, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.iter_next(&it, NULL, &out_v) == EC_ERR_INVALID_ARG);
+	TASSERT(t.iter_next(&it, &out_k, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(t.iter_remove(NULL) == EC_ERR_INVALID_ARG);
+
+	TASSERT(t.size_fn(NULL) == 0);
+
+	t.remove_all(&t);
+	printf("pass:test_invalid_args\n");
+}
+
 int
 main(void)
 {
@@ -293,6 +389,7 @@ main(void)
 #endif
 	test_init(mp);
 	test_add_get_remove(mp);
+	test_get_first_last(mp);
 	test_remove_first_last(mp);
 	test_greater_lesser(mp);
 	test_contains(mp);
@@ -300,6 +397,7 @@ main(void)
 	test_iterators(mp);
 	test_foreach(mp);
 	test_big_random(mp);
+	test_invalid_args(mp);
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif

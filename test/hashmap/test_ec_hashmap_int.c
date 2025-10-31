@@ -148,7 +148,7 @@ test_hashmap_int_remove_all(void* mp)
 			hm.add(&hm, &k, &v);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t st = hm.remove_all(&hm);
+	ec_status_t ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
@@ -297,6 +297,53 @@ test_hashmap_int_rehash(void* mp)
 	hm.remove_all(&hm);
 	printf("pass:test_hashmap_int_rehash\n");
 }
+static void
+test_hashmap_int_invalid_args(void* mp)
+{
+	stamp();
+	printf("test_hashmap_int_invalid_args\n");
+	ec_hashmap_int_t hm;
+	ec_hashmap_int_init(&hm, mp);
+	int k = 1, v = 10;
+	TEST_ASSERT(ec_hashmap_int_init(NULL, mp) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.add(NULL, &k, &v) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.add(&hm, NULL, &v) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.add(&hm, &k, NULL) == EC_ERR_INVALID_ARG);
+	int* out;
+	TEST_ASSERT(hm.get(NULL, &k, &out) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.get(&hm, NULL, &out) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.get(&hm, &k, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.remove(NULL, &k) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.remove(&hm, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.contains_key(NULL, &k) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.contains_key(&hm, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.remove_all(NULL) == EC_ERR_INVALID_ARG);
+	int* keys = NULL;
+	size_t count = 0;
+	TEST_ASSERT(hm.get_keys(NULL, &keys, &count) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.get_keys(&hm, NULL, &count) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.get_keys(&hm, &keys, NULL) == EC_ERR_INVALID_ARG);
+	int* values = NULL;
+	TEST_ASSERT(hm.get_values(NULL, &values, &count) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.get_values(&hm, NULL, &count) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.get_values(&hm, &values, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.foreach_key(NULL, foreach_key_int) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.foreach_key(&hm, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.foreach_value(NULL, foreach_val_int) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.foreach_value(&hm, NULL) == EC_ERR_INVALID_ARG);
+	ec_hashmap_int_iter_t it;
+	TEST_ASSERT(hm.iter_init(NULL, &it) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.iter_init(&hm, NULL) == EC_ERR_INVALID_ARG);
+	int key, val;
+	TEST_ASSERT(hm.iter_next(NULL, &key, &val) == EC_ERR_INVALID_ARG);
+	hm.iter_init(&hm, &it);
+	TEST_ASSERT(hm.iter_next(&it, NULL, &val) == EC_ERR_INVALID_ARG);
+	hm.iter_init(&hm, &it);
+	TEST_ASSERT(hm.iter_next(&it, &key, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(hm.iter_remove(NULL) == EC_ERR_INVALID_ARG);
+	hm.remove_all(&hm);
+	printf("pass:test_hashmap_int_invalid_args\n");
+}
 int
 main(void)
 {
@@ -321,6 +368,7 @@ main(void)
 	test_hashmap_int_iterators_empty(mp);
 	test_hashmap_int_iterators(mp);
 	test_hashmap_int_rehash(mp);
+	test_hashmap_int_invalid_args(mp);
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif

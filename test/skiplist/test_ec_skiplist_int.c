@@ -57,23 +57,32 @@ stamp(void)
 }
 
 static void
-test_skiplist_int_init(void* mp)
+test_skiplist_int_init_pos(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_init\n");
+	printf("test_skiplist_int_init_pos\n");
 	ec_skiplist_int_t sl;
 	ec_status_t st = ec_skiplist_int_init(&sl, mp, NULL);
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(sl.size == 0);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_init\n");
+	printf("pass:test_skiplist_int_init_pos\n");
 }
 
 static void
-test_skiplist_int_add(void* mp)
+test_skiplist_int_init_neg(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_add\n");
+	printf("test_skiplist_int_init_neg\n");
+	TEST_ASSERT(ec_skiplist_int_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
+	printf("pass:test_skiplist_int_init_neg\n");
+}
+
+static void
+test_skiplist_int_add_pos(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_add_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	int k1 = 10, k2 = 20;
@@ -84,7 +93,21 @@ test_skiplist_int_add(void* mp)
 	int bad = 999;
 	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_add\n");
+	printf("pass:test_skiplist_int_add_pos\n");
+}
+
+static void
+test_skiplist_int_add_neg(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_add_neg\n");
+	ec_skiplist_int_t sl;
+	ec_skiplist_int_init(&sl, mp, NULL);
+	int k = 10;
+	TEST_ASSERT(sl.add(NULL, &k) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.add(&sl, NULL) == EC_ERR_INVALID_ARG);
+	sl.remove_all(&sl);
+	printf("pass:test_skiplist_int_add_neg\n");
 }
 
 static void
@@ -105,10 +128,10 @@ test_skiplist_int_add_duplicate(void* mp)
 }
 
 static void
-test_skiplist_int_remove(void* mp)
+test_skiplist_int_remove_pos(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_remove\n");
+	printf("test_skiplist_int_remove_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	int k1 = 1, k2 = 2, k3 = 3;
@@ -119,16 +142,32 @@ test_skiplist_int_remove(void* mp)
 	TEST_ASSERT(sl.remove_f(&sl, &k2) == EC_OK);
 	TEST_ASSERT(sl.size_fn(&sl) == 2);
 	TEST_ASSERT(sl.remove_f(&sl, &k2) == EC_ERR_NOT_FOUND);
-	TEST_ASSERT(sl.remove_f(NULL, &k3) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_remove\n");
+	printf("pass:test_skiplist_int_remove_pos\n");
 }
 
 static void
-test_skiplist_int_remove_all(void* mp)
+test_skiplist_int_remove_neg(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_remove_all\n");
+	printf("test_skiplist_int_remove_neg\n");
+	ec_skiplist_int_t sl;
+	ec_skiplist_int_init(&sl, mp, NULL);
+	int k = 10;
+	sl.add(&sl, &k);
+	TEST_ASSERT(sl.remove_f(NULL, &k) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.remove_f(&sl, NULL) == EC_ERR_INVALID_ARG);
+	int bad = 999;
+	TEST_ASSERT(sl.remove_f(&sl, &bad) == EC_ERR_NOT_FOUND);
+	sl.remove_all(&sl);
+	printf("pass:test_skiplist_int_remove_neg\n");
+}
+
+static void
+test_skiplist_int_remove_all_pos(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_remove_all_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	for (int i = 0; i < 10; i++)
@@ -136,30 +175,57 @@ test_skiplist_int_remove_all(void* mp)
 	TEST_ASSERT(sl.size_fn(&sl) == 10);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
-	printf("pass:test_skiplist_int_remove_all\n");
+	printf("pass:test_skiplist_int_remove_all_pos\n");
 }
 
 static void
-test_skiplist_int_contains(void* mp)
+test_skiplist_int_remove_all_neg(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_contains\n");
+	printf("test_skiplist_int_remove_all_neg\n");
+	ec_skiplist_int_t sl;
+	ec_skiplist_int_init(&sl, mp, NULL);
+	TEST_ASSERT(sl.remove_all(NULL) == EC_ERR_INVALID_ARG);
+	sl.remove_all(&sl);
+	printf("pass:test_skiplist_int_remove_all_neg\n");
+}
+
+static void
+test_skiplist_int_contains_pos(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_contains_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	int k = 999;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(&sl, &k) == EC_OK);
-	int bad = 1000;
-	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_contains\n");
+	printf("pass:test_skiplist_int_contains_pos\n");
 }
 
 static void
-test_skiplist_int_get_keys(void* mp)
+test_skiplist_int_contains_neg(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_get_keys\n");
+	printf("test_skiplist_int_contains_neg\n");
+	ec_skiplist_int_t sl;
+	ec_skiplist_int_init(&sl, mp, NULL);
+	int k = 10;
+	sl.add(&sl, &k);
+	TEST_ASSERT(sl.contains(NULL, &k) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.contains(&sl, NULL) == EC_ERR_INVALID_ARG);
+	int bad = 1000;
+	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
+	sl.remove_all(&sl);
+	printf("pass:test_skiplist_int_contains_neg\n");
+}
+
+static void
+test_skiplist_int_get_keys_pos(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_get_keys_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	for (int i = 1; i <= 5; i++)
@@ -171,8 +237,30 @@ test_skiplist_int_get_keys(void* mp)
 	for (size_t i = 1; i < count; i++)
 		TEST_ASSERT(keys[i - 1] <= keys[i]);
 	EC_FREE(keys);
+	/* Test empty list */
+	int* keys2 = NULL;
+	size_t count2 = 0;
+	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_get_keys\n");
+	printf("pass:test_skiplist_int_get_keys_pos\n");
+}
+
+static void
+test_skiplist_int_get_keys_neg(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_get_keys_neg\n");
+	ec_skiplist_int_t sl;
+	ec_skiplist_int_init(&sl, mp, NULL);
+	int k = 10;
+	sl.add(&sl, &k);
+	int* keys = NULL;
+	size_t count = 0;
+	TEST_ASSERT(sl.get_keys(NULL, &keys, &count) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.get_keys(&sl, NULL, &count) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.get_keys(&sl, &keys, NULL) == EC_ERR_INVALID_ARG);
+	sl.remove_all(&sl);
+	printf("pass:test_skiplist_int_get_keys_neg\n");
 }
 
 static void
@@ -182,10 +270,10 @@ foreach_key_int(int k)
 }
 
 static void
-test_skiplist_int_foreach(void* mp)
+test_skiplist_int_foreach_pos(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_foreach\n");
+	printf("test_skiplist_int_foreach_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	for (int i = 0; i < 5; i++)
@@ -195,30 +283,69 @@ test_skiplist_int_foreach(void* mp)
 		}
 	TEST_ASSERT(sl.foreach_key(&sl, foreach_key_int) == EC_OK);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_foreach\n");
+	printf("pass:test_skiplist_int_foreach_pos\n");
 }
 
 static void
-test_skiplist_int_iterators_empty(void* mp)
+test_skiplist_int_foreach_neg(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_iterators_empty\n");
+	printf("test_skiplist_int_foreach_neg\n");
+	ec_skiplist_int_t sl;
+	ec_skiplist_int_init(&sl, mp, NULL);
+	int k = 10;
+	sl.add(&sl, &k);
+	TEST_ASSERT(sl.foreach_key(NULL, foreach_key_int) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.foreach_key(&sl, NULL) == EC_ERR_INVALID_ARG);
+	sl.remove_all(&sl);
+	printf("pass:test_skiplist_int_foreach_neg\n");
+}
+
+static void
+test_skiplist_int_iterators_empty_pos(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_iterators_empty_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	ec_skiplist_int_iter_t it;
 	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
 	int key;
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
-	TEST_ASSERT(sl.iter_remove(&it) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_iterators_empty\n");
+	printf("pass:test_skiplist_int_iterators_empty_pos\n");
 }
 
 static void
-test_skiplist_int_iterators(void* mp)
+test_skiplist_int_iterators_neg(void* mp)
 {
 	stamp();
-	printf("test_skiplist_int_iterators\n");
+	printf("test_skiplist_int_iterators_neg\n");
+	ec_skiplist_int_t sl;
+	ec_skiplist_int_init(&sl, mp, NULL);
+	ec_skiplist_int_iter_t it;
+	/* Test iter_init with NULL */
+	TEST_ASSERT(sl.iter_init(NULL, &it) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.iter_init(&sl, NULL) == EC_ERR_INVALID_ARG);
+	/* Test iter_next with NULL */
+	sl.iter_init(&sl, &it);
+	int key;
+	TEST_ASSERT(sl.iter_next(NULL, &key) == EC_ERR_INVALID_ARG);
+	sl.iter_init(&sl, &it);
+	TEST_ASSERT(sl.iter_next(&it, NULL) == EC_ERR_INVALID_ARG);
+	/* Test iter_remove with invalid iterator */
+	sl.iter_init(&sl, &it);
+	TEST_ASSERT(sl.iter_remove(&it) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(sl.iter_remove(NULL) == EC_ERR_INVALID_ARG);
+	sl.remove_all(&sl);
+	printf("pass:test_skiplist_int_iterators_neg\n");
+}
+
+static void
+test_skiplist_int_iterators_pos(void* mp)
+{
+	stamp();
+	printf("test_skiplist_int_iterators_pos\n");
 	ec_skiplist_int_t sl;
 	ec_skiplist_int_init(&sl, mp, NULL);
 	for (int i = 0; i < 5; i++)
@@ -241,7 +368,7 @@ test_skiplist_int_iterators(void* mp)
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_OK);
 	TEST_ASSERT(sl.iter_remove(&it) == EC_OK && sl.size_fn(&sl) == 4);
 	sl.remove_all(&sl);
-	printf("pass:test_skiplist_int_iterators\n");
+	printf("pass:test_skiplist_int_iterators_pos\n");
 }
 
 int
@@ -258,16 +385,24 @@ main(void)
 	void* mp = NULL;
 #endif
 
-	test_skiplist_int_init(mp);
-	test_skiplist_int_add(mp);
+	test_skiplist_int_init_pos(mp);
+	test_skiplist_int_init_neg(mp);
+	test_skiplist_int_add_pos(mp);
+	test_skiplist_int_add_neg(mp);
 	test_skiplist_int_add_duplicate(mp);
-	test_skiplist_int_remove(mp);
-	test_skiplist_int_remove_all(mp);
-	test_skiplist_int_contains(mp);
-	test_skiplist_int_get_keys(mp);
-	test_skiplist_int_foreach(mp);
-	test_skiplist_int_iterators_empty(mp);
-	test_skiplist_int_iterators(mp);
+	test_skiplist_int_remove_pos(mp);
+	test_skiplist_int_remove_neg(mp);
+	test_skiplist_int_remove_all_pos(mp);
+	test_skiplist_int_remove_all_neg(mp);
+	test_skiplist_int_contains_pos(mp);
+	test_skiplist_int_contains_neg(mp);
+	test_skiplist_int_get_keys_pos(mp);
+	test_skiplist_int_get_keys_neg(mp);
+	test_skiplist_int_foreach_pos(mp);
+	test_skiplist_int_foreach_neg(mp);
+	test_skiplist_int_iterators_empty_pos(mp);
+	test_skiplist_int_iterators_neg(mp);
+	test_skiplist_int_iterators_pos(mp);
 
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);

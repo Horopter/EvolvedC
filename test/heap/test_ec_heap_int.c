@@ -148,6 +148,65 @@ test_heap_free(void* mp)
 	printf("pass: test_heap_free\n");
 }
 
+void
+test_heap_empty_extract_neg(void* mp)
+{
+	stamp();
+	printf("test_heap_empty_extract_neg\n");
+	ec_heap_int_t heap;
+	ec_status_t st = ec_heap_int_init(&heap, 10, int_comparator, mp);
+	TEST_ASSERT(st == EC_OK);
+
+	int top;
+	st = heap.extract_top(&heap, &top);
+	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
+
+	heap.free_fn(&heap);
+	printf("pass: test_heap_empty_extract_neg\n");
+}
+
+void
+test_heap_empty_peek_neg(void* mp)
+{
+	stamp();
+	printf("test_heap_empty_peek_neg\n");
+	ec_heap_int_t heap;
+	ec_status_t st = ec_heap_int_init(&heap, 10, int_comparator, mp);
+	TEST_ASSERT(st == EC_OK);
+
+	int top;
+	st = heap.peek_top(&heap, &top);
+	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
+
+	heap.free_fn(&heap);
+	printf("pass: test_heap_empty_peek_neg\n");
+}
+
+void
+test_heap_invalid_args_neg(void* mp)
+{
+	stamp();
+	printf("test_heap_invalid_args_neg\n");
+	ec_heap_int_t heap;
+	int top;
+
+	TEST_ASSERT(ec_heap_int_init(NULL, 10, int_comparator, mp) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(ec_heap_int_init(&heap, 0, int_comparator, mp) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(ec_heap_int_init(&heap, 10, NULL, mp) == EC_ERR_INVALID_ARG);
+
+	st = ec_heap_int_init(&heap, 10, int_comparator, mp);
+	TEST_ASSERT(st == EC_OK);
+
+	TEST_ASSERT(heap.insert(NULL, 5) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(heap.extract_top(NULL, &top) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(heap.extract_top(&heap, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(heap.peek_top(NULL, &top) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(heap.peek_top(&heap, NULL) == EC_ERR_INVALID_ARG);
+
+	heap.free_fn(&heap);
+	printf("pass: test_heap_invalid_args_neg\n");
+}
+
 int
 main(void)
 {
@@ -167,6 +226,9 @@ main(void)
 	test_heap_peek(mp);
 	test_heap_size(mp);
 	test_heap_free(mp);
+	test_heap_empty_extract_neg(mp);
+	test_heap_empty_peek_neg(mp);
+	test_heap_invalid_args_neg(mp);
 
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);

@@ -62,6 +62,40 @@ stamp(void)
 		}
 }
 
+/* --- Local helpers to reduce duplication --- */
+static inline ec_status_t
+add_dir(ec_graph_int_t* g, int u, int v, int w)
+{
+	return g->insert_edge(g, &u, &v, w, 1);
+}
+
+static inline ec_status_t
+add_undir(ec_graph_int_t* g, int u, int v, int w)
+{
+	return g->insert_edge(g, &u, &v, w, 0);
+}
+
+static bool
+has_edge(ec_graph_int_t* g, int u, int v)
+{
+	ec_graph_int_node_t* nu = ec_graph_int_find(g, &u);
+	ec_graph_int_node_t* nv = ec_graph_int_find(g, &v);
+	if (!nu || !nv)
+		return false;
+	for (size_t i = 0; i < nu->edge_count; i++)
+		{
+			if (nu->edges[i].dst == nv)
+				return true;
+		}
+	return false;
+}
+
+static void
+reset_traversals(void)
+{
+	/* globals will be declared below; forward-reset via extern isn't needed here */
+}
+
 /* --- Global variables for traversal tests --- */
 
 static int bfs_result[100];
@@ -86,24 +120,35 @@ dfs_visit(int key)
 
 /* Test that a newly initialized graph is empty. */
 static void
-test_graph_init(void* mp)
+test_graph_init_pos(void* mp)
 {
 	stamp();
-	printf("test_graph_init\n");
+	printf("test_graph_init_pos\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
 	TASSERT(g.node_count == 0);
 	g.clear(&g);
-	printf("pass:test_graph_init\n");
+	printf("pass:test_graph_init_pos\n");
+}
+
+/* Test init with NULL graph pointer */
+static void
+test_graph_init_neg_null(void* mp)
+{
+	stamp();
+	printf("test_graph_init_neg_null\n");
+	ec_status_t st = ec_graph_int_init(NULL, mp, NULL);
+	TASSERT(st == EC_ERR_INVALID_ARG);
+	printf("pass:test_graph_init_neg_null\n");
 }
 
 /* Test node insertion (and duplicate avoidance). */
 static void
-test_graph_insert_node(void* mp)
+test_graph_insert_node_pos(void* mp)
 {
 	stamp();
-	printf("test_graph_insert_node\n");
+	printf("test_graph_insert_node_pos\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
@@ -111,8 +156,7 @@ test_graph_insert_node(void* mp)
 	st = g.insert_node(&g, &n1);
 	TASSERT(st == EC_OK);
 	TASSERT(g.node_count == 1);
-	ec_graph_int_node_t* node = ec_graph_int_find(&g, &n1);
-	TASSERT(node != NULL);
+	TASSERT(ec_graph_int_find(&g, &n1) != NULL);
 	/* Inserting the same node again should not add a duplicate */
 	st = g.insert_node(&g, &n1);
 	TASSERT(st == EC_OK);
@@ -122,298 +166,311 @@ test_graph_insert_node(void* mp)
 	TASSERT(st == EC_OK);
 	TASSERT(g.node_count == 2);
 	g.clear(&g);
-	printf("pass:test_graph_insert_node\n");
+	printf("pass:test_graph_insert_node_pos\n");
+}
+
+/* Test insert_node with NULL arguments */
+static void
+test_graph_insert_node_neg(void* mp)
+{
+	stamp();
+	printf("test_graph_insert_node_neg\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
+	TASSERT(st == EC_OK);
+	int n1 = 10;
+	TASSERT(g.insert_node(NULL, &n1) == EC_ERR_INVALID_ARG);
+	TASSERT(g.insert_node(&g, NULL) == EC_ERR_INVALID_ARG);
+	g.clear(&g);
+	printf("pass:test_graph_insert_node_neg\n");
 }
 
 /* Test edge insertion in both directed and undirected mode. */
 static void
-test_graph_insert_edge(void* mp)
+test_graph_insert_edge_pos(void* mp)
 {
 	stamp();
-	printf("test_graph_insert_edge\n");
+	printf("test_graph_insert_edge_pos\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	/* Insert a directed edge from 10 to 20 */
-	int src = 10, dst = 20;
-	st = g.insert_edge(&g, &src, &dst, 5, 1);
-	TASSERT(st == EC_OK);
+	/* directed 10->20 */
+	TASSERT(add_dir(&g, 10, 20, 5) == EC_OK);
 	TASSERT(g.node_count == 2);
-	ec_graph_int_node_t* node_src = ec_graph_int_find(&g, &src);
-	TASSERT(node_src != NULL);
-	TASSERT(node_src->edge_count == 1);
-	TASSERT(node_src->edges[0].dst == ec_graph_int_find(&g, &dst));
-
-	/* Insert an undirected edge from 20 to 30 */
-	int n30 = 30;
-	st = g.insert_edge(&g, &dst, &n30, 2, 0); /* undirected: adds edge in both directions */
-	TASSERT(st == EC_OK);
-	ec_graph_int_node_t* node_dst = ec_graph_int_find(&g, &dst);
-	TASSERT(node_dst != NULL);
-	ec_graph_int_node_t* node_n30 = ec_graph_int_find(&g, &n30);
-	TASSERT(node_n30 != NULL);
-	{
-		bool found_dn = false;
-		for (size_t i = 0; i < node_dst->edge_count; i++)
-			{
-				if (node_dst->edges[i].dst == node_n30)
-					{
-						found_dn = true;
-						break;
-					}
-			}
-		TASSERT(found_dn);
-	}
-	{
-		bool found_nd = false;
-		for (size_t i = 0; i < node_n30->edge_count; i++)
-			{
-				if (node_n30->edges[i].dst == node_dst)
-					{
-						found_nd = true;
-						break;
-					}
-			}
-		TASSERT(found_nd);
-	}
+	TASSERT(has_edge(&g, 10, 20));
+	/* undirected 20<->30 */
+	TASSERT(add_undir(&g, 20, 30, 2) == EC_OK);
+	TASSERT(has_edge(&g, 20, 30) && has_edge(&g, 30, 20));
 	g.clear(&g);
-	printf("pass:test_graph_insert_edge\n");
+	printf("pass:test_graph_insert_edge_pos\n");
 }
 
-/* Test Breadth-First Search (BFS) on a simple directed tree.
-   The graph is:
-         1
-        / \
-       2   3
-      / \
-     4   5
-       \
-        6 (from node 3)
-*/
+/* Test insert_edge with NULL arguments */
 static void
-test_graph_bfs(void* mp)
+test_graph_insert_edge_neg(void* mp)
 {
 	stamp();
-	printf("test_graph_bfs\n");
+	printf("test_graph_insert_edge_neg\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	int n1 = 1, n2 = 2, n3 = 3, n4 = 4, n5 = 5, n6 = 6;
-	st = g.insert_edge(&g, &n1, &n2, 1, 1); /* 1->2 */
+	TASSERT(g.insert_edge(NULL, &(int){ 1 }, &(int){ 2 }, 1, 0) == EC_ERR_INVALID_ARG);
+	TASSERT(g.insert_edge(&g, NULL, &(int){ 2 }, 1, 0) == EC_ERR_INVALID_ARG);
+	TASSERT(g.insert_edge(&g, &(int){ 1 }, NULL, 1, 0) == EC_ERR_INVALID_ARG);
+	g.clear(&g);
+	printf("pass:test_graph_insert_edge_neg\n");
+}
+
+/* BFS on a simple tree. */
+static void
+test_graph_bfs_pos(void* mp)
+{
+	stamp();
+	printf("test_graph_bfs_pos\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n1, &n3, 1, 1); /* 1->3 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n2, &n4, 1, 1); /* 2->4 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n2, &n5, 1, 1); /* 2->5 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n3, &n6, 1, 1); /* 3->6 */
-	TASSERT(st == EC_OK);
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	TASSERT(add_dir(&g, 1, 3, 1) == EC_OK);
+	TASSERT(add_dir(&g, 2, 4, 1) == EC_OK);
+	TASSERT(add_dir(&g, 2, 5, 1) == EC_OK);
+	TASSERT(add_dir(&g, 3, 6, 1) == EC_OK);
 	bfs_index = 0;
-	st = g.bfs(&g, &n1, bfs_visit);
-	TASSERT(st == EC_OK);
-	/* Expected BFS order: 1, 2, 3, 4, 5, 6 */
-	int expected[] = { 1, 2, 3, 4, 5, 6 };
-	TASSERT(bfs_index == 6);
-	for (int i = 0; i < 6; i++)
-		{
-			TASSERT(bfs_result[i] == expected[i]);
-		}
+	TASSERT(g.bfs(&g, &(int){ 1 }, bfs_visit) == EC_OK);
+	{
+		int expected[] = { 1, 2, 3, 4, 5, 6 };
+		TASSERT(bfs_index == 6);
+		for (int i = 0; i < 6; i++)
+			{
+				TASSERT(bfs_result[i] == expected[i]);
+			}
+	}
 	g.clear(&g);
-	printf("pass:test_graph_bfs\n");
+	printf("pass:test_graph_bfs_pos\n");
 }
 
-/* Test Depth-First Search (DFS) on the same tree.
-   Expected DFS order (following insertion order): 1, 2, 4, 5, 3, 6
-*/
+/* Test BFS with NULL arguments and non-existent node */
 static void
-test_graph_dfs(void* mp)
+test_graph_bfs_neg(void* mp)
 {
 	stamp();
-	printf("test_graph_dfs\n");
+	printf("test_graph_bfs_neg\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	int n1 = 1, n2 = 2, n3 = 3, n4 = 4, n5 = 5, n6 = 6;
-	st = g.insert_edge(&g, &n1, &n2, 1, 1); /* 1->2 */
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	/* Test NULL arguments */
+	TASSERT(g.bfs(NULL, &(int){ 1 }, bfs_visit) == EC_ERR_INVALID_ARG);
+	TASSERT(g.bfs(&g, NULL, bfs_visit) == EC_ERR_INVALID_ARG);
+	TASSERT(g.bfs(&g, &(int){ 1 }, NULL) == EC_ERR_INVALID_ARG);
+	/* Test non-existent node */
+	TASSERT(g.bfs(&g, &(int){ 99 }, bfs_visit) == EC_ERR_NOT_FOUND);
+	g.clear(&g);
+	printf("pass:test_graph_bfs_neg\n");
+}
+
+/* DFS on the same tree. */
+static void
+test_graph_dfs_pos(void* mp)
+{
+	stamp();
+	printf("test_graph_dfs_pos\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n1, &n3, 1, 1); /* 1->3 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n2, &n4, 1, 1); /* 2->4 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n2, &n5, 1, 1); /* 2->5 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n3, &n6, 1, 1); /* 3->6 */
-	TASSERT(st == EC_OK);
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	TASSERT(add_dir(&g, 1, 3, 1) == EC_OK);
+	TASSERT(add_dir(&g, 2, 4, 1) == EC_OK);
+	TASSERT(add_dir(&g, 2, 5, 1) == EC_OK);
+	TASSERT(add_dir(&g, 3, 6, 1) == EC_OK);
 	dfs_index = 0;
-	st = g.dfs(&g, &n1, dfs_visit);
-	TASSERT(st == EC_OK);
-	/* Expected DFS order: 1, 2, 4, 5, 3, 6 */
-	int expected[] = { 1, 2, 4, 5, 3, 6 };
-	TASSERT(dfs_index == 6);
-	for (int i = 0; i < 6; i++)
-		{
-			TASSERT(dfs_result[i] == expected[i]);
-		}
+	TASSERT(g.dfs(&g, &(int){ 1 }, dfs_visit) == EC_OK);
+	{
+		int expected[] = { 1, 2, 4, 5, 3, 6 };
+		TASSERT(dfs_index == 6);
+		for (int i = 0; i < 6; i++)
+			{
+				TASSERT(dfs_result[i] == expected[i]);
+			}
+	}
 	g.clear(&g);
-	printf("pass:test_graph_dfs\n");
+	printf("pass:test_graph_dfs_pos\n");
 }
 
-/* Test Dijkstra’s algorithm on a simple weighted directed graph.
-   Graph:
-       1 -> 2 (weight 1)
-       2 -> 3 (weight 2)
-       1 -> 3 (weight 5)
-       3 -> 4 (weight 1)
-   Expected shortest distances from 1: {0, 1, 3, 4}
-*/
+/* Test DFS with NULL arguments and non-existent node */
 static void
-test_graph_dijkstra(void* mp)
+test_graph_dfs_neg(void* mp)
 {
 	stamp();
-	printf("test_graph_dijkstra\n");
+	printf("test_graph_dfs_neg\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	int n1 = 1, n2 = 2, n3 = 3, n4 = 4;
-	st = g.insert_edge(&g, &n1, &n2, 1, 1); /* 1->2 */
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	/* Test NULL arguments */
+	TASSERT(g.dfs(NULL, &(int){ 1 }, dfs_visit) == EC_ERR_INVALID_ARG);
+	TASSERT(g.dfs(&g, NULL, dfs_visit) == EC_ERR_INVALID_ARG);
+	TASSERT(g.dfs(&g, &(int){ 1 }, NULL) == EC_ERR_INVALID_ARG);
+	/* Test non-existent node */
+	TASSERT(g.dfs(&g, &(int){ 99 }, dfs_visit) == EC_ERR_NOT_FOUND);
+	g.clear(&g);
+	printf("pass:test_graph_dfs_neg\n");
+}
+
+/* Dijkstra on a small weighted digraph. */
+static void
+test_graph_dijkstra_pos(void* mp)
+{
+	stamp();
+	printf("test_graph_dijkstra_pos\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n2, &n3, 2, 1); /* 2->3 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n1, &n3, 5, 1); /* 1->3 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n3, &n4, 1, 1); /* 3->4 */
-	TASSERT(st == EC_OK);
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	TASSERT(add_dir(&g, 2, 3, 2) == EC_OK);
+	TASSERT(add_dir(&g, 1, 3, 5) == EC_OK);
+	TASSERT(add_dir(&g, 3, 4, 1) == EC_OK);
 	int* distances = NULL;
-	st = g.dijkstra(&g, &n1, &distances);
-	TASSERT(st == EC_OK);
-	/* Assuming nodes are in order of first insertion: 1, 2, 3, 4 */
+	TASSERT(g.dijkstra(&g, &(int){ 1 }, &distances) == EC_OK);
 	TASSERT(distances[0] == 0);
 	TASSERT(distances[1] == 1);
 	TASSERT(distances[2] == 3);
 	TASSERT(distances[3] == 4);
 	free(distances);
 	g.clear(&g);
-	printf("pass:test_graph_dijkstra\n");
+	printf("pass:test_graph_dijkstra_pos\n");
 }
 
-/* Test removal of a node.
-   Create an undirected graph:
-       1 -- 2 -- 3
-   Remove node 2 and verify that no remaining node has an edge pointing to 2.
-*/
+/* Test Dijkstra with NULL arguments and non-existent node */
 static void
-test_graph_remove_node(void* mp)
+test_graph_dijkstra_neg(void* mp)
 {
 	stamp();
-	printf("test_graph_remove_node\n");
+	printf("test_graph_dijkstra_neg\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	int n1 = 1, n2 = 2, n3 = 3;
-	st = g.insert_edge(&g, &n1, &n2, 1, 0); /* undirected edge 1<->2 */
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	int* distances = NULL;
+	/* Test NULL arguments */
+	TASSERT(g.dijkstra(NULL, &(int){ 1 }, &distances) == EC_ERR_INVALID_ARG);
+	TASSERT(g.dijkstra(&g, NULL, &distances) == EC_ERR_INVALID_ARG);
+	TASSERT(g.dijkstra(&g, &(int){ 1 }, NULL) == EC_ERR_INVALID_ARG);
+	/* Test non-existent node */
+	TASSERT(g.dijkstra(&g, &(int){ 99 }, &distances) == EC_ERR_NOT_FOUND);
+	g.clear(&g);
+	printf("pass:test_graph_dijkstra_neg\n");
+}
+
+/* Removal of a node and validation of incident edge cleanup. */
+static void
+test_graph_remove_node_pos(void* mp)
+{
+	stamp();
+	printf("test_graph_remove_node_pos\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n2, &n3, 1, 0); /* undirected edge 2<->3 */
-	TASSERT(st == EC_OK);
-	st = g.remove_node(&g, &n2);
-	TASSERT(st == EC_OK);
+	TASSERT(add_undir(&g, 1, 2, 1) == EC_OK);
+	TASSERT(add_undir(&g, 2, 3, 1) == EC_OK);
+	TASSERT(g.remove_node(&g, &(int){ 2 }) == EC_OK);
 	TASSERT(g.node_count == 2);
-	ec_graph_int_node_t* node1 = ec_graph_int_find(&g, &n1);
-	TASSERT(node1 != NULL);
-	for (size_t i = 0; i < node1->edge_count; i++)
-		{
-			TASSERT(node1->edges[i].dst->key != n2);
-		}
-	ec_graph_int_node_t* node3 = ec_graph_int_find(&g, &n3);
-	TASSERT(node3 != NULL);
-	for (size_t i = 0; i < node3->edge_count; i++)
-		{
-			TASSERT(node3->edges[i].dst->key != n2);
-		}
+	TASSERT(!has_edge(&g, 1, 2));
+	TASSERT(!has_edge(&g, 3, 2));
 	g.clear(&g);
-	printf("pass:test_graph_remove_node\n");
+	printf("pass:test_graph_remove_node_pos\n");
 }
 
-/* Test removal of an edge.
-   Build a graph with a undirected edge between 1 and 2 and a directed edge 1->3.
-   Then remove them and verify that the edge lists are updated.
-*/
+/* Test remove_node with NULL arguments and non-existent node */
 static void
-test_graph_remove_edge(void* mp)
+test_graph_remove_node_neg(void* mp)
 {
 	stamp();
-	printf("test_graph_remove_edge\n");
+	printf("test_graph_remove_node_neg\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	int n1 = 1, n2 = 2, n3 = 3;
-	st = g.insert_edge(&g, &n1, &n2, 1, 0); /* undirected edge 1<->2 */
-	TASSERT(st == EC_OK);
-	st = g.insert_edge(&g, &n1, &n3, 1, 1); /* directed edge 1->3 */
-	TASSERT(st == EC_OK);
-	st = g.remove_edge(&g, &n1, &n2, 0);
-	TASSERT(st == EC_OK);
-	ec_graph_int_node_t* node1 = ec_graph_int_find(&g, &n1);
-	bool found = false;
-	for (size_t i = 0; i < node1->edge_count; i++)
-		{
-			if (node1->edges[i].dst->key == n2)
-				{
-					found = true;
-					break;
-				}
-		}
-	TASSERT(!found);
-	ec_graph_int_node_t* node2 = ec_graph_int_find(&g, &n2);
-	found = false;
-	for (size_t i = 0; i < node2->edge_count; i++)
-		{
-			if (node2->edges[i].dst->key == n1)
-				{
-					found = true;
-					break;
-				}
-		}
-	TASSERT(!found);
-	st = g.remove_edge(&g, &n1, &n3, 1);
-	TASSERT(st == EC_OK);
-	found = false;
-	for (size_t i = 0; i < node1->edge_count; i++)
-		{
-			if (node1->edges[i].dst->key == n3)
-				{
-					found = true;
-					break;
-				}
-		}
-	TASSERT(!found);
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	/* Test NULL arguments */
+	TASSERT(g.remove_node(NULL, &(int){ 1 }) == EC_ERR_INVALID_ARG);
+	TASSERT(g.remove_node(&g, NULL) == EC_ERR_INVALID_ARG);
+	/* Test non-existent node */
+	TASSERT(g.remove_node(&g, &(int){ 99 }) == EC_ERR_NOT_FOUND);
 	g.clear(&g);
-	printf("pass:test_graph_remove_edge\n");
+	printf("pass:test_graph_remove_node_neg\n");
 }
 
-/* Test clear: insert an edge then clear the graph. */
+/* Removal of edges (directed and undirected). */
 static void
-test_graph_clear(void* mp)
+test_graph_remove_edge_pos(void* mp)
 {
 	stamp();
-	printf("test_graph_clear\n");
+	printf("test_graph_remove_edge_pos\n");
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	int n1 = 1, n2 = 2;
-	st = g.insert_edge(&g, &n1, &n2, 1, 0);
+	TASSERT(add_undir(&g, 1, 2, 1) == EC_OK);
+	TASSERT(add_dir(&g, 1, 3, 1) == EC_OK);
+	TASSERT(g.remove_edge(&g, &(int){ 1 }, &(int){ 2 }, 0) == EC_OK);
+	TASSERT(!has_edge(&g, 1, 2) && !has_edge(&g, 2, 1));
+	TASSERT(g.remove_edge(&g, &(int){ 1 }, &(int){ 3 }, 1) == EC_OK);
+	TASSERT(!has_edge(&g, 1, 3));
+	g.clear(&g);
+	printf("pass:test_graph_remove_edge_pos\n");
+}
+
+/* Test remove_edge with NULL arguments and non-existent nodes/edges */
+static void
+test_graph_remove_edge_neg(void* mp)
+{
+	stamp();
+	printf("test_graph_remove_edge_neg\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
+	TASSERT(add_dir(&g, 1, 2, 1) == EC_OK);
+	/* Test NULL arguments */
+	TASSERT(g.remove_edge(NULL, &(int){ 1 }, &(int){ 2 }, 1) == EC_ERR_INVALID_ARG);
+	TASSERT(g.remove_edge(&g, NULL, &(int){ 2 }, 1) == EC_ERR_INVALID_ARG);
+	TASSERT(g.remove_edge(&g, &(int){ 1 }, NULL, 1) == EC_ERR_INVALID_ARG);
+	/* Test non-existent nodes */
+	TASSERT(g.remove_edge(&g, &(int){ 99 }, &(int){ 2 }, 1) == EC_ERR_NOT_FOUND);
+	TASSERT(g.remove_edge(&g, &(int){ 1 }, &(int){ 99 }, 1) == EC_ERR_NOT_FOUND);
+	g.clear(&g);
+	printf("pass:test_graph_remove_edge_neg\n");
+}
+
+/* Clear. */
+static void
+test_graph_clear_pos(void* mp)
+{
+	stamp();
+	printf("test_graph_clear_pos\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
+	TASSERT(st == EC_OK);
+	TASSERT(add_undir(&g, 1, 2, 1) == EC_OK);
 	TASSERT(g.node_count > 0);
-	st = g.clear(&g);
-	TASSERT(st == EC_OK);
+	TASSERT(g.clear(&g) == EC_OK);
 	TASSERT(g.node_count == 0);
-	printf("pass:test_graph_clear\n");
+	printf("pass:test_graph_clear_pos\n");
 }
 
-/* Test using a custom compare function.
-   Here we define a descending order compare so that duplicate “equal”
-   values are detected properly.
-*/
+/* Test clear with NULL argument */
+static void
+test_graph_clear_neg(void* mp)
+{
+	stamp();
+	printf("test_graph_clear_neg\n");
+	ec_graph_int_t g;
+	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
+	TASSERT(st == EC_OK);
+	TASSERT(g.clear(NULL) == EC_ERR_INVALID_ARG);
+	g.clear(&g);
+	printf("pass:test_graph_clear_neg\n");
+}
+
+/* Custom comparator. */
 static int
 cmp_desc(const int* a, const int* b)
 {
@@ -429,24 +486,18 @@ test_graph_custom_compare(void* mp)
 	ec_status_t st = ec_graph_int_init(&g, mp, cmp_desc);
 	TASSERT(st == EC_OK);
 	int n1 = 5, n2 = 10, n3 = 5;
-	st = g.insert_node(&g, &n1);
-	TASSERT(st == EC_OK);
+	TASSERT(g.insert_node(&g, &n1) == EC_OK);
 	TASSERT(g.node_count == 1);
-	/* Inserting an equal value (5) should not add a new node */
-	st = g.insert_node(&g, &n3);
-	TASSERT(st == EC_OK);
+	/* Equal value should not add a new node */
+	TASSERT(g.insert_node(&g, &n3) == EC_OK);
 	TASSERT(g.node_count == 1);
-	st = g.insert_node(&g, &n2);
-	TASSERT(st == EC_OK);
+	TASSERT(g.insert_node(&g, &n2) == EC_OK);
 	TASSERT(g.node_count == 2);
 	g.clear(&g);
 	printf("pass:test_graph_custom_compare\n");
 }
 
-/* Test inserting many random nodes.
-   (Since duplicate values are not added, the final node count should be
-    less than or equal to the range of random values.)
-*/
+/* Stress with many insertions but reduced bounds to keep CI fast. */
 static void
 test_graph_big_random(void* mp)
 {
@@ -455,15 +506,15 @@ test_graph_big_random(void* mp)
 	ec_graph_int_t g;
 	ec_status_t st = ec_graph_int_init(&g, mp, NULL);
 	TASSERT(st == EC_OK);
-	srand((unsigned)time(NULL));
-	const int N = 1000;
+	srand(12345);
+	const int N = 400;     /* reduced from 1000 to accelerate CI */
+	const int RANGE = 300; /* duplicates expected; caps unique nodes */
 	for (int i = 0; i < N; i++)
 		{
-			int val = rand() % 500; /* many duplicates expected */
-			st = g.insert_node(&g, &val);
-			TASSERT(st == EC_OK);
+			int val = rand() % RANGE;
+			TASSERT(g.insert_node(&g, &val) == EC_OK);
 		}
-	TASSERT(g.node_count <= 500);
+	TASSERT(g.node_count <= (size_t)RANGE);
 	g.clear(&g);
 	printf("pass:test_graph_big_random\n");
 }
@@ -494,15 +545,24 @@ main(void)
 	void* mp = NULL;
 #endif
 
-	test_graph_init(mp);
-	test_graph_insert_node(mp);
-	test_graph_insert_edge(mp);
-	test_graph_bfs(mp);
-	test_graph_dfs(mp);
-	test_graph_dijkstra(mp);
-	test_graph_remove_node(mp);
-	test_graph_remove_edge(mp);
-	test_graph_clear(mp);
+	test_graph_init_pos(mp);
+	test_graph_init_neg_null(mp);
+	test_graph_insert_node_pos(mp);
+	test_graph_insert_node_neg(mp);
+	test_graph_insert_edge_pos(mp);
+	test_graph_insert_edge_neg(mp);
+	test_graph_bfs_pos(mp);
+	test_graph_bfs_neg(mp);
+	test_graph_dfs_pos(mp);
+	test_graph_dfs_neg(mp);
+	test_graph_dijkstra_pos(mp);
+	test_graph_dijkstra_neg(mp);
+	test_graph_remove_node_pos(mp);
+	test_graph_remove_node_neg(mp);
+	test_graph_remove_edge_pos(mp);
+	test_graph_remove_edge_neg(mp);
+	test_graph_clear_pos(mp);
+	test_graph_clear_neg(mp);
 	test_graph_custom_compare(mp);
 	test_graph_big_random(mp);
 

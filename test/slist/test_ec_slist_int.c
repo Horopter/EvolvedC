@@ -778,6 +778,411 @@ test_slist_int_zip_iterators(void* mp)
 	printf("pass: test_slist_int_zip_iterators\n");
 }
 
+// Negative test cases
+void
+test_slist_int_add_at_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_add_at_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int x = 1, y = 2;
+	l.add(&l, &x);
+	ec_status_t s = l.add_at(&l, &y, 10);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_add_at_neg\n");
+}
+
+void
+test_slist_int_remove_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_remove_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 10, b = 20;
+	l.add(&l, &a);
+	l.add(&l, &b);
+	int v = 99;
+	ec_status_t s = l.remove_fn(&l, &v);
+	TEST_ASSERT(s == EC_ERR_NOT_FOUND);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_remove_neg\n");
+}
+
+void
+test_slist_int_remove_first_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_remove_first_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	ec_status_t s = l.remove_first(&l);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_remove_first_neg\n");
+}
+
+void
+test_slist_int_remove_last_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_remove_last_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	ec_status_t s = l.remove_last(&l);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_remove_last_neg\n");
+}
+
+void
+test_slist_int_remove_at_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_remove_at_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 10;
+	l.add(&l, &a);
+	ec_status_t s = l.remove_at(&l, 5);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_remove_at_neg\n");
+}
+
+void
+test_slist_int_get_first_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_get_first_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	void* out = NULL;
+	ec_status_t s = l.get_first(&l, &out);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_get_first_neg\n");
+}
+
+void
+test_slist_int_get_last_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_get_last_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	void* out = NULL;
+	ec_status_t s = l.get_last(&l, &out);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_get_last_neg\n");
+}
+
+void
+test_slist_int_splice_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_splice_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	ec_status_t s = l.splice(&l, NULL);
+	TEST_ASSERT(s == EC_ERR_INVALID_ARG);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_splice_neg\n");
+}
+
+void
+test_slist_int_splice_at_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_splice_at_neg\n");
+	ec_slist_int_t l1, l2;
+	ec_slist_int_init(&l1, mp);
+	ec_slist_int_init(&l2, mp);
+	int a = 10;
+	l1.add(&l1, &a);
+	ec_status_t s = l1.splice_at(&l1, &l2, 10);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l1.free_fn(&l1);
+	l2.free_fn(&l2);
+	printf("pass: test_slist_int_splice_at_neg\n");
+}
+
+void
+test_slist_int_sublist_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_sublist_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 10, b = 20;
+	l.add(&l, &a);
+	l.add(&l, &b);
+	ec_slist_int_t* sub = NULL;
+	ec_status_t s = l.sublist(&l, 1, 10, &sub);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_sublist_neg\n");
+}
+
+void
+test_slist_int_replace_at_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_replace_at_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 10, b = 99;
+	l.add(&l, &a);
+	ec_status_t s = l.replace_at(&l, &b, 10);
+	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_replace_at_neg\n");
+}
+
+void
+test_slist_int_contains_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_contains_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 10, b = 20;
+	l.add(&l, &a);
+	l.add(&l, &b);
+	int x = 99;
+	size_t r = l.contains(&l, &x);
+	TEST_ASSERT(r == 0);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_contains_neg\n");
+}
+
+void
+test_slist_int_index_of_neg(void* mp)
+{
+	stamp();
+	printf("test_slist_int_index_of_neg\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	for (int i = 1; i <= 5; i++)
+		{
+			int v = i * 10;
+			l.add(&l, &v);
+		}
+	int x = 99;
+	size_t idx;
+	ec_status_t s = l.index_of(&l, &x, cmp_int, &idx);
+	TEST_ASSERT(s == EC_ERR_NOT_FOUND);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_index_of_neg\n");
+}
+
+// Additional methods
+void
+test_slist_int_add_first(void* mp)
+{
+	stamp();
+	printf("test_slist_int_add_first\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 10, b = 20;
+	l.add(&l, &b);
+	l.add_first(&l, &a);
+	void* out;
+	l.get_at(&l, 0, &out);
+	TEST_ASSERT(*(int*)out == 10);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_add_first\n");
+}
+
+void
+test_slist_int_add_last(void* mp)
+{
+	stamp();
+	printf("test_slist_int_add_last\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 10, b = 20;
+	l.add(&l, &a);
+	l.add_last(&l, &b);
+	void* out;
+	l.get_last(&l, &out);
+	TEST_ASSERT(*(int*)out == 20);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_add_last\n");
+}
+
+void
+test_slist_int_remove_all(void* mp)
+{
+	stamp();
+	printf("test_slist_int_remove_all\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	for (int i = 0; i < 5; i++)
+		{
+			int v = i + 10;
+			l.add(&l, &v);
+		}
+	ec_status_t s = l.remove_all(&l);
+	TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 0);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_remove_all\n");
+}
+
+static void
+cb_int(void* x)
+{
+	(void)x;
+}
+
+void
+test_slist_int_remove_all_cb(void* mp)
+{
+	stamp();
+	printf("test_slist_int_remove_all_cb\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	for (int i = 0; i < 5; i++)
+		{
+			int v = i + 10;
+			l.add(&l, &v);
+		}
+	ec_status_t s = l.remove_all_cb(&l, cb_int);
+	TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 0);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_remove_all_cb\n");
+}
+
+void
+test_slist_int_sort_in_place(void* mp)
+{
+	stamp();
+	printf("test_slist_int_sort_in_place\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	int a = 30, b = 10, c = 20;
+	l.add(&l, &a);
+	l.add(&l, &b);
+	l.add(&l, &c);
+	l.sort_in_place(&l, cmp_int);
+	void* out;
+	l.get_at(&l, 0, &out);
+	TEST_ASSERT(*(int*)out == 10);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_sort_in_place\n");
+}
+
+void
+test_slist_int_iter_index(void* mp)
+{
+	stamp();
+	printf("test_slist_int_iter_index\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	for (int i = 0; i < 5; i++)
+		{
+			int v = i + 10;
+			l.add(&l, &v);
+		}
+	ec_slist_int_iter_t it;
+	l.iter_init(&it, &l);
+	void* out;
+	size_t idx = 0;
+	while (l.iter_next(&it, &out) == EC_OK)
+		{
+			TEST_ASSERT(l.iter_index(&it) == idx);
+			idx++;
+		}
+	l.free_fn(&l);
+	printf("pass: test_slist_int_iter_index\n");
+}
+
+void
+test_slist_int_diter(void* mp)
+{
+	stamp();
+	printf("test_slist_int_diter\n");
+	ec_slist_int_t l;
+	ec_slist_int_init(&l, mp);
+	for (int i = 0; i < 5; i++)
+		{
+			int v = i + 10;
+			l.add(&l, &v);
+		}
+	ec_slist_int_iter_t it;
+	l.diter_init(&it, &l);
+	void* out;
+	size_t count = 0;
+	while (l.diter_next(&it, &out) == EC_OK)
+		{
+			TEST_ASSERT(*(int*)out >= 10);
+			count++;
+		}
+	TEST_ASSERT(count == 5);
+	TEST_ASSERT(l.diter_index(&it) == 5);
+	l.free_fn(&l);
+	printf("pass: test_slist_int_diter\n");
+}
+
+void
+test_slist_int_zip_iter_index(void* mp)
+{
+	stamp();
+	printf("test_slist_int_zip_iter_index\n");
+	ec_slist_int_t l1, l2;
+	ec_slist_int_init(&l1, mp);
+	ec_slist_int_init(&l2, mp);
+	for (int i = 0; i < 5; i++)
+		{
+			int aa = i + 1, bb = (i + 1) * 10;
+			l1.add(&l1, &aa);
+			l2.add(&l2, &bb);
+		}
+	ec_slist_int_zip_iter_t zit;
+	l1.zip_iter_init(&zit, &l1, &l2);
+	void *out1, *out2;
+	size_t idx = 0;
+	while (l1.zip_iter_next(&zit, &out1, &out2) == EC_OK)
+		{
+			TEST_ASSERT(l1.zip_iter_index(&zit) == idx + 1);
+			idx++;
+		}
+	l1.free_fn(&l1);
+	l2.free_fn(&l2);
+	printf("pass: test_slist_int_zip_iter_index\n");
+}
+
+void
+test_slist_int_zip_iter_not_supported(void* mp)
+{
+	stamp();
+	printf("test_slist_int_zip_iter_not_supported\n");
+	ec_slist_int_t l1, l2;
+	ec_slist_int_init(&l1, mp);
+	ec_slist_int_init(&l2, mp);
+	int a = 10, b = 20;
+	l1.add(&l1, &a);
+	l2.add(&l2, &b);
+	ec_slist_int_zip_iter_t zit;
+	l1.zip_iter_init(&zit, &l1, &l2);
+	void *out1, *out2;
+	l1.zip_iter_next(&zit, &out1, &out2);
+	int x = 99, y = 88;
+	void *o1, *o2;
+	ec_status_t s = l1.zip_iter_add(&zit, &x, &y);
+	TEST_ASSERT(s == EC_ERR_NOT_SUPPORTED);
+	s = l1.zip_iter_remove(&zit, &o1, &o2);
+	TEST_ASSERT(s == EC_ERR_NOT_SUPPORTED);
+	s = l1.zip_iter_replace(&zit, &x, &y, &o1, &o2);
+	TEST_ASSERT(s == EC_ERR_NOT_SUPPORTED);
+	l1.free_fn(&l1);
+	l2.free_fn(&l2);
+	printf("pass: test_slist_int_zip_iter_not_supported\n");
+}
+
 int
 main(void)
 {
@@ -821,6 +1226,30 @@ main(void)
 	test_slist_int_filter_mut(mp);
 	test_slist_int_iterators(mp);
 	test_slist_int_zip_iterators(mp);
+	// Negative tests
+	test_slist_int_add_at_neg(mp);
+	test_slist_int_remove_neg(mp);
+	test_slist_int_remove_first_neg(mp);
+	test_slist_int_remove_last_neg(mp);
+	test_slist_int_remove_at_neg(mp);
+	test_slist_int_get_first_neg(mp);
+	test_slist_int_get_last_neg(mp);
+	test_slist_int_splice_neg(mp);
+	test_slist_int_splice_at_neg(mp);
+	test_slist_int_sublist_neg(mp);
+	test_slist_int_replace_at_neg(mp);
+	test_slist_int_contains_neg(mp);
+	test_slist_int_index_of_neg(mp);
+	// Additional methods
+	test_slist_int_add_first(mp);
+	test_slist_int_add_last(mp);
+	test_slist_int_remove_all(mp);
+	test_slist_int_remove_all_cb(mp);
+	test_slist_int_sort_in_place(mp);
+	test_slist_int_iter_index(mp);
+	test_slist_int_diter(mp);
+	test_slist_int_zip_iter_index(mp);
+	test_slist_int_zip_iter_not_supported(mp);
 
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);

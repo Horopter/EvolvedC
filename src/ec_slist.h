@@ -1342,6 +1342,7 @@
 		l->free_fn = ec_slist_##NAME##_free_fn;                                                                                                   \
 	}
 
+EC_SLIST_DEF(char, char)
 EC_SLIST_DEF(int, int)
 EC_SLIST_DEF(unsigned int, uint)
 EC_SLIST_DEF(long, long)

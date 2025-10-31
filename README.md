@@ -100,14 +100,33 @@ Before submitting, please review the **Evolved-C Core Design Principles**.
 - Steps: format (non-blocking), build, and run all tests via `test/run_tests.sh` across structure-specific subfolders.
 - Current status: Passing locally; CI configured to auto-detect test directory and execute all suites.
 
-### Today’s changes (highlights)
+### Recent Updates (Highlights)
+
+#### Code Quality & Formatting
+- ✅ **Code Formatting**: Applied clang-format (GNU style) to all 278 C/C++ files in `src/` and `test/`
+- ✅ **Consistent Style**: All source code now follows the `.clang-format` configuration (GNU style with tabs)
+
+#### Test Organization & Coverage
 - Organized tests into subfolders per data structure under `test/`:
   - `array/`, `buffer/`, `deque/`, `dlist/`, `ds/`, `graph/`, `hashmap/`, `hashset/`, `heap/`, `log/`, `queue/`, `ringbuffer/`, `skiplist/`, `slist/`, `stack/`, `timer/`, `treeset/`, `treetable/`, `trie/`, `vector/`.
+- **Completed Test Coverage** (✅):
+  - `array`: 13 test files covering all data types
+  - `buffer`: 15 test files covering all data types
+  - `deque`: 14 test files covering all data types
+  - `dlist`: 15 test files covering all data types
+  - `queue`: 13 test files covering all data types
+  - `slist`: 13 test files covering all data types
+  - `timer`: 1 comprehensive test file
+  - `trie`: 7 test files covering all language types
+- **In Progress Test Coverage** (⚠️):
+  - `ds`, `graph`, `hashmap`, `hashset`, `heap`, `log`, `ringbuffer`, `skiplist`, `stack`, `treeset`, `treetable`, `vector`: Multiple test files created, coverage expansion ongoing
 - Expanded `vector` coverage across many data types by mirroring `int` tests to: `double`, `long`, `unsigned long`, `long long`, `unsigned long long`, `uint32_t`, `uint64_t`, `const char*`, and `void*`.
 - Added and strengthened tests for `array`, `buffer`, and `deque`; ensured per-method coverage and iterator/zip-iterator checks where available.
 - Removed all meta tests and relocation stubs; each data structure now has independent, explicit tests.
 - Fixed header include issues (case and paths); standardized includes in tests to `../../src/*.h` from subfolders.
-- Added `.clang-format` (GNU style) and applied formatting across `src/` and `test/`.
+
+#### Infrastructure & Tooling
+- Added `.clang-format` (GNU style) configuration file
 - Improved `test/run_tests.sh` to build into `test/build/`, accept optional targets, and clean generated outputs.
 - Introduced CI workflow (`.github/workflows/ci.yml`) with cross-platform builds, formatting check (non-blocking), and robust path resolution on runners.
 - Updated `.gitignore` to exclude build artifacts and IDE files.

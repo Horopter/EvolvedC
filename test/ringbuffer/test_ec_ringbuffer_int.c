@@ -172,6 +172,11 @@ foreach_int(int x)
 	(void)x;
 } // dummy
 static void
+foreach_int_test(int x)
+{
+	(void)x;
+}
+static void
 test_foreach(void* mp)
 {
 	stamp();
@@ -264,6 +269,41 @@ test_big_random(void* mp)
 	printf("pass:test_big_random\n");
 }
 
+static void
+test_invalid_args(void* mp)
+{
+	stamp();
+	printf("test_invalid_args\n");
+	ec_ringbuf_int_t rb;
+	ec_ringbuf_int_init(&rb, mp, 4, NULL);
+	int val = 42, out;
+
+	// NULL checks
+	TASSERT(ec_ringbuf_int_init(NULL, mp, 4, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.push(NULL, &val) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.push(&rb, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.pop(NULL, &out) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.pop(&rb, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.front(NULL, &out) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.front(&rb, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.back(NULL, &out) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.back(&rb, NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.clear(NULL) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.contains(NULL, &val) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.contains(&rb, NULL) == EC_ERR_INVALID_ARG);
+
+	// foreach NULL checks
+	TASSERT(rb.foreach (NULL, foreach_int_test) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.foreach (&rb, NULL) == EC_ERR_INVALID_ARG);
+
+	// size_fn and capacity_fn handle NULL gracefully
+	TASSERT(rb.size_fn(NULL) == 0);
+	TASSERT(rb.capacity_fn(NULL) == 0);
+
+	rb.clear(&rb);
+	printf("pass:test_invalid_args\n");
+}
+
 int
 main(void)
 {
@@ -287,6 +327,7 @@ main(void)
 	test_expand(mp);
 	test_custom_compare(mp);
 	test_big_random(mp);
+	test_invalid_args(mp);
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
