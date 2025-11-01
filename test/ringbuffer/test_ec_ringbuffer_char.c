@@ -11,15 +11,8 @@
 #endif
 
 /*
- * NOTE: This test file is a placeholder. The ringbuffer header (ec_ringbuffer.h)
- * does not currently define a 'char' type. The test follows the same pattern
- * as other ringbuffer tests. To enable this test, add:
- *   EC_RINGBUF_DEF(char, ch)
- * to ec_ringbuffer.h
+ * Test file for ec_ringbuffer with char type.
  */
-
-/* This will fail to compile until char type is added to ec_ringbuffer.h */
-#if 0
 static void
 stktrc(void)
 {
@@ -173,9 +166,15 @@ test_contains(void* mp)
 }
 
 static void
-foreach_ch(char x) { (void)x; }
+foreach_ch(char x)
+{
+	(void)x;
+}
 static void
-foreach_ch_test(char x) { (void)x; }
+foreach_ch_test(char x)
+{
+	(void)x;
+}
 
 static void
 test_foreach(void* mp)
@@ -184,12 +183,12 @@ test_foreach(void* mp)
 	printf("test_foreach\n");
 	ec_ringbuf_ch_t rb;
 	ec_ringbuf_ch_init(&rb, mp, 4, NULL);
-	char vals[4] = {'a', 'b', 'c', 'd'};
+	char vals[4] = { 'a', 'b', 'c', 'd' };
 	for (int i = 0; i < 4; i++)
 		{
 			rb.push(&rb, &vals[i]);
 		}
-	TASSERT(rb.foreach(&rb, foreach_ch) == EC_OK);
+	TASSERT(rb.foreach (&rb, foreach_ch) == EC_OK);
 	rb.clear(&rb);
 	printf("pass:test_foreach\n");
 }
@@ -249,7 +248,7 @@ test_invalid_args(void* mp)
 	ec_ringbuf_ch_t rb;
 	ec_ringbuf_ch_init(&rb, mp, 4, NULL);
 	char val = 'X', out;
-	
+
 	TASSERT(ec_ringbuf_ch_init(NULL, mp, 4, NULL) == EC_ERR_INVALID_ARG);
 	TASSERT(rb.push(NULL, &val) == EC_ERR_INVALID_ARG);
 	TASSERT(rb.push(&rb, NULL) == EC_ERR_INVALID_ARG);
@@ -262,13 +261,13 @@ test_invalid_args(void* mp)
 	TASSERT(rb.clear(NULL) == EC_ERR_INVALID_ARG);
 	TASSERT(rb.contains(NULL, &val) == EC_ERR_INVALID_ARG);
 	TASSERT(rb.contains(&rb, NULL) == EC_ERR_INVALID_ARG);
-	
-	TASSERT(rb.foreach(NULL, foreach_ch_test) == EC_ERR_INVALID_ARG);
-	TASSERT(rb.foreach(&rb, NULL) == EC_ERR_INVALID_ARG);
-	
+
+	TASSERT(rb.foreach (NULL, foreach_ch_test) == EC_ERR_INVALID_ARG);
+	TASSERT(rb.foreach (&rb, NULL) == EC_ERR_INVALID_ARG);
+
 	TASSERT(rb.size_fn(NULL) == 0);
 	TASSERT(rb.capacity_fn(NULL) == 0);
-	
+
 	rb.clear(&rb);
 	printf("pass:test_invalid_args\n");
 }
@@ -300,15 +299,5 @@ main(void)
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
 	printf("All ec_ringbuf_ch tests passed.\n");
-	return 0;
-}
-#endif
-
-int
-main(void)
-{
-	printf("test_ec_ringbuffer_char.c: char type not defined in ec_ringbuffer.h\n");
-	printf("To enable this test, add EC_RINGBUF_DEF(char, ch) to ec_ringbuffer.h\n");
-	printf("Skipping char tests.\n");
 	return 0;
 }

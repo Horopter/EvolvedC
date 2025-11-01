@@ -67,7 +67,7 @@ test_queue_uint_enqueue(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_enqueue\n\n");
-ec_queue_uint_t q;
+	ec_queue_uint_t q;
 	ec_status_t st = ec_queue_uint_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	unsigned int a = 10U, b = 20;
@@ -109,7 +109,7 @@ test_queue_uint_dequeue(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_dequeue\n\n");
-ec_queue_uint_t q;
+	ec_queue_uint_t q;
 	ec_status_t st = ec_queue_uint_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	unsigned int a = 10U, b = 20, c = 30;
@@ -144,7 +144,7 @@ test_queue_uint_size(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_size\n\n");
-ec_queue_uint_t q;
+	ec_queue_uint_t q;
 	ec_status_t st = ec_queue_uint_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(q.size_fn(&q) == 0);
@@ -162,7 +162,7 @@ test_queue_uint_free(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_free\n\n");
-ec_queue_uint_t q;
+	ec_queue_uint_t q;
 	ec_status_t st = ec_queue_uint_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	unsigned int a = 1U, b = 6;
@@ -179,7 +179,7 @@ test_queue_uint_iterators(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_iterators\n\n");
-ec_queue_uint_t q;
+	ec_queue_uint_t q;
 	ec_status_t st = ec_queue_uint_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 
@@ -205,14 +205,14 @@ ec_queue_uint_t q;
 	// Test iterator replacement
 	q.iter_init(&it, &q);
 	q.iter_next(&it, &out); // first element (1)
-	unsigned int new_val = 30U;
+	unsigned int new_val = 99U;
 	st = q.iter_replace(&it, &new_val, NULL);
 	TEST_ASSERT(st == EC_OK);
 
 	unsigned int* peek_val = malloc(sizeof(int));
 	TEST_ASSERT(peek_val != NULL);
 	q.peek(&q, (void**)&peek_val);
-	TEST_ASSERT(*peek_val == 99);
+	TEST_ASSERT(*peek_val == 99U);
 
 	q.free_fn(&q);
 	EC_FREE(peek_val);
@@ -226,14 +226,14 @@ test_queue_uint_zip_iterators(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_zip_iterators\n\n");
-ec_queue_uint_t q1, q2;
+	ec_queue_uint_t q1, q2;
 	ec_status_t st = ec_queue_uint_init(&q1, mp);
 	TEST_ASSERT(st == EC_OK);
 	st = ec_queue_uint_init(&q2, mp);
 	TEST_ASSERT(st == EC_OK);
 
-	unsigned int a = 1U, b = 20, c = 30;
-	unsigned int d = 10U, e = 200, f = 300;
+	unsigned int a = 10U, b = 20U, c = 30U;
+	unsigned int d = 100U, e = 200U, f = 300U;
 	q1.enqueue(&q1, &a);
 	q1.enqueue(&q1, &b);
 	q1.enqueue(&q1, &c);
@@ -246,8 +246,8 @@ ec_queue_uint_t q1, q2;
 	void* out1 = malloc(sizeof(int));
 	void* out2 = malloc(sizeof(int));
 	TEST_ASSERT(out1 != NULL && out2 != NULL);
-	unsigned int expected1[] = { 10, 20, 30 };
-	unsigned int expected2[] = { 100, 200, 300 };
+	unsigned int expected1[] = { 10U, 20U, 30U };
+	unsigned int expected2[] = { 100U, 200U, 300U };
 	int count = 0;
 
 	while (q1.zip_iter_next(&zit, &out1, &out2) == EC_OK)
@@ -284,7 +284,7 @@ test_queue_uint_enqueue_neg_null(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_enqueue_neg_null\n");
-ec_queue_uint_t q;
+	ec_queue_uint_t q;
 	ec_status_t st = ec_queue_uint_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	unsigned int a = 1U;
@@ -355,7 +355,7 @@ test_queue_uint_iter_replace_neg_no_prev(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_iter_replace_neg_no_prev\n");
-ec_queue_uint_t q;
+	ec_queue_uint_t q;
 	ec_status_t st = ec_queue_uint_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	ec_queue_uint_iter_t it;
@@ -383,7 +383,7 @@ test_queue_uint_zip_iter_next_neg_mismatch(void* mp)
 {
 	stamp();
 	printf("test_queue_uint_zip_iter_next_neg_mismatch\n");
-ec_queue_uint_t q1, q2;
+	ec_queue_uint_t q1, q2;
 	ec_status_t st = ec_queue_uint_init(&q1, mp);
 	TEST_ASSERT(st == EC_OK);
 	st = ec_queue_uint_init(&q2, mp);

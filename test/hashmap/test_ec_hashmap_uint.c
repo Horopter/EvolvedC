@@ -291,7 +291,7 @@ test_hashmap_uint_rehash(void* mp)
 			int* kval = NULL;
 			int k = i;
 			ec_status_t s = hm.get(&hm, &k, &kval);
-			TEST_ASSERT(s == EC_OK && *kval == i + 1000);
+			TEST_ASSERT(s == EC_OK && *kval == i + 100);
 			free(kval);
 		}
 	hm.remove_all(&hm);

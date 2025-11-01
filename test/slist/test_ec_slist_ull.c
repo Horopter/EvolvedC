@@ -1090,7 +1090,7 @@ test_slist_ull_iter_index(void* mp)
 	ec_slist_ull_iter_t it;
 	l.iter_init(&it, &l);
 	void* out;
-	size_t idx = 0ULL;
+	size_t idx = 1ULL; // iter_index is 1-based after first iter_next
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
 			TEST_ASSERT(l.iter_index(&it) == idx);

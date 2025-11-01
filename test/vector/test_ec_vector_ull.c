@@ -213,7 +213,7 @@ test_replace_at_pos(void)
 {
 	ec_vector_ull_t vec;
 	ec_vector_ull_init(&vec, 3, NULL);
-	vec.push(&vec, 5);
+	vec.push(&vec, 1000ULL);
 	unsigned long long old_val;
 	assert(vec.replace_at(&vec, 0, 9999ULL, &old_val) == EC_OK);
 	assert(old_val == 1000ULL);
@@ -241,7 +241,7 @@ test_replace_at_neg_out_of_bounds(void)
 	ec_vector_ull_init(&vec, 3, NULL);
 	vec.push(&vec, 5);
 	unsigned long long old_val;
-	assert(vec.replace_at(&vec, 0, 9999ULL, &old_val) == EC_ERR_OUT_OF_BOUNDS);
+	assert(vec.replace_at(&vec, 1, 9999ULL, &old_val) == EC_ERR_OUT_OF_BOUNDS);
 	vec.free_fn(&vec);
 }
 

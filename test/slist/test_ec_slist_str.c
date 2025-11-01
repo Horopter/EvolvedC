@@ -239,7 +239,7 @@ test_slist_str_get_at(void* mp)
 	l.add(&l, (void*)&b);
 	void* out = NULL;
 	ec_status_t s = l.get_at(&l, 1, &out);
-	TEST_ASSERT(s == EC_OK && *(const char**)out == 200);
+	TEST_ASSERT(s == EC_OK && strcmp(*(const char**)out, "200") == 0);
 	s = l.get_at(&l, 2, &out);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
 	l.free_fn(&l);
@@ -1147,7 +1147,7 @@ test_slist_str_iter_index(void* mp)
 	ec_slist_str_iter_t it;
 	l.iter_init(&it, &l);
 	void* out;
-	size_t idx = 0;
+	size_t idx = 1; // iter_index is 1-based after first iter_next
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
 			TEST_ASSERT(l.iter_index(&it) == idx);

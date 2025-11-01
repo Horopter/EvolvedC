@@ -213,7 +213,7 @@ test_replace_at_pos(void)
 {
 	ec_vector_uint_t vec;
 	ec_vector_uint_init(&vec, 3, NULL);
-	vec.push(&vec, 5);
+	vec.push(&vec, 10U);
 	unsigned int old_val;
 	assert(vec.replace_at(&vec, 0, 99U, &old_val) == EC_OK);
 	assert(old_val == 10U);
@@ -239,9 +239,9 @@ test_replace_at_neg_out_of_bounds(void)
 {
 	ec_vector_uint_t vec;
 	ec_vector_uint_init(&vec, 3, NULL);
-	vec.push(&vec, 5);
+	vec.push(&vec, 5U);
 	unsigned int old_val;
-	assert(vec.replace_at(&vec, 0, 99U, &old_val) == EC_ERR_OUT_OF_BOUNDS);
+	assert(vec.replace_at(&vec, 1, 99U, &old_val) == EC_ERR_OUT_OF_BOUNDS);
 	vec.free_fn(&vec);
 }
 
@@ -397,9 +397,9 @@ test_sort_pos(void)
 	vec.push(&vec, 2);
 	vec.sort(&vec, cmp_uint);
 	unsigned int val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 10U);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 20U);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 30U);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1U);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2U);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 3U);
 	vec.free_fn(&vec);
 }
 

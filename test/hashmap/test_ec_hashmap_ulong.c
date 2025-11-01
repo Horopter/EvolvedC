@@ -151,7 +151,7 @@ test_hashmap_ulong_remove_all(void* mp)
 			hm.add(&hm, &k, &v);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t ec_status_t st = hm.remove_all(&hm);
+	ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);

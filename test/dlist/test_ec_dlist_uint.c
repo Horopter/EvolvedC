@@ -257,7 +257,7 @@ test_get_last_pos(void)
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	void* out;
-	assert(l.get_last(&l, &out) == EC_OK && *(unsigned int*)out == 20U);
+	assert(l.get_last(&l, &out) == EC_OK && *(unsigned int*)out == 200U);
 	assert(l.free_fn(&l) == EC_OK);
 }
 

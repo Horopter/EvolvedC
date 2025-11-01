@@ -213,6 +213,7 @@
 		m->foreach = ec_ringbuf_##NAME##_foreach_f;                                                                                              \
 		return EC_OK;                                                                                                                            \
 	}
+EC_RINGBUF_DEF(char, ch)
 EC_RINGBUF_DEF(int, int)
 EC_RINGBUF_DEF(unsigned int, uint)
 EC_RINGBUF_DEF(long, long)

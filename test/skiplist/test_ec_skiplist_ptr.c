@@ -171,10 +171,10 @@ test_skiplist_ptr_remove_all_pos(void* mp)
 	printf("test_skiplist_ptr_remove_all_pos\n");
 	ec_skiplist_ptr_t sl;
 	ec_skiplist_ptr_init(&sl, mp, NULL);
-	int val = 42;  // Add same value multiple times (duplicates not allowed)
+	int val = 42; // Add same value multiple times (duplicates not allowed)
 	for (int i = 0; i < 10; i++)
 		sl.add(&sl, &val);
-	TEST_ASSERT(sl.size_fn(&sl) == 1);  // Skiplist doesn't allow duplicates
+	TEST_ASSERT(sl.size_fn(&sl) == 1); // Skiplist doesn't allow duplicates
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
 	printf("pass:test_skiplist_ptr_remove_all_pos\n");
@@ -246,10 +246,10 @@ test_skiplist_ptr_get_keys_pos(void* mp)
 		TEST_ASSERT((uintptr_t)keys[i - 1] <= (uintptr_t)keys[i]);
 	EC_FREE(keys);
 	/* Test empty list */
+	sl.remove_all(&sl);
 	void** keys2 = NULL;
 	size_t count2 = 0;
 	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
-	sl.remove_all(&sl);
 	printf("pass:test_skiplist_ptr_get_keys_pos\n");
 }
 

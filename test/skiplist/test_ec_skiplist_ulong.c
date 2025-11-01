@@ -87,12 +87,12 @@ test_skiplist_ulong_add_pos(void* mp)
 	printf("test_skiplist_ulong_add_pos\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k1 = 10UL, k2 = 20UL;
+	unsigned long k1 = 10UL, k2 = 20UL;
 	sl.add(&sl, &k1);
 	sl.add(&sl, &k2);
 	TEST_ASSERT(sl.size_fn(&sl) == 2UL);
 	TEST_ASSERT(sl.contains(&sl, &k1) == EC_OK && sl.contains(&sl, &k2) == EC_OK);
-	ul bad = 999UL;
+	unsigned long bad = 999UL;
 	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
 	printf("pass:test_skiplist_ulong_add_pos\n");
@@ -105,7 +105,7 @@ test_skiplist_ulong_add_neg(void* mp)
 	printf("test_skiplist_ulong_add_neg\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k = 10UL;
+	unsigned long k = 10UL;
 	TEST_ASSERT(sl.add(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.add(&sl, NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
@@ -119,7 +119,7 @@ test_skiplist_ulong_add_duplicate(void* mp)
 	printf("test_skiplist_ulong_add_duplicate\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k = 42UL;
+	unsigned long k = 42UL;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.size_fn(&sl) == 1UL);
 	sl.add(&sl, &k);
@@ -136,7 +136,7 @@ test_skiplist_ulong_remove_pos(void* mp)
 	printf("test_skiplist_ulong_remove_pos\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k1 = 1UL, k2 = 2UL, k3 = 3UL;
+	unsigned long k1 = 1UL, k2 = 2UL, k3 = 3UL;
 	sl.add(&sl, &k1);
 	sl.add(&sl, &k2);
 	sl.add(&sl, &k3);
@@ -155,11 +155,11 @@ test_skiplist_ulong_remove_neg(void* mp)
 	printf("test_skiplist_ulong_remove_neg\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k = 10UL;
+	unsigned long k = 10UL;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.remove_f(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.remove_f(&sl, NULL) == EC_ERR_INVALID_ARG);
-	ul bad = 999UL;
+	unsigned long bad = 999UL;
 	TEST_ASSERT(sl.remove_f(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
 	printf("pass:test_skiplist_ulong_remove_neg\n");
@@ -172,7 +172,7 @@ test_skiplist_ulong_remove_all_pos(void* mp)
 	printf("test_skiplist_ulong_remove_all_pos\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	for (ul i = 0; i < 10UL; i++)
+	for (unsigned long i = 0; i < 10UL; i++)
 		sl.add(&sl, &i);
 	TEST_ASSERT(sl.size_fn(&sl) == 10UL);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
@@ -199,7 +199,7 @@ test_skiplist_ulong_contains_pos(void* mp)
 	printf("test_skiplist_ulong_contains_pos\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k = 999UL;
+	unsigned long k = 999UL;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(&sl, &k) == EC_OK);
 	sl.remove_all(&sl);
@@ -213,11 +213,11 @@ test_skiplist_ulong_contains_neg(void* mp)
 	printf("test_skiplist_ulong_contains_neg\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k = 10UL;
+	unsigned long k = 10UL;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.contains(&sl, NULL) == EC_ERR_INVALID_ARG);
-	ul bad = 1000UL;
+	unsigned long bad = 1000UL;
 	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
 	printf("pass:test_skiplist_ulong_contains_neg\n");
@@ -230,9 +230,9 @@ test_skiplist_ulong_get_keys_pos(void* mp)
 	printf("test_skiplist_ulong_get_keys_pos\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	for (ul i = 1UL; i <= 5; i++)
+	for (unsigned long i = 1UL; i <= 5; i++)
 		sl.add(&sl, &i);
-	ul* keys = NULL;
+	unsigned long* keys = NULL;
 	size_t count = 0;
 	ec_status_t st = sl.get_keys(&sl, &keys, &count);
 	TEST_ASSERT(st == EC_OK && count == 5);
@@ -240,7 +240,7 @@ test_skiplist_ulong_get_keys_pos(void* mp)
 		TEST_ASSERT(keys[i - 1UL] <= keys[i]);
 	EC_FREE(keys);
 	/* Test empty list */
-	ul* keys2 = NULL;
+	unsigned long* keys2 = NULL;
 	size_t count2 = 0;
 	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
 	sl.remove_all(&sl);
@@ -254,9 +254,9 @@ test_skiplist_ulong_get_keys_neg(void* mp)
 	printf("test_skiplist_ulong_get_keys_neg\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k = 10UL;
+	unsigned long k = 10UL;
 	sl.add(&sl, &k);
-	ul* keys = NULL;
+	unsigned long* keys = NULL;
 	size_t count = 0;
 	TEST_ASSERT(sl.get_keys(NULL, &keys, &count) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.get_keys(&sl, NULL, &count) == EC_ERR_INVALID_ARG);
@@ -266,7 +266,7 @@ test_skiplist_ulong_get_keys_neg(void* mp)
 }
 
 static void
-foreach_key_ulong(ul k)
+foreach_key_ulong(unsigned long k)
 {
 	(void)k;
 }
@@ -278,9 +278,9 @@ test_skiplist_ulong_foreach_pos(void* mp)
 	printf("test_skiplist_ulong_foreach_pos\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	for (ul i = 0; i < 5; i++)
+	for (unsigned long i = 0; i < 5; i++)
 		{
-			ul v = i + 10UL;
+			unsigned long v = i + 10UL;
 			sl.add(&sl, &v);
 		}
 	TEST_ASSERT(sl.foreach_key(&sl, foreach_key_ulong) == EC_OK);
@@ -295,7 +295,7 @@ test_skiplist_ulong_foreach_neg(void* mp)
 	printf("test_skiplist_ulong_foreach_neg\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	ul k = 10UL;
+	unsigned long k = 10UL;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.foreach_key(NULL, foreach_key_ulong) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.foreach_key(&sl, NULL) == EC_ERR_INVALID_ARG);
@@ -312,7 +312,7 @@ test_skiplist_ulong_iterators_empty_pos(void* mp)
 	ec_skiplist_ulong_init(&sl, mp, NULL);
 	ec_skiplist_ulong_iter_t it;
 	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	ul key;
+	unsigned long key;
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
 	sl.remove_all(&sl);
 	printf("pass:test_skiplist_ulong_iterators_empty_pos\n");
@@ -331,7 +331,7 @@ test_skiplist_ulong_iterators_neg(void* mp)
 	TEST_ASSERT(sl.iter_init(&sl, NULL) == EC_ERR_INVALID_ARG);
 	/* Test iter_next with NULL */
 	sl.iter_init(&sl, &it);
-	ul key;
+	unsigned long key;
 	TEST_ASSERT(sl.iter_next(NULL, &key) == EC_ERR_INVALID_ARG);
 	sl.iter_init(&sl, &it);
 	TEST_ASSERT(sl.iter_next(&it, NULL) == EC_ERR_INVALID_ARG);
@@ -350,14 +350,14 @@ test_skiplist_ulong_iterators_pos(void* mp)
 	printf("test_skiplist_ulong_iterators_pos\n");
 	ec_skiplist_ulong_t sl;
 	ec_skiplist_ulong_init(&sl, mp, NULL);
-	for (ul i = 0; i < 5; i++)
+	for (unsigned long i = 0; i < 5; i++)
 		{
-			ul k = i + 100UL;
+			unsigned long k = i + 100UL;
 			sl.add(&sl, &k);
 		}
 	ec_skiplist_ulong_iter_t it;
 	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	ul key;
+	unsigned long key;
 	size_t cnt = 0;
 	while (sl.iter_next(&it, &key) == EC_OK)
 		{
@@ -373,7 +373,7 @@ test_skiplist_ulong_iterators_pos(void* mp)
 	printf("pass:test_skiplist_ulong_iterators_pos\n");
 }
 
-ul
+int
 main(void)
 {
 	printf("Starting ec_skiplist_ul tests...\n");

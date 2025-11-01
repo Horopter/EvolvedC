@@ -443,7 +443,7 @@ test_slist_char_copy_shallow(void* mp)
 		}
 	ec_slist_char_t* cp = NULL;
 	ec_status_t s = l.copy_shallow(&l, &cp);
-	TEST_ASSERT(s == EC_OK && cp->size == 3);
+	TEST_ASSERT(s == EC_OK && cp->size_fn(cp) == 3);
 	cp->free_fn(cp);
 	free(cp);
 	l.free_fn(&l);
@@ -1090,7 +1090,7 @@ test_slist_char_iter_index(void* mp)
 	ec_slist_char_iter_t it;
 	l.iter_init(&it, &l);
 	void* out;
-	size_t idx = 1;  // iter_index is 1-based after first iter_next
+	size_t idx = 1; // iter_index is 1-based after first iter_next
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
 			TEST_ASSERT(l.iter_index(&it) == idx);

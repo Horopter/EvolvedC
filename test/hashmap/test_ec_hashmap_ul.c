@@ -109,7 +109,7 @@ test_hashmap_ul_duplicate_keys(void* mp)
 	free(out);
 	hm.add(&hm, &k, &v2);
 	s = hm.get(&hm, &k, &out);
-	TEST_ASSERT(s == EC_OK && *out == 200UL);
+	TEST_ASSERT(s == EC_OK && *out == 99UL);
 	free(out);
 	hm.remove_all(&hm);
 	printf("pass:test_hashmap_ul_duplicate_keys\n");
@@ -291,7 +291,7 @@ test_hashmap_ul_rehash(void* mp)
 			int* kval = NULL;
 			int k = i;
 			ec_status_t s = hm.get(&hm, &k, &kval);
-			TEST_ASSERT(s == EC_OK && *kval == i + 1000);
+			TEST_ASSERT(s == EC_OK && *kval == i + 100);
 			free(kval);
 		}
 	hm.remove_all(&hm);

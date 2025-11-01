@@ -836,7 +836,7 @@ test_iter_index_pos(void)
 	size_t idx = 0;
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
-			assert(l.iter_index(&it) == idx);
+			assert(l.iter_index(&it) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);
@@ -879,7 +879,7 @@ test_zip_iter_index_pos(void)
 	size_t idx = 0;
 	while (l1.zip_iter_next(&zit, &out1, &out2) == EC_OK)
 		{
-			assert(l1.zip_iter_index(&zit) == idx);
+			assert(l1.zip_iter_index(&zit) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);

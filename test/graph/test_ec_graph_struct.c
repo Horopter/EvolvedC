@@ -18,13 +18,20 @@ typedef struct person_g_s
 	char name[16];
 } person_g_t;
 
-/* Note: EC_GRAPH_DEF cannot be used directly with struct types because
- * it generates a default comparator using < > operators that don't work for structs.
- * This test file is disabled until the macro is updated to support structs.
+/* TBD: This test is not yet implemented.
+ *
+ * LIMITATION: The EC_GRAPH_DEF macro generates a default comparator function that uses:
+ *   return (*a < *b) ? -1 : ((*a > *b) ? 1 : 0);
+ *
+ * This does not compile for struct types since C does not support direct comparison of structs
+ * with < and > operators. The macro would need to be enhanced to detect struct types and use
+ * memcmp() or another approach for the default comparator, or provide a separate macro variant
+ * for struct types (e.g., EC_GRAPH_DEF_STRUCT).
+ *
+ * TODO: Enhance EC_GRAPH_DEF macro to support struct types properly.
  */
 #if 0
 EC_GRAPH_DEF(person_g_t, person)
-#endif
 
 /* Custom comparator for person struct */
 static int
@@ -90,8 +97,6 @@ stamp(void)
 }
 
 /* --- Local helpers to reduce duplication --- */
-/* Note: These functions are disabled because ec_graph_person_t is not defined */
-#if 0
 static inline ec_status_t
 add_dir(ec_graph_person_t* g, person_g_t* u, person_g_t* v, int w)
 {
@@ -118,7 +123,6 @@ has_edge(ec_graph_person_t* g, person_g_t* u, person_g_t* v)
 		}
 	return false;
 }
-#endif
 
 /* --- Global variables for traversal tests --- */
 
@@ -141,8 +145,6 @@ dfs_visit(person_g_t key)
 }
 
 /* --- Test Functions --- */
-/* NOTE: All tests and helper functions are disabled because ec_graph_person_t type is not defined */
-#if 0
 /* Test that a newly initialized graph is empty. */
 static void
 test_graph_init_pos(void* mp)
@@ -545,7 +547,7 @@ main(void)
 	printf("All ec_graph_person tests passed.\n");
 	return 0;
 }
-#endif /* #if 0 - All tests disabled because ec_graph_person_t is not defined */
+#endif /* #if 0 - TBD: EC_GRAPH_DEF macro limitation with struct types */
 
 /* Empty main to prevent linker errors */
 int

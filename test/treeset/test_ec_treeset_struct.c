@@ -7,9 +7,18 @@
 #include "../../src/ec_treeset.h"
 #include <string.h>
 
-/* NOTE: This test is disabled because EC_TREESET_DEF generates a default compare function
- * that tries to use < and > operators on structs, which doesn't compile. The macro
- * would need to be enhanced to support struct types without default comparison. */
+/* TBD: This test is not yet implemented.
+ *
+ * LIMITATION: The EC_TREESET_DEF macro generates a default comparator function that uses:
+ *   return (*a < *b) ? -1 : ((*a > *b) ? 1 : 0);
+ *
+ * This does not compile for struct types since C does not support direct comparison of structs
+ * with < and > operators. The macro would need to be enhanced to detect struct types and use
+ * memcmp() or another approach for the default comparator, or provide a separate macro variant
+ * for struct types (e.g., EC_TREESET_DEF_STRUCT).
+ *
+ * TODO: Enhance EC_TREESET_DEF macro to support struct types properly.
+ */
 #if 0
 
 /* Define custom struct type for treeset */
@@ -18,9 +27,6 @@ typedef struct person_ts_s
 	int id;
 	char name[16];
 } person_ts_t;
-
-EC_TREESET_DEF(person_ts_t, person)
-/* Note: We must always pass cmp_person to init() because the default compare doesn't work for structs */
 
 /* Custom comparator for person struct */
 static int
@@ -611,8 +617,7 @@ main(void)
 	printf("All ec_treeset_person tests passed.\n");
 	return 0;
 }
-
-#endif /* #if 0 - Test disabled due to macro limitation */
+#endif /* #if 0 - TBD: EC_TREESET_DEF macro limitation with struct types */
 
 /* Empty main to prevent linker errors */
 int

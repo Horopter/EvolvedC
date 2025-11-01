@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -19,13 +20,13 @@ pru32_stacktrace(void)
 	char** sym = backtrace_symbols(arr, sz);
 	if (sym)
 		{
-			fpru32f(stderr, "---StackTrace---\n");
+			fprintf(stderr, "---StackTrace---\n");
 			for (size_t i = 0; i < sz; i++)
-				fpru32f(stderr, "%s\n", sym[i]);
+				fprintf(stderr, "%s\n", sym[i]);
 			free(sym);
 		}
 #else
-	fpru32f(stderr, "(NoStackTrace)\n");
+	fprintf(stderr, "(NoStackTrace)\n");
 #endif
 }
 
@@ -34,7 +35,7 @@ pru32_stacktrace(void)
 		{                                                                            \
 			if (!(cond))                                                             \
 				{                                                                    \
-					fpru32f(stderr, "[FAIL]%s:%d: %s\n", __FILE__, __LINE__, #cond); \
+					fprintf(stderr, "[FAIL]%s:%d: %s\n", __FILE__, __LINE__, #cond); \
 					pru32_stacktrace();                                              \
 					exit(3U);                                                        \
 				}                                                                    \
@@ -50,91 +51,91 @@ stamp(void)
 		{
 			char b[64];
 			strftime(b, sizeof(b), "[%Y-%m-%d %H:%M:%S]", m);
-			pru32f("%s ", b);
+			printf("%s ", b);
 		}
 	else
-		pru32f("[timeerr] ");
+		printf("[timeerr] ");
 }
 
 static void
 test_skiplist_u32_init_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_init_pos\n");
+	printf("test_skiplist_u32_init_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_status_t st = ec_skiplist_u32_init(&sl, mp, NULL);
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(sl.size == 0);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_init_pos\n");
+	printf("pass:test_skiplist_u32_init_pos\n");
 }
 
 static void
 test_skiplist_u32_init_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_init_neg\n");
+	printf("test_skiplist_u32_init_neg\n");
 	TEST_ASSERT(ec_skiplist_u32_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
-	pru32f("pass:test_skiplist_u32_init_neg\n");
+	printf("pass:test_skiplist_u32_init_neg\n");
 }
 
 static void
 test_skiplist_u32_add_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_add_pos\n");
+	printf("test_skiplist_u32_add_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k1 = 10U, k2 = 20U;
+	uint32_t k1 = 10U, k2 = 20U;
 	sl.add(&sl, &k1);
 	sl.add(&sl, &k2);
 	TEST_ASSERT(sl.size_fn(&sl) == 2U);
 	TEST_ASSERT(sl.contains(&sl, &k1) == EC_OK && sl.contains(&sl, &k2) == EC_OK);
-	u32 bad = 999U;
+	uint32_t bad = 999U;
 	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_add_pos\n");
+	printf("pass:test_skiplist_u32_add_pos\n");
 }
 
 static void
 test_skiplist_u32_add_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_add_neg\n");
+	printf("test_skiplist_u32_add_neg\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k = 10U;
+	uint32_t k = 10U;
 	TEST_ASSERT(sl.add(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.add(&sl, NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_add_neg\n");
+	printf("pass:test_skiplist_u32_add_neg\n");
 }
 
 static void
 test_skiplist_u32_add_duplicate(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_add_duplicate\n");
+	printf("test_skiplist_u32_add_duplicate\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k = 42U;
+	uint32_t k = 42U;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.size_fn(&sl) == 1U);
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.size_fn(&sl) == 1U);
 	TEST_ASSERT(sl.contains(&sl, &k) == EC_OK);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_add_duplicate\n");
+	printf("pass:test_skiplist_u32_add_duplicate\n");
 }
 
 static void
 test_skiplist_u32_remove_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_remove_pos\n");
+	printf("test_skiplist_u32_remove_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k1 = 1U, k2 = 2U, k3 = 3U;
+	uint32_t k1 = 1U, k2 = 2U, k3 = 3U;
 	sl.add(&sl, &k1);
 	sl.add(&sl, &k2);
 	sl.add(&sl, &k3);
@@ -143,94 +144,94 @@ test_skiplist_u32_remove_pos(void* mp)
 	TEST_ASSERT(sl.size_fn(&sl) == 2U);
 	TEST_ASSERT(sl.remove_f(&sl, &k2) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_remove_pos\n");
+	printf("pass:test_skiplist_u32_remove_pos\n");
 }
 
 static void
 test_skiplist_u32_remove_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_remove_neg\n");
+	printf("test_skiplist_u32_remove_neg\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k = 10U;
+	uint32_t k = 10U;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.remove_f(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.remove_f(&sl, NULL) == EC_ERR_INVALID_ARG);
-	u32 bad = 999U;
+	uint32_t bad = 999U;
 	TEST_ASSERT(sl.remove_f(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_remove_neg\n");
+	printf("pass:test_skiplist_u32_remove_neg\n");
 }
 
 static void
 test_skiplist_u32_remove_all_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_remove_all_pos\n");
+	printf("test_skiplist_u32_remove_all_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	for (u32 i = 0; i < 10U; i++)
+	for (uint32_t i = 0; i < 10U; i++)
 		sl.add(&sl, &i);
 	TEST_ASSERT(sl.size_fn(&sl) == 10U);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
-	pru32f("pass:test_skiplist_u32_remove_all_pos\n");
+	printf("pass:test_skiplist_u32_remove_all_pos\n");
 }
 
 static void
 test_skiplist_u32_remove_all_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_remove_all_neg\n");
+	printf("test_skiplist_u32_remove_all_neg\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
 	TEST_ASSERT(sl.remove_all(NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_remove_all_neg\n");
+	printf("pass:test_skiplist_u32_remove_all_neg\n");
 }
 
 static void
 test_skiplist_u32_contains_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_contains_pos\n");
+	printf("test_skiplist_u32_contains_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k = 999U;
+	uint32_t k = 999U;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(&sl, &k) == EC_OK);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_contains_pos\n");
+	printf("pass:test_skiplist_u32_contains_pos\n");
 }
 
 static void
 test_skiplist_u32_contains_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_contains_neg\n");
+	printf("test_skiplist_u32_contains_neg\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k = 10U;
+	uint32_t k = 10U;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.contains(&sl, NULL) == EC_ERR_INVALID_ARG);
-	u32 bad = 1000U;
+	uint32_t bad = 1000U;
 	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_contains_neg\n");
+	printf("pass:test_skiplist_u32_contains_neg\n");
 }
 
 static void
 test_skiplist_u32_get_keys_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_get_keys_pos\n");
+	printf("test_skiplist_u32_get_keys_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	for (u32 i = 1U; i <= 5; i++)
+	for (uint32_t i = 1U; i <= 5; i++)
 		sl.add(&sl, &i);
-	u32* keys = NULL;
+	uint32_t* keys = NULL;
 	size_t count = 0;
 	ec_status_t st = sl.get_keys(&sl, &keys, &count);
 	TEST_ASSERT(st == EC_OK && count == 5);
@@ -238,33 +239,33 @@ test_skiplist_u32_get_keys_pos(void* mp)
 		TEST_ASSERT(keys[i - 1U] <= keys[i]);
 	EC_FREE(keys);
 	/* Test empty list */
-	u32* keys2 = NULL;
+	uint32_t* keys2 = NULL;
 	size_t count2 = 0;
 	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_get_keys_pos\n");
+	printf("pass:test_skiplist_u32_get_keys_pos\n");
 }
 
 static void
 test_skiplist_u32_get_keys_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_get_keys_neg\n");
+	printf("test_skiplist_u32_get_keys_neg\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k = 10U;
+	uint32_t k = 10U;
 	sl.add(&sl, &k);
-	u32* keys = NULL;
+	uint32_t* keys = NULL;
 	size_t count = 0;
 	TEST_ASSERT(sl.get_keys(NULL, &keys, &count) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.get_keys(&sl, NULL, &count) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.get_keys(&sl, &keys, NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_get_keys_neg\n");
+	printf("pass:test_skiplist_u32_get_keys_neg\n");
 }
 
 static void
-foreach_key_u32(u32 k)
+foreach_key_u32(uint32_t k)
 {
 	(void)k;
 }
@@ -273,54 +274,54 @@ static void
 test_skiplist_u32_foreach_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_foreach_pos\n");
+	printf("test_skiplist_u32_foreach_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	for (u32 i = 0; i < 5; i++)
+	for (uint32_t i = 0; i < 5; i++)
 		{
-			u32 v = i + 10U;
+			uint32_t v = i + 10U;
 			sl.add(&sl, &v);
 		}
 	TEST_ASSERT(sl.foreach_key(&sl, foreach_key_u32) == EC_OK);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_foreach_pos\n");
+	printf("pass:test_skiplist_u32_foreach_pos\n");
 }
 
 static void
 test_skiplist_u32_foreach_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_foreach_neg\n");
+	printf("test_skiplist_u32_foreach_neg\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	u32 k = 10U;
+	uint32_t k = 10U;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.foreach_key(NULL, foreach_key_u32) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.foreach_key(&sl, NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_foreach_neg\n");
+	printf("pass:test_skiplist_u32_foreach_neg\n");
 }
 
 static void
 test_skiplist_u32_iterators_empty_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_iterators_empty_pos\n");
+	printf("test_skiplist_u32_iterators_empty_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
 	ec_skiplist_u32_iter_t it;
 	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	u32 key;
+	uint32_t key;
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_iterators_empty_pos\n");
+	printf("pass:test_skiplist_u32_iterators_empty_pos\n");
 }
 
 static void
 test_skiplist_u32_iterators_neg(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_iterators_neg\n");
+	printf("test_skiplist_u32_iterators_neg\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
 	ec_skiplist_u32_iter_t it;
@@ -329,7 +330,7 @@ test_skiplist_u32_iterators_neg(void* mp)
 	TEST_ASSERT(sl.iter_init(&sl, NULL) == EC_ERR_INVALID_ARG);
 	/* Test iter_next with NULL */
 	sl.iter_init(&sl, &it);
-	u32 key;
+	uint32_t key;
 	TEST_ASSERT(sl.iter_next(NULL, &key) == EC_ERR_INVALID_ARG);
 	sl.iter_init(&sl, &it);
 	TEST_ASSERT(sl.iter_next(&it, NULL) == EC_ERR_INVALID_ARG);
@@ -338,24 +339,24 @@ test_skiplist_u32_iterators_neg(void* mp)
 	TEST_ASSERT(sl.iter_remove(&it) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.iter_remove(NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_iterators_neg\n");
+	printf("pass:test_skiplist_u32_iterators_neg\n");
 }
 
 static void
 test_skiplist_u32_iterators_pos(void* mp)
 {
 	stamp();
-	pru32f("test_skiplist_u32_iterators_pos\n");
+	printf("test_skiplist_u32_iterators_pos\n");
 	ec_skiplist_u32_t sl;
 	ec_skiplist_u32_init(&sl, mp, NULL);
-	for (u32 i = 0; i < 5; i++)
+	for (uint32_t i = 0; i < 5; i++)
 		{
-			u32 k = i + 100U;
+			uint32_t k = i + 100U;
 			sl.add(&sl, &k);
 		}
 	ec_skiplist_u32_iter_t it;
 	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	u32 key;
+	uint32_t key;
 	size_t cnt = 0;
 	while (sl.iter_next(&it, &key) == EC_OK)
 		{
@@ -368,13 +369,13 @@ test_skiplist_u32_iterators_pos(void* mp)
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_OK);
 	TEST_ASSERT(sl.iter_remove(&it) == EC_OK && sl.size_fn(&sl) == 4);
 	sl.remove_all(&sl);
-	pru32f("pass:test_skiplist_u32_iterators_pos\n");
+	printf("pass:test_skiplist_u32_iterators_pos\n");
 }
 
-u32
+int
 main(void)
 {
-	pru32f("Starting ec_skiplist_u32 tests...\n");
+	printf("Starting ec_skiplist_u32 tests...\n");
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_conf_t conf = { 64, 100U, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2U.0f, NULL, NULL, NULL };
 	ec_mempool_t pool;
@@ -408,6 +409,6 @@ main(void)
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
 
-	pru32f("All ec_skiplist_u32 tests passed.\n");
+	printf("All ec_skiplist_u32 tests passed.\n");
 	return 0;
 }
