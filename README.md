@@ -1,4 +1,4 @@
-# Evolved-C (EC) Data Structures Library
+#Evolved - C(EC) Data Structures Library
 
 ![CI](https://github.com/Horopter/EvolvedC/actions/workflows/ci.yml/badge.svg)
 
@@ -63,19 +63,19 @@ Include any header file in your project and start using the data structures:
 #include <stdio.h>
 
 int main() {
-    ec_vector_int_t vec;
-    ec_vector_int_init(&vec, 10, NULL);
-    
-    vec.push(&vec, 42);
-    vec.push(&vec, 84);
-    
-    int value;
-    vec.get(&vec, 0, &value);
-    
-    printf("First value: %d\n", value);
-    
-    vec.free_fn(&vec);
-    return 0;
+	ec_vector_int_t vec;
+	ec_vector_int_init(&vec, 10, NULL);
+
+	vec.push(&vec, 42);
+	vec.push(&vec, 84);
+
+	int value;
+	vec.get(&vec, 0, &value);
+
+	printf("First value: %d\n", value);
+
+	vec.free_fn(&vec);
+	return 0;
 }
 ```
 
@@ -98,8 +98,9 @@ Before submitting, please review the **Evolved-C Core Design Principles**.
 
 - GitHub Actions workflow `ci.yml` runs on Ubuntu and macOS.
 - Steps: format (non-blocking), build, and run all tests via `test/run_tests.sh` across structure-specific subfolders.
-- Current status: ✅ **All tests passing** - Comprehensive test coverage across all data structures with 200+ test files
+- Current status: ✅ **All tests passing** - Comprehensive test coverage across all data structures with **253 test files**
 - Test execution: All tests compile and run successfully; TBD tests (struct type limitations) are properly skipped
+- Recent fixes: Resolved all test failures in dlist, vector, slist, hashmap, and skiplist modules; enabled ringbuffer char tests
 
 ### Recent Updates (Highlights)
 
@@ -107,6 +108,11 @@ Before submitting, please review the **Evolved-C Core Design Principles**.
 - ✅ **Code Formatting**: Applied clang-format (GNU style) to all 278 C/C++ files in `src/` and `test/`
 - ✅ **Consistent Style**: All source code now follows the `.clang-format` configuration (GNU style with tabs)
 - ✅ **Test Suite Health**: All test failures resolved; entire test suite passing with comprehensive coverage
+  - Fixed assertion mismatches in dlist, vector, and hashmap tests
+  - Fixed iterator index calculations in dlist and slist tests
+  - Fixed type definitions and compilation errors in skiplist tests (u32, u64, uint, ul, ull, ulong)
+  - Fixed string comparison issues in slist and hashmap tests
+  - Enabled ringbuffer char tests by adding missing `EC_RINGBUF_DEF(char, ch)` macro
 
 #### Test Organization & Coverage
 - Organized tests into subfolders per data structure under `test/`:
@@ -132,7 +138,7 @@ Before submitting, please review the **Evolved-C Core Design Principles**.
   - `stack`: 14 test files, coverage expansion ongoing
   - `treeset`: 15 test files, coverage expansion ongoing
   - `treetable`: 11 test files, coverage expansion ongoing
-  - `vector`: 13 test files, coverage expansion ongoing
+  - `vector`: 13 test files + 1 stress test, coverage expansion ongoing
 - Expanded `vector` coverage across many data types by mirroring `int` tests to: `double`, `long`, `unsigned long`, `long long`, `unsigned long long`, `uint32_t`, `uint64_t`, `const char*`, and `void*`.
 - Added and strengthened tests for `array`, `buffer`, and `deque`; ensured per-method coverage and iterator/zip-iterator checks where available.
 - Removed all meta tests and relocation stubs; each data structure now has independent, explicit tests.
