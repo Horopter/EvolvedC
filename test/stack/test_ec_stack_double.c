@@ -248,7 +248,7 @@ test_stack_double_invalid_args_neg(void* mp)
 	assert(out != NULL);
 
 	assert(ec_stack_dbl_init(NULL, mp) == EC_ERR_INVALID_ARG);
-	st = ec_stack_dbl_init(&s, mp);
+	ec_status_t st = ec_stack_dbl_init(&s, mp);
 	assert(st == EC_OK);
 
 	assert(s.push(NULL, &val) == EC_ERR_INVALID_ARG);

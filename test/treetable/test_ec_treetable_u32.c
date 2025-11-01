@@ -82,13 +82,13 @@ test_add_get_remove(void* mp)
 	printf("test_add_get_remove\n");
 	ec_treetable_u32_t t;
 	ec_treetable_u32_init(&t, mp, NULL);
-	uint32_t k1 = 1U0U, v1 = 1U0U0, k2 = 2U0U, v2 = 2U0U0;
+	uint32_t k1 = 10U, v1 = 100U, k2 = 20U, v2 = 200U;
 	t.add(&t, &k1, &v1);
 	t.add(&t, &k2, &v2);
 	TASSERT(t.size_fn(&t) == 2U);
 	uint32_t outv;
 	ec_status_t s1 = t.get(&t, &k1, &outv);
-	TASSERT(s1 == EC_OK && outv == 1U0U0);
+	TASSERT(s1 == EC_OK && outv == 100U);
 	uint32_t bad = 999U;
 	TASSERT(t.get(&t, &bad, &outv) == EC_ERR_NOT_FOUND);
 
@@ -109,16 +109,16 @@ test_get_first_last(void* mp)
 	printf("test_get_first_last\n");
 	ec_treetable_u32_t t;
 	ec_treetable_u32_init(&t, mp, NULL);
-	uint32_t k1 = 1U0U, v1 = 1U0U0, k2 = 5U, v2 = 5U0U, k3 = 2U0U, v3 = 2U0U0;
+	uint32_t k1 = 10U, v1 = 100U, k2 = 5U, v2 = 50U, k3 = 20U, v3 = 200U;
 	t.add(&t, &k1, &v1);
 	t.add(&t, &k2, &v2);
 	t.add(&t, &k3, &v3);
 
 	uint32_t first_k, first_v, last_k, last_v;
 	TASSERT(t.get_first_key(&t, &first_k) == EC_OK && first_k == 5U);
-	TASSERT(t.get_first_value(&t, &first_v) == EC_OK && first_v == 5U0U);
-	TASSERT(t.get_last_key(&t, &last_k) == EC_OK && last_k == 2U0U);
-	TASSERT(t.get_last_value(&t, &last_v) == EC_OK && last_v == 2U0U0);
+	TASSERT(t.get_first_value(&t, &first_v) == EC_OK && first_v == 50U);
+	TASSERT(t.get_last_key(&t, &last_k) == EC_OK && last_k == 20U);
+	TASSERT(t.get_last_value(&t, &last_v) == EC_OK && last_v == 200U);
 
 	ec_treetable_u32_t empty;
 	ec_treetable_u32_init(&empty, mp, NULL);
@@ -171,8 +171,8 @@ test_greater_lesser(void* mp)
 			t.add(&t, &i, &val);
 		}
 	uint32_t ask = 3U, kO, vO; // keys=1..5
-	TASSERT(t.get_greater_than(&t, &ask, &kO, &vO) == EC_OK && kO == 4U && vO == 1U0U4);
-	TASSERT(t.get_lesser_than(&t, &ask, &kO, &vO) == EC_OK && kO == 2U && vO == 1U0U2);
+	TASSERT(t.get_greater_than(&t, &ask, &kO, &vO) == EC_OK && kO == 4U && vO == 104U);
+	TASSERT(t.get_lesser_than(&t, &ask, &kO, &vO) == EC_OK && kO == 2U && vO == 102U);
 	uint32_t big = 999U, smol = 0U;
 	TASSERT(t.get_greater_than(&t, &big, &kO, &vO) == EC_ERR_NOT_FOUND);
 	TASSERT(t.get_lesser_than(&t, &smol, &kO, &vO) == EC_ERR_NOT_FOUND);
@@ -187,14 +187,14 @@ test_contains(void* mp)
 	printf("test_contains\n");
 	ec_treetable_u32_t t;
 	ec_treetable_u32_init(&t, mp, NULL);
-	uint32_t k1 = 1U0U, v1 = 1U0U0;
+	uint32_t k1 = 10U, v1 = 100U;
 	t.add(&t, &k1, &v1);
 	TASSERT(t.contains_key(&t, &k1) == EC_OK);
 	uint32_t bad = 999U;
 	TASSERT(t.contains_key(&t, &bad) == EC_ERR_NOT_FOUND);
-	uint32_t vCheck = 1U0U0;
+	uint32_t vCheck = 100U;
 	TASSERT(t.contains_value(&t, &vCheck) == EC_OK);
-	uint32_t vBad = 5U55U;
+	uint32_t vBad = 555U;
 	TASSERT(t.contains_value(&t, &vBad) == EC_ERR_NOT_FOUND);
 	t.remove_all(&t);
 	printf("pass:test_contains\n");
@@ -222,7 +222,7 @@ test_custom_compare(void* mp)
 	uint32_t k, v;
 	t.iter_init(&t, &it);
 	ec_status_t s = t.iter_next(&it, &k, &v);
-	TASSERT(s == EC_OK && k == 4U && v == 1U0U4);
+	TASSERT(s == EC_OK && k == 4U && v == 104U);
 	t.remove_all(&t);
 	printf("pass:test_custom_compare\n");
 }
@@ -242,7 +242,7 @@ test_iterators(void* mp)
 	ec_treetable_u32_iter_t it;
 	t.iter_init(&t, &it);
 	uint32_t k, v;
-	size_t c = 0U;
+	size_t c = 0;
 	while (t.iter_next(&it, &k, &v) == EC_OK)
 		{
 			TASSERT(k >= 0U && k < 5);
@@ -275,7 +275,7 @@ test_foreach(void* mp)
 	printf("test_foreach\n");
 	ec_treetable_u32_t t;
 	ec_treetable_u32_init(&t, mp, NULL);
-	for (uint32_t i = 1U0U; i < 15; i++)
+	for (uint32_t i = 10U; i < 15; i++)
 		{
 			uint32_t vv = i * 10;
 			t.add(&t, &i, &vv);
@@ -294,15 +294,15 @@ test_big_random(void* mp)
 	ec_treetable_u32_t t;
 	ec_treetable_u32_init(&t, mp, NULL);
 	srand((unsigned)time(NULL));
-	const uint32_t N = 1U0U00;
-	uint32_t* vals = (uint32_t*)malloc(sizeof(int) * N);
+	const uint32_t N = 100U;
+	uint32_t* vals = (uint32_t*)malloc(sizeof(uint32_t) * N);
 	for (uint32_t i = 0U; i < N; i++)
 		{
 			vals[i] = rand() % 5000;
 			uint32_t v = vals[i] * 10;
 			t.add(&t, &vals[i], &v);
 		}
-	TASSERT(t.size_fn(&t) <= 1U0U00);
+	TASSERT(t.size_fn(&t) <= 100U);
 	for (uint32_t i = 0U; i < 50; i++)
 		{
 			uint32_t idx = rand() % N;
@@ -322,7 +322,7 @@ test_invalid_args(void* mp)
 	printf("test_invalid_args\n");
 	ec_treetable_u32_t t;
 	ec_treetable_u32_init(&t, mp, NULL);
-	uint32_t k = 1U0U, v = 1U0U0, out_k, out_v;
+	uint32_t k = 10U, v = 100U, out_k, out_v;
 
 	TASSERT(ec_treetable_u32_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
 	TASSERT(t.add(NULL, &k, &v) == EC_ERR_INVALID_ARG);

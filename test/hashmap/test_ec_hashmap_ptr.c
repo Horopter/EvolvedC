@@ -4,14 +4,14 @@
 #ifdef __linux__
 #include <execinfo.h>
 #endif
-#include <stdint.h>
 #include "../../src/ec_hashmap.h"
 #include <stdbool.h>
+#include <stdint.h>
 #ifdef EC_USE_MEMPOOL
 #include "ec_mempool.h"
 #endif
 
-EC_HASHMAP_DEF(void*, ptr)
+// EC_HASHMAP_DEF(void*, ptr) is already defined in ec_hashmap.h
 
 static void
 print_stacktrace(void)
@@ -167,7 +167,7 @@ test_hashmap_ptr_remove_all(void* mp)
 			hm.add(&hm, &keys[i], &values[i]);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t ec_status_t st = hm.remove_all(&hm);
+	ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);

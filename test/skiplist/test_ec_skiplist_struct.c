@@ -10,7 +10,7 @@
 /* Define custom struct type for skiplist */
 typedef struct person_sl_s
 {
-	person_sl_t id;
+	int id;
 	char name[16];
 } person_sl_t;
 
@@ -82,8 +82,8 @@ test_skiplist_struct_init_pos(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_init_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_status_t st = ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_status_t st = ec_skiplist_person_init(&sl, mp, cmp_person);
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(sl.size == 0);
 	sl.remove_all(&sl);
@@ -95,7 +95,7 @@ test_skiplist_struct_init_neg(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_init_neg\n");
-	TEST_ASSERT(ec_skiplist_struct_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(ec_skiplist_person_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
 	printf("pass:test_skiplist_struct_init_neg\n");
 }
 
@@ -104,8 +104,8 @@ test_skiplist_struct_add_pos(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_add_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
 	person_sl_t k1 = { 10, "alice" }, k2 = { 20, "bob" };
 	sl.add(&sl, &k1);
 	sl.add(&sl, &k2);
@@ -122,8 +122,8 @@ test_skiplist_struct_add_neg(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_add_neg\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
 	person_sl_t k = { 10, "ten" };
 	TEST_ASSERT(sl.add(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.add(&sl, NULL) == EC_ERR_INVALID_ARG);
@@ -136,8 +136,8 @@ test_skiplist_struct_add_duplicate(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_add_duplicate\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
 	person_sl_t k = { 42, "test" };
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.size_fn(&sl) == 1);
@@ -153,8 +153,8 @@ test_skiplist_struct_remove_pos(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_remove_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
 	person_sl_t k1 = { 1, "one" }, k2 = { 2, "two" }, k3 = { 3, "three" };
 	sl.add(&sl, &k1);
 	sl.add(&sl, &k2);
@@ -172,8 +172,8 @@ test_skiplist_struct_remove_neg(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_remove_neg\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
 	person_sl_t k = { 10, "ten" };
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.remove_f(NULL, &k) == EC_ERR_INVALID_ARG);
@@ -189,10 +189,15 @@ test_skiplist_struct_remove_all_pos(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_remove_all_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	for (person_sl_t i = 0; i < 10; i++)
-		sl.add(&sl, &i);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
+	person_sl_t items[10];
+	for (int j = 0; j < 10; j++)
+		{
+			items[j].id = j;
+			snprintf(items[j].name, sizeof(items[j].name), "name%d", j);
+			sl.add(&sl, &items[j]);
+		}
 	TEST_ASSERT(sl.size_fn(&sl) == 10);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
@@ -204,8 +209,8 @@ test_skiplist_struct_remove_all_neg(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_remove_all_neg\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
 	TEST_ASSERT(sl.remove_all(NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
 	printf("pass:test_skiplist_struct_remove_all_neg\n");
@@ -216,9 +221,9 @@ test_skiplist_struct_contains_pos(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_contains_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	person_sl_t k = 999;
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
+	person_sl_t k = { 999, "test" };
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(&sl, &k) == EC_OK);
 	sl.remove_all(&sl);
@@ -230,8 +235,8 @@ test_skiplist_struct_contains_neg(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_contains_neg\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
 	person_sl_t k = { 10, "ten" };
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(NULL, &k) == EC_ERR_INVALID_ARG);
@@ -247,188 +252,179 @@ test_skiplist_struct_get_keys_pos(void* mp)
 {
 	stamp();
 	printf("test_skiplist_struct_get_keys_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	for (person_sl_t i = 1; i <= 5; i++)
-		sl.add(&sl, &i);
-	person_sl_t* keys = NULL;
-	size_t count = 0;
-	ec_status_t st = sl.get_keys(&sl, &keys, &count);
-	TEST_ASSERT(st == EC_OK && count == 5);
-	for (size_t i = 1; i < count; i++)
-		TEST_ASSERT(cmp_person(&keys[i - 1], &keys[i]) <= 0);
-	EC_FREE(keys);
-	/* Test empty list */
-	person_sl_t* keys2 = NULL;
-	size_t count2 = 0;
-	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
-	sl.remove_all(&sl);
-	printf("pass:test_skiplist_struct_get_keys_pos\n");
-}
+	ec_skiplist_person_t sl;
+	ec_skiplist_person_init(&sl, mp, cmp_person);
+	person_sl_t items[5];
+	for (int j = 0; j < 5; j++)
+		{
+			items[j].id = j;
+			snprintf(items[j].name, sizeof(items[j].name), "name%d", j);
+			sl.add(&sl, &items[j]);
+		}
 
-static void
-test_skiplist_struct_get_keys_neg(void* mp)
-{
-	stamp();
-	printf("test_skiplist_struct_get_keys_neg\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	person_sl_t k = { 10, "ten" };
-	sl.add(&sl, &k);
-	person_sl_t* keys = NULL;
-	size_t count = 0;
-	TEST_ASSERT(sl.get_keys(NULL, &keys, &count) == EC_ERR_INVALID_ARG);
-	TEST_ASSERT(sl.get_keys(&sl, NULL, &count) == EC_ERR_INVALID_ARG);
-	TEST_ASSERT(sl.get_keys(&sl, &keys, NULL) == EC_ERR_INVALID_ARG);
-	sl.remove_all(&sl);
-	printf("pass:test_skiplist_struct_get_keys_neg\n");
-}
+	static void
+	test_skiplist_struct_get_keys_neg(void* mp)
+	{
+		stamp();
+		printf("test_skiplist_struct_get_keys_neg\n");
+		ec_skiplist_person_t sl;
+		ec_skiplist_person_init(&sl, mp, cmp_person);
+		person_sl_t k = { 10, "ten" };
+		sl.add(&sl, &k);
+		person_sl_t* keys = NULL;
+		size_t count = 0;
+		TEST_ASSERT(sl.get_keys(NULL, &keys, &count) == EC_ERR_INVALID_ARG);
+		TEST_ASSERT(sl.get_keys(&sl, NULL, &count) == EC_ERR_INVALID_ARG);
+		TEST_ASSERT(sl.get_keys(&sl, &keys, NULL) == EC_ERR_INVALID_ARG);
+		sl.remove_all(&sl);
+		printf("pass:test_skiplist_struct_get_keys_neg\n");
+	}
 
-static void
-foreach_key_struct(person_sl_t k)
-{
-	(void)k;
-}
+	static void
+	foreach_key_struct(person_sl_t k)
+	{
+		(void)k;
+	}
 
-static void
-test_skiplist_struct_foreach_pos(void* mp)
-{
-	stamp();
-	printf("test_skiplist_struct_foreach_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	for (person_sl_t i = 0; i < 5; i++)
+	static void
+	test_skiplist_struct_foreach_pos(void* mp)
+	{
+		stamp();
+		printf("test_skiplist_struct_foreach_pos\n");
+		ec_skiplist_person_t sl;
+		ec_skiplist_person_init(&sl, mp, cmp_person);
+		person_sl_t i = { 0, "test" };
 		{
 			person_sl_t v = i + 10;
 			sl.add(&sl, &v);
 		}
-	TEST_ASSERT(sl.foreach_key(&sl, foreach_key_struct) == EC_OK);
-	sl.remove_all(&sl);
-	printf("pass:test_skiplist_struct_foreach_pos\n");
-}
+		TEST_ASSERT(sl.foreach_key(&sl, foreach_key_struct) == EC_OK);
+		sl.remove_all(&sl);
+		printf("pass:test_skiplist_struct_foreach_pos\n");
+	}
 
-static void
-test_skiplist_struct_foreach_neg(void* mp)
-{
-	stamp();
-	printf("test_skiplist_struct_foreach_neg\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	person_sl_t k = { 10, "ten" };
-	sl.add(&sl, &k);
-	TEST_ASSERT(sl.foreach_key(NULL, foreach_key_struct) == EC_ERR_INVALID_ARG);
-	TEST_ASSERT(sl.foreach_key(&sl, NULL) == EC_ERR_INVALID_ARG);
-	sl.remove_all(&sl);
-	printf("pass:test_skiplist_struct_foreach_neg\n");
-}
+	static void
+	test_skiplist_struct_foreach_neg(void* mp)
+	{
+		stamp();
+		printf("test_skiplist_struct_foreach_neg\n");
+		ec_skiplist_person_t sl;
+		ec_skiplist_person_init(&sl, mp, cmp_person);
+		person_sl_t k = { 10, "ten" };
+		sl.add(&sl, &k);
+		TEST_ASSERT(sl.foreach_key(NULL, foreach_key_struct) == EC_ERR_INVALID_ARG);
+		TEST_ASSERT(sl.foreach_key(&sl, NULL) == EC_ERR_INVALID_ARG);
+		sl.remove_all(&sl);
+		printf("pass:test_skiplist_struct_foreach_neg\n");
+	}
 
-static void
-test_skiplist_struct_iterators_empty_pos(void* mp)
-{
-	stamp();
-	printf("test_skiplist_struct_iterators_empty_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	ec_skiplist_struct_iter_t it;
-	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	person_sl_t key;
-	TEST_ASSERT(sl.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
-	sl.remove_all(&sl);
-	printf("pass:test_skiplist_struct_iterators_empty_pos\n");
-}
+	static void
+	test_skiplist_struct_iterators_empty_pos(void* mp)
+	{
+		stamp();
+		printf("test_skiplist_struct_iterators_empty_pos\n");
+		ec_skiplist_person_t sl;
+		ec_skiplist_person_init(&sl, mp, cmp_person);
+		ec_skiplist_struct_iter_t it;
+		TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
+		person_sl_t key;
+		TEST_ASSERT(sl.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
+		sl.remove_all(&sl);
+		printf("pass:test_skiplist_struct_iterators_empty_pos\n");
+	}
 
-static void
-test_skiplist_struct_iterators_neg(void* mp)
-{
-	stamp();
-	printf("test_skiplist_struct_iterators_neg\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	ec_skiplist_struct_iter_t it;
-	/* Test iter_init with NULL */
-	TEST_ASSERT(sl.iter_init(NULL, &it) == EC_ERR_INVALID_ARG);
-	TEST_ASSERT(sl.iter_init(&sl, NULL) == EC_ERR_INVALID_ARG);
-	/* Test iter_next with NULL */
-	sl.iter_init(&sl, &it);
-	person_sl_t key;
-	TEST_ASSERT(sl.iter_next(NULL, &key) == EC_ERR_INVALID_ARG);
-	sl.iter_init(&sl, &it);
-	TEST_ASSERT(sl.iter_next(&it, NULL) == EC_ERR_INVALID_ARG);
-	/* Test iter_remove with invalid iterator */
-	sl.iter_init(&sl, &it);
-	TEST_ASSERT(sl.iter_remove(&it) == EC_ERR_INVALID_ARG);
-	TEST_ASSERT(sl.iter_remove(NULL) == EC_ERR_INVALID_ARG);
-	sl.remove_all(&sl);
-	printf("pass:test_skiplist_struct_iterators_neg\n");
-}
+	static void
+	test_skiplist_struct_iterators_neg(void* mp)
+	{
+		stamp();
+		printf("test_skiplist_struct_iterators_neg\n");
+		ec_skiplist_person_t sl;
+		ec_skiplist_person_init(&sl, mp, cmp_person);
+		ec_skiplist_struct_iter_t it;
+		/* Test iter_init with NULL */
+		TEST_ASSERT(sl.iter_init(NULL, &it) == EC_ERR_INVALID_ARG);
+		TEST_ASSERT(sl.iter_init(&sl, NULL) == EC_ERR_INVALID_ARG);
+		/* Test iter_next with NULL */
+		sl.iter_init(&sl, &it);
+		person_sl_t key;
+		TEST_ASSERT(sl.iter_next(NULL, &key) == EC_ERR_INVALID_ARG);
+		sl.iter_init(&sl, &it);
+		TEST_ASSERT(sl.iter_next(&it, NULL) == EC_ERR_INVALID_ARG);
+		/* Test iter_remove with invalid iterator */
+		sl.iter_init(&sl, &it);
+		TEST_ASSERT(sl.iter_remove(&it) == EC_ERR_INVALID_ARG);
+		TEST_ASSERT(sl.iter_remove(NULL) == EC_ERR_INVALID_ARG);
+		sl.remove_all(&sl);
+		printf("pass:test_skiplist_struct_iterators_neg\n");
+	}
 
-static void
-test_skiplist_struct_iterators_pos(void* mp)
-{
-	stamp();
-	printf("test_skiplist_struct_iterators_pos\n");
-	ec_skiplist_struct_t sl;
-	ec_skiplist_struct_init(&sl, mp, NULL);
-	for (person_sl_t i = 0; i < 5; i++)
+	static void
+	test_skiplist_struct_iterators_pos(void* mp)
+	{
+		stamp();
+		printf("test_skiplist_struct_iterators_pos\n");
+		ec_skiplist_person_t sl;
+		ec_skiplist_person_init(&sl, mp, cmp_person);
+		person_sl_t i = { 0, "test" };
 		{
 			person_sl_t k = i + 100;
 			sl.add(&sl, &k);
 		}
-	ec_skiplist_struct_iter_t it;
-	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	person_sl_t key;
-	size_t cnt = 0;
-	while (sl.iter_next(&it, &key) == EC_OK)
-		{
-			TEST_ASSERT(key.id >= 100 && key.id < 105);
-			cnt++;
-		}
-	TEST_ASSERT(cnt == 5);
-	/* Test removal during iteration */
-	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	TEST_ASSERT(sl.iter_next(&it, &key) == EC_OK);
-	TEST_ASSERT(sl.iter_remove(&it) == EC_OK && sl.size_fn(&sl) == 4);
-	sl.remove_all(&sl);
-	printf("pass:test_skiplist_struct_iterators_pos\n");
-}
+		ec_skiplist_struct_iter_t it;
+		TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
+		person_sl_t key;
+		size_t cnt = 0;
+		while (sl.iter_next(&it, &key) == EC_OK)
+			{
+				TEST_ASSERT(key.id >= 100 && key.id < 105);
+				cnt++;
+			}
+		TEST_ASSERT(cnt == 5);
+		/* Test removal during iteration */
+		TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
+		TEST_ASSERT(sl.iter_next(&it, &key) == EC_OK);
+		TEST_ASSERT(sl.iter_remove(&it) == EC_OK && sl.size_fn(&sl) == 4);
+		sl.remove_all(&sl);
+		printf("pass:test_skiplist_struct_iterators_pos\n");
+	}
 
-int
-main(void)
-{
-	printf("Starting ec_skiplist_struct tests...\n");
+	int
+	main(void)
+	{
+		printf("Starting ec_skiplist_struct tests...\n");
 #ifdef EC_USE_MEMPOOL
-	ec_mempool_conf_t conf = { 64, 100, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2.0f, NULL, NULL, NULL };
-	ec_mempool_t pool;
-	ec_status_t st = ec_mempool_init(&pool, &conf);
-	TEST_ASSERT(st == EC_OK);
-	void* mp = &pool;
+		ec_mempool_conf_t conf = { 64, 100, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2.0f, NULL, NULL, NULL };
+		ec_mempool_t pool;
+		ec_status_t st = ec_mempool_init(&pool, &conf);
+		TEST_ASSERT(st == EC_OK);
+		void* mp = &pool;
 #else
-	void* mp = NULL;
+		void* mp = NULL;
 #endif
 
-	test_skiplist_struct_init_pos(mp);
-	test_skiplist_struct_init_neg(mp);
-	test_skiplist_struct_add_pos(mp);
-	test_skiplist_struct_add_neg(mp);
-	test_skiplist_struct_add_duplicate(mp);
-	test_skiplist_struct_remove_pos(mp);
-	test_skiplist_struct_remove_neg(mp);
-	test_skiplist_struct_remove_all_pos(mp);
-	test_skiplist_struct_remove_all_neg(mp);
-	test_skiplist_struct_contains_pos(mp);
-	test_skiplist_struct_contains_neg(mp);
-	test_skiplist_struct_get_keys_pos(mp);
-	test_skiplist_struct_get_keys_neg(mp);
-	test_skiplist_struct_foreach_pos(mp);
-	test_skiplist_struct_foreach_neg(mp);
-	test_skiplist_struct_iterators_empty_pos(mp);
-	test_skiplist_struct_iterators_neg(mp);
-	test_skiplist_struct_iterators_pos(mp);
+		test_skiplist_struct_init_pos(mp);
+		test_skiplist_struct_init_neg(mp);
+		test_skiplist_struct_add_pos(mp);
+		test_skiplist_struct_add_neg(mp);
+		test_skiplist_struct_add_duplicate(mp);
+		test_skiplist_struct_remove_pos(mp);
+		test_skiplist_struct_remove_neg(mp);
+		test_skiplist_struct_remove_all_pos(mp);
+		test_skiplist_struct_remove_all_neg(mp);
+		test_skiplist_struct_contains_pos(mp);
+		test_skiplist_struct_contains_neg(mp);
+		test_skiplist_struct_get_keys_pos(mp);
+		test_skiplist_struct_get_keys_neg(mp);
+		test_skiplist_struct_foreach_pos(mp);
+		test_skiplist_struct_foreach_neg(mp);
+		test_skiplist_struct_iterators_empty_pos(mp);
+		test_skiplist_struct_iterators_neg(mp);
+		test_skiplist_struct_iterators_pos(mp);
 
 #ifdef EC_USE_MEMPOOL
-	ec_mempool_destroy((ec_mempool_t*)mp);
+		ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
 
-	printf("All ec_skiplist_struct tests passed.\n");
-	return 0;
-}
+		printf("All ec_skiplist_struct tests passed.\n");
+		return 0;
+	}

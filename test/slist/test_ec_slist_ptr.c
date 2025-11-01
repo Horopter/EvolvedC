@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -79,22 +80,23 @@ cmp_ptr(const void* a, const void* b)
 static bool
 is_non_null(const void* x)
 {
-	return ((*(void**)x) % 2) == 0;
+	return (((uintptr_t)(*(void**)x)) % 2) == 0;
 }
 static void
 inc_ptr(void* x)
 {
-	(*(void**)x)++;
+	void* ptr = *(void**)x;
+	*(void**)x = (void*)((uintptr_t)ptr + 1);
 }
 static void
 add_ptrs(void* a, void* b, void* out)
 {
-	*(void**)out = (*(void**)a) + (*(void**)b);
+	*(void**)out = (void*)((uintptr_t)(*(void**)a) + (uintptr_t)(*(void**)b));
 }
 static void
 mul_ptrs(void* a, void* b, void* out)
 {
-	*(void**)out = (*(void**)a) * (*(void**)b);
+	*(void**)out = (void*)((uintptr_t)(*(void**)a) * (uintptr_t)(*(void**)b));
 }
 
 /*-----------------------------------------------------------------------------*
@@ -131,7 +133,7 @@ test_slist_ptr_add_at(void* mp)
 	TEST_ASSERT(st == EC_OK);
 	void* out;
 	l.get_at(&l, 1, &out);
-	TEST_ASSERT(*(void**)out == 2);
+	TEST_ASSERT(*(int*)*(void**)out == 2);  // Dereference pointer to get integer value
 	TEST_ASSERT(l.size_fn(&l) == 3);
 	l.free_fn(&l);
 	printf("pass: test_slist_ptr_add_at\n");
@@ -365,10 +367,9 @@ test_slist_ptr_sublist(void* mp)
 		}
 
 	// Adding elements: 10, 20, 30, 40, 50
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int v = (i + 1) * 10;
+			int v = (val_i + 1) * 10;
 			ec_status_t add_status = l.add(&l, &v);
 			if (add_status != EC_OK)
 				{
@@ -439,17 +440,19 @@ test_slist_ptr_copy_shallow(void* mp)
 	printf("test_slist_ptr_copy_shallow\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 1;
-	     void* i = &val_i; i <= 3; i++)
+	static int vals[3];
+	static void* ptrs[3];
+	for (int i = 0; i < 3; i++)
 		{
-			int v = i;
-			l.add(&l, &v);
+			vals[i] = i + 1;
+			ptrs[i] = &vals[i];
+			l.add(&l, &ptrs[i]);
 		}
-	ec_slist_ptr_t* cp = NULL;
-	ec_status_t s = l.copy_shallow(&l, &cp);
-	TEST_ASSERT(s == EC_OK && cp->size == 3);
-	cp->free_fn(cp);
-	free(cp);
+	ec_slist_ptr_t* copy = NULL;
+	ec_status_t s = l.copy_shallow(&l, &copy);
+	TEST_ASSERT(s == EC_OK && copy->size == 3);
+	copy->free_fn(copy);
+	free(copy);
 	l.free_fn(&l);
 	printf("pass: test_slist_ptr_copy_shallow\n");
 }
@@ -470,17 +473,19 @@ test_slist_ptr_copy_deep(void* mp)
 	printf("test_slist_ptr_copy_deep\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 1;
-	     void* i = &val_i; i <= 3; i++)
+	static int vals[3];
+	static void* ptrs[3];
+	for (int i = 0; i < 3; i++)
 		{
-			int v = i * 10;
-			l.add(&l, &v);
+			vals[i] = (i + 1) * 10;
+			ptrs[i] = &vals[i];
+			l.add(&l, &ptrs[i]);
 		}
-	ec_slist_ptr_t* cp = NULL;
-	ec_status_t s = l.copy_deep(&l, dupe_ptr, &cp);
-	TEST_ASSERT(s == EC_OK && cp->size_fn(cp) == 3);
-	cp->free_fn(cp);
-	free(cp);
+	ec_slist_ptr_t* copy = NULL;
+	ec_status_t s = l.copy_deep(&l, dupe_ptr, &copy);
+	TEST_ASSERT(s == EC_OK && copy->size_fn(copy) == 3);
+	copy->free_fn(copy);
+	free(copy);
 	l.free_fn(&l);
 	printf("pass: test_slist_ptr_copy_deep\n");
 }
@@ -549,11 +554,13 @@ test_slist_ptr_index_of(void* mp)
 	printf("test_slist_ptr_index_of\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 1;
-	     void* i = &val_i; i <= 5; i++)
+	static int vals[5];
+	static void* ptrs[5];
+	for (int i = 0; i < 5; i++)
 		{
-			int v = i * 10;
-			l.add(&l, &v);
+			vals[i] = (i + 1) * 10;
+			ptrs[i] = &vals[i];
+			l.add(&l, &ptrs[i]);
 		}
 	int val_x = 40;
 	void* x = &val_x;
@@ -648,11 +655,13 @@ test_slist_ptr_reduce(void* mp)
 	printf("test_slist_ptr_reduce\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 1;
-	     void* i = &val_i; i <= 4; i++)
+	static int vals[4];
+	static void* ptrs[4];
+	for (int j = 0; j < 4; j++)
 		{
-			int v = i;
-			l.add(&l, &v);
+			vals[j] = (j + 1) * 10;
+			ptrs[j] = &vals[j];
+			l.add(&l, &ptrs[j]);
 		}
 	int sum = 0;
 	ec_status_t s = l.reduce(&l, add_ptrs, &sum);
@@ -672,9 +681,8 @@ test_slist_ptr_filter(void* mp)
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
 	int arr[6] = { 10, 15, 20, 25, 30, 35 };
-	for (int val_i = 0;
-	     void* i = &val_i; i < 6; i++)
-		l.add(&l, &arr[i]);
+	for (int val_i = 0; val_i < 5; val_i++)
+		l.add(&l, &arr[val_i]);
 	ec_slist_ptr_t* fl = NULL;
 	ec_status_t s = l.filter(&l, is_non_null, &fl);
 	TEST_ASSERT(s == EC_OK && fl->size_fn(fl) == 3);
@@ -692,9 +700,8 @@ test_slist_ptr_filter_mut(void* mp)
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
 	int arr[6] = { 10, 15, 20, 25, 30, 35 };
-	for (int val_i = 0;
-	     void* i = &val_i; i < 6; i++)
-		l.add(&l, &arr[i]);
+	for (int val_i = 0; val_i < 5; val_i++)
+		l.add(&l, &arr[val_i]);
 	ec_status_t s = l.filter_mut(&l, is_non_null);
 	TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 3);
 	l.free_fn(&l);
@@ -711,11 +718,13 @@ test_slist_ptr_iterators(void* mp)
 	ec_slist_ptr_init(&l, mp);
 
 	// Add initial values to the list: 100, 101, 102, 103, 104
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	static int vals[5];
+	static void* ptrs[5];
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int v = i + 100;
-			l.add(&l, &v);
+			vals[val_i] = val_i + 100;
+			ptrs[val_i] = &vals[val_i];
+			l.add(&l, &ptrs[val_i]);
 		}
 
 	ec_slist_ptr_iter_t it;
@@ -771,12 +780,16 @@ test_slist_ptr_zip_iterators(void* mp)
 	ec_slist_ptr_t l1, l2;
 	ec_slist_ptr_init(&l1, mp);
 	ec_slist_ptr_init(&l2, mp);
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	static int vals1[5], vals2[5];
+	static void *ptrs1[5], *ptrs2[5];
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int aa = i + 1, bb = (i + 1) * 10;
-			l1.add(&l1, &aa);
-			l2.add(&l2, &bb);
+			vals1[val_i] = val_i + 1;
+			vals2[val_i] = (val_i + 1) * 10;
+			ptrs1[val_i] = &vals1[val_i];
+			ptrs2[val_i] = &vals2[val_i];
+			l1.add(&l1, &ptrs1[val_i]);
+			l2.add(&l2, &ptrs2[val_i]);
 		}
 	ec_slist_ptr_zip_iter_t zit;
 	l1.zip_iter_init(&zit, &l1, &l2);
@@ -986,11 +999,13 @@ test_slist_ptr_index_of_neg(void* mp)
 	printf("test_slist_ptr_index_of_neg\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 1;
-	     void* i = &val_i; i <= 5; i++)
+	static int vals[5];
+	static void* ptrs[5];
+	for (int j = 0; j < 5; j++)
 		{
-			int v = i * 10;
-			l.add(&l, &v);
+			vals[j] = (j + 1) * 10;
+			ptrs[j] = &vals[j];
+			l.add(&l, &ptrs[j]);
 		}
 	int val_x = 99;
 	void* x = &val_x;
@@ -1043,10 +1058,9 @@ test_slist_ptr_remove_all(void* mp)
 	printf("test_slist_ptr_remove_all\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int v = i + 10;
+			int v = val_i + 10;
 			l.add(&l, &v);
 		}
 	ec_status_t s = l.remove_all(&l);
@@ -1068,10 +1082,9 @@ test_slist_ptr_remove_all_cb(void* mp)
 	printf("test_slist_ptr_remove_all_cb\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int v = i + 10;
+			int v = val_i + 10;
 			l.add(&l, &v);
 		}
 	ec_status_t s = l.remove_all_cb(&l, cb_ptr);
@@ -1106,10 +1119,9 @@ test_slist_ptr_iter_index(void* mp)
 	printf("test_slist_ptr_iter_index\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int v = i + 10;
+			int v = val_i + 10;
 			l.add(&l, &v);
 		}
 	ec_slist_ptr_iter_t it;
@@ -1132,10 +1144,9 @@ test_slist_ptr_diter(void* mp)
 	printf("test_slist_ptr_diter\n");
 	ec_slist_ptr_t l;
 	ec_slist_ptr_init(&l, mp);
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int v = i + 10;
+			int v = val_i + 10;
 			l.add(&l, &v);
 		}
 	ec_slist_ptr_iter_t it;
@@ -1161,12 +1172,16 @@ test_slist_ptr_zip_iter_index(void* mp)
 	ec_slist_ptr_t l1, l2;
 	ec_slist_ptr_init(&l1, mp);
 	ec_slist_ptr_init(&l2, mp);
-	for (int val_i = 0;
-	     void* i = &val_i; i < 5; i++)
+	static int vals1[5], vals2[5];
+	static void *ptrs1[5], *ptrs2[5];
+	for (int val_i = 0; val_i < 5; val_i++)
 		{
-			int aa = i + 1, bb = (i + 1) * 10;
-			l1.add(&l1, &aa);
-			l2.add(&l2, &bb);
+			vals1[val_i] = val_i + 1;
+			vals2[val_i] = (val_i + 1) * 10;
+			ptrs1[val_i] = &vals1[val_i];
+			ptrs2[val_i] = &vals2[val_i];
+			l1.add(&l1, &ptrs1[val_i]);
+			l2.add(&l2, &ptrs2[val_i]);
 		}
 	ec_slist_ptr_zip_iter_t zit;
 	l1.zip_iter_init(&zit, &l1, &l2);

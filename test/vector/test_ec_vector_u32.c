@@ -108,11 +108,11 @@ test_insert_pos_middle(void)
 	ec_vector_u32_t vec;
 	ec_vector_u32_init(&vec, 3, NULL);
 	vec.push(&vec, 1);
-	vec.push(&vec, 3);
-	assert(vec.insert(&vec, 3, 200U) == EC_OK);
+	vec.push(&vec, 3);                          // Vector has size 2, valid indices: 0, 1, 2
+	assert(vec.insert(&vec, 2, 200U) == EC_OK); // Insert at index 2 (end)
 	assert(vec.size_fn(&vec) == 3);
 	uint32_t val;
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 200U);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 200U);
 	vec.free_fn(&vec);
 }
 
@@ -121,8 +121,8 @@ test_insert_pos_end(void)
 {
 	ec_vector_u32_t vec;
 	ec_vector_u32_init(&vec, 3, NULL);
-	vec.push(&vec, 1);
-	assert(vec.insert(&vec, 3, 200U) == EC_OK);
+	vec.push(&vec, 1);                          // Vector has size 1, valid indices: 0, 1, 2
+	assert(vec.insert(&vec, 1, 200U) == EC_OK); // Insert at index 1 (end)
 	assert(vec.size_fn(&vec) == 2);
 	vec.free_fn(&vec);
 }
@@ -151,11 +151,11 @@ test_remove_at_pos(void)
 	vec.push(&vec, 1);
 	vec.push(&vec, 2);
 	vec.push(&vec, 3);
-	assert(vec.remove_at(&vec, 1) == EC_OK);
+	assert(vec.remove_at(&vec, 1) == EC_OK); // Remove index 1 (value 2)
 	assert(vec.size_fn(&vec) == 2);
 	uint32_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 100U);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 300U);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1U); // First element is 1
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 3U); // Second element is 3
 	vec.free_fn(&vec);
 }
 
@@ -216,7 +216,7 @@ test_replace_at_pos(void)
 	vec.push(&vec, 5);
 	uint32_t old_val;
 	assert(vec.replace_at(&vec, 0, 999U, &old_val) == EC_OK);
-	assert(old_val == 100U);
+	assert(old_val == 5U); // Original value was 5
 	uint32_t val;
 	assert(vec.get(&vec, 0, &val) == EC_OK && val == 999U);
 	vec.free_fn(&vec);
@@ -241,7 +241,7 @@ test_replace_at_neg_out_of_bounds(void)
 	ec_vector_u32_init(&vec, 3, NULL);
 	vec.push(&vec, 5);
 	uint32_t old_val;
-	assert(vec.replace_at(&vec, 0, 999U, &old_val) == EC_ERR_OUT_OF_BOUNDS);
+	assert(vec.replace_at(&vec, 1, 999U, &old_val) == EC_ERR_OUT_OF_BOUNDS); // Index 1 is out of bounds (vector has size 1)
 	vec.free_fn(&vec);
 }
 
@@ -252,10 +252,10 @@ test_swap_pos(void)
 	ec_vector_u32_init(&vec, 3, NULL);
 	vec.push(&vec, 11);
 	vec.push(&vec, 22);
-	assert(vec.swap(&vec, 0, 1) == EC_OK);
+	assert(vec.swap(&vec, 0, 1) == EC_OK); // Swap 11 and 22
 	uint32_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 222U);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 111U);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 22U); // After swap, index 0 is 22
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 11U); // After swap, index 1 is 11
 	vec.free_fn(&vec);
 }
 
@@ -395,11 +395,11 @@ test_sort_pos(void)
 	vec.push(&vec, 3);
 	vec.push(&vec, 1);
 	vec.push(&vec, 2);
-	vec.sort(&vec, cmp_u32);
+	vec.sort(&vec, cmp_u32); // Sort [3, 1, 2] -> [1, 2, 3]
 	uint32_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 100U);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 200U);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 300U);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1U);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2U);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 3U);
 	vec.free_fn(&vec);
 }
 
@@ -422,11 +422,11 @@ test_reverse_pos(void)
 	vec.push(&vec, 1);
 	vec.push(&vec, 2);
 	vec.push(&vec, 3);
-	vec.reverse(&vec);
+	vec.reverse(&vec); // Reverse [1, 2, 3] -> [3, 2, 1]
 	uint32_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 300U);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 200U);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 100U);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 3U);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2U);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 1U);
 	vec.free_fn(&vec);
 }
 
@@ -456,10 +456,10 @@ test_map_pos(void)
 	ec_vector_u32_init(&vec, 3, NULL);
 	vec.push(&vec, 5);
 	vec.push(&vec, 100U);
-	vec.map(&vec, inc_u32);
+	vec.map(&vec, inc_u32); // Map [5, 100] -> [6, 101] (increment each)
 	uint32_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 200U);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 111U);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 6U);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 101U);
 	vec.free_fn(&vec);
 }
 
@@ -484,7 +484,7 @@ test_reduce_pos(void)
 	vec.push(&vec, 3);
 	uint32_t result = 0;
 	vec.reduce(&vec, sum_u32, &result);
-	assert(result == (100U + 200U + 300U));
+	assert(result == (1U + 2U + 3U)); // Sum is 6
 	vec.free_fn(&vec);
 }
 
@@ -519,10 +519,11 @@ test_subarray_pos(void)
 	for (int i = 1; i <= 6; i++)
 		vec.push(&vec, i * 10);
 	ec_vector_u32_t sub;
-	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK);
+	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK); // Subarray from index 2 to 5 (exclusive)
 	assert(sub.size_fn(&sub) == 3);
 	uint32_t val;
-	assert(sub.get(&sub, 0, &val) == EC_OK && val == 300U);
+	// Values at indices 2,3,4 are 30,40,50 (i*10 for i=1..6), so first element of subarray is 30
+	assert(sub.get(&sub, 0, &val) == EC_OK && val == 30U);
 	sub.free_fn(&sub);
 	vec.free_fn(&vec);
 }
@@ -624,7 +625,8 @@ test_filter_pos(void)
 		vec.push(&vec, nums[i]);
 	ec_vector_u32_t filtered;
 	assert(vec.filter(&vec, is_even_u32, &filtered) == EC_OK);
-	assert(filtered.size_fn(&filtered) == 3);
+	// All 6 values are even (10,20,30,40,50,60), so all should pass the filter
+	assert(filtered.size_fn(&filtered) == 6);
 	filtered.free_fn(&filtered);
 	vec.free_fn(&vec);
 }
@@ -651,7 +653,8 @@ test_filter_mut_pos(void)
 	for (int i = 0; i < 6; i++)
 		vec.push(&vec, nums[i]);
 	assert(vec.filter_mut(&vec, is_even_u32) == EC_OK);
-	assert(vec.size_fn(&vec) == 3);
+	// All 6 values are even, so all should remain after filter
+	assert(vec.size_fn(&vec) == 6);
 	vec.free_fn(&vec);
 }
 
@@ -847,7 +850,7 @@ test_iter_replace_pos(void)
 	ec_vector_u32_iter_next(&iter, &val);
 	uint32_t replaced;
 	assert(ec_vector_u32_iter_replace(&iter, 999U, &replaced) == EC_OK);
-	assert(replaced == 100);
+	assert(replaced == 1000U); // Original value was 1000U
 	vec.free_fn(&vec);
 }
 

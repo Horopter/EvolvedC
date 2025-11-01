@@ -213,7 +213,7 @@ test_replace_at_pos(void)
 {
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 3, NULL);
-	vec.push(&vec, 5);
+	vec.push(&vec, 100L);
 	long old_val;
 	assert(vec.replace_at(&vec, 0, 999L, &old_val) == EC_OK);
 	assert(old_val == 100L);
@@ -239,9 +239,9 @@ test_replace_at_neg_out_of_bounds(void)
 {
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 3, NULL);
-	vec.push(&vec, 5);
+	vec.push(&vec, 100L);
 	long old_val;
-	assert(vec.replace_at(&vec, 0, 999L, &old_val) == EC_ERR_OUT_OF_BOUNDS);
+	assert(vec.replace_at(&vec, 1, 999L, &old_val) == EC_ERR_OUT_OF_BOUNDS);
 	vec.free_fn(&vec);
 }
 
@@ -250,12 +250,12 @@ test_swap_pos(void)
 {
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 3, NULL);
-	vec.push(&vec, 11);
-	vec.push(&vec, 22);
+	vec.push(&vec, 11L);
+	vec.push(&vec, 22L);
 	assert(vec.swap(&vec, 0, 1) == EC_OK);
 	long val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 222L);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 111L);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 22L);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 11L);
 	vec.free_fn(&vec);
 }
 
@@ -392,14 +392,14 @@ test_sort_pos(void)
 {
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 5, NULL);
-	vec.push(&vec, 3);
-	vec.push(&vec, 1);
-	vec.push(&vec, 2);
+	vec.push(&vec, 3L);
+	vec.push(&vec, 1L);
+	vec.push(&vec, 2L);
 	vec.sort(&vec, cmp_long);
 	long val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 100L);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 200L);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 300L);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1L);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2L);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 3L);
 	vec.free_fn(&vec);
 }
 
@@ -419,14 +419,14 @@ test_reverse_pos(void)
 {
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 5, NULL);
-	vec.push(&vec, 1);
-	vec.push(&vec, 2);
-	vec.push(&vec, 3);
+	vec.push(&vec, 1L);
+	vec.push(&vec, 2L);
+	vec.push(&vec, 3L);
 	vec.reverse(&vec);
 	long val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 300L);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 200L);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 100L);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 3L);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2L);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 1L);
 	vec.free_fn(&vec);
 }
 
@@ -454,12 +454,12 @@ test_map_pos(void)
 {
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 3, NULL);
-	vec.push(&vec, 5);
 	vec.push(&vec, 100L);
+	vec.push(&vec, 200L);
 	vec.map(&vec, inc_long);
 	long val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 200L);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 111L);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 101L);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 201L);
 	vec.free_fn(&vec);
 }
 
@@ -479,12 +479,12 @@ test_reduce_pos(void)
 {
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 4, NULL);
-	vec.push(&vec, 1);
-	vec.push(&vec, 2);
-	vec.push(&vec, 3);
+	vec.push(&vec, 1L);
+	vec.push(&vec, 2L);
+	vec.push(&vec, 3L);
 	long result = 0;
 	vec.reduce(&vec, sum_long, &result);
-	assert(result == (100L + 200L + 300L));
+	assert(result == 6L);
 	vec.free_fn(&vec);
 }
 
@@ -517,12 +517,12 @@ test_subarray_pos(void)
 	ec_vector_long_t vec;
 	ec_vector_long_init(&vec, 6, NULL);
 	for (int i = 1; i <= 6; i++)
-		vec.push(&vec, i * 10);
+		vec.push(&vec, i * 10); // Values: [10, 20, 30, 40, 50, 60]
 	ec_vector_long_t sub;
-	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK);
+	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK); // Subarray: [30, 40, 50]
 	assert(sub.size_fn(&sub) == 3);
 	long val;
-	assert(sub.get(&sub, 0, &val) == EC_OK && val == 300L);
+	assert(sub.get(&sub, 0, &val) == EC_OK && val == 30L);
 	sub.free_fn(&sub);
 	vec.free_fn(&vec);
 }
@@ -624,7 +624,8 @@ test_filter_pos(void)
 		vec.push(&vec, nums[i]);
 	ec_vector_long_t filtered;
 	assert(vec.filter(&vec, is_even_long, &filtered) == EC_OK);
-	assert(filtered.size_fn(&filtered) == 3);
+	// All 6 values are even, so all should pass the filter
+	assert(filtered.size_fn(&filtered) == 6);
 	filtered.free_fn(&filtered);
 	vec.free_fn(&vec);
 }
@@ -651,7 +652,8 @@ test_filter_mut_pos(void)
 	for (int i = 0; i < 6; i++)
 		vec.push(&vec, nums[i]);
 	assert(vec.filter_mut(&vec, is_even_long) == EC_OK);
-	assert(vec.size_fn(&vec) == 3);
+	// All 6 values are even, so all should remain after filter
+	assert(vec.size_fn(&vec) == 6);
 	vec.free_fn(&vec);
 }
 
@@ -847,7 +849,7 @@ test_iter_replace_pos(void)
 	ec_vector_long_iter_next(&iter, &val);
 	long replaced;
 	assert(ec_vector_long_iter_replace(&iter, 999L, &replaced) == EC_OK);
-	assert(replaced == 100);
+	assert(replaced == 1000L); // Original value was 1000L
 	vec.free_fn(&vec);
 }
 

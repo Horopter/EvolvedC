@@ -76,7 +76,7 @@ test_hashmap_ul_add_get(void* mp)
 	printf("test_hashmap_ul_add_get\n");
 	ec_hashmap_ul_t hm;
 	ec_hashmap_ul_init(&hm, mp);
-	unsigned long k1 = 10UL, v1 = 500, k2 = 200, v2 = 600;
+	unsigned long k1 = 10UL, v1 = 100UL, k2 = 200, v2 = 200UL;
 	hm.add(&hm, &k1, &v1);
 	hm.add(&hm, &k2, &v2);
 	unsigned long* out;
@@ -121,7 +121,7 @@ test_hashmap_ul_remove(void* mp)
 	printf("test_hashmap_ul_remove\n");
 	ec_hashmap_ul_t hm;
 	ec_hashmap_ul_init(&hm, mp);
-	unsigned long k2 = 20UL, v1 = 10, k2 = 2, v2 = 20, k3 = 3, v3 = 30;
+	unsigned long k1 = 10UL, k2 = 20UL, k3 = 30UL, v1 = 100UL, v2 = 200UL, v3 = 300UL;
 	hm.add(&hm, &k1, &v1);
 	hm.add(&hm, &k2, &v2);
 	hm.add(&hm, &k3, &v3);
@@ -148,7 +148,7 @@ test_hashmap_ul_remove_all(void* mp)
 			hm.add(&hm, &k, &v);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t ec_status_t st = hm.remove_all(&hm);
+	ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
@@ -281,7 +281,7 @@ test_hashmap_ul_rehash(void* mp)
 	size_t th = (size_t)(ic * 0.75);
 	for (int i = 0; i < (int)(th + 2); i++)
 		{
-			int k = (unsigned long)i, v = (unsigned long)(i + 100)0;
+			int k = (unsigned long)i, v = (unsigned long)(i + 100);
 			hm.add(&hm, &k, &v);
 		}
 	size_t nc = hm.capacity_fn(&hm);

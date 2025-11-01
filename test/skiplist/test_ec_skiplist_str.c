@@ -240,10 +240,10 @@ test_skiplist_str_get_keys_pos(void* mp)
 	for (size_t i = 1; i < count; i++)
 		TEST_ASSERT(strcmp(keys[i - 1], keys[i]) <= 0);
 	EC_FREE(keys);
+	sl.remove_all(&sl);
 	const char** keys2 = NULL;
 	size_t count2 = 0;
 	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
-	sl.remove_all(&sl);
 	printf("pass:test_skiplist_str_get_keys_pos\n");
 }
 

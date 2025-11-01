@@ -71,7 +71,9 @@ test_queue_ptr_enqueue(void* mp)
 	ec_status_t st = ec_queue_ptr_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	int val_a = 10;
-	void *a = &val_a, b = 20;
+	void* a = &val_a;
+	int val_b = 20;
+	void* b = &val_b;
 	st = q.enqueue(&q, &a);
 	TEST_ASSERT(st == EC_OK && q.size_fn(&q) == 1);
 	st = q.enqueue(&q, &b);
@@ -115,7 +117,10 @@ test_queue_ptr_dequeue(void* mp)
 	ec_status_t st = ec_queue_ptr_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	int val_a = 10;
-	void *a = &val_a, b = 20, c = 30;
+	void* a = &val_a;
+	int val_b = 20, val_c = 30;
+	void* b = &val_b;
+	void* c = &val_c;
 	st = q.enqueue(&q, &a);
 	TEST_ASSERT(st == EC_OK);
 	st = q.enqueue(&q, &b);
@@ -125,7 +130,7 @@ test_queue_ptr_dequeue(void* mp)
 
 	void** dequeue_val = malloc(sizeof(int));
 	TEST_ASSERT(dequeue_val != NULL);
-	ec_status_t st = q.dequeue(&q, (void**)&dequeue_val);
+	st = q.dequeue(&q, (void**)&dequeue_val);
 	TEST_ASSERT(st == EC_OK && *dequeue_val == a && q.size_fn(&q) == 2);
 
 	st = q.dequeue(&q, (void**)&dequeue_val);
@@ -152,7 +157,9 @@ test_queue_ptr_size(void* mp)
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(q.size_fn(&q) == 0);
 	int val_a = 1;
-	void *a = &val_a, b = 2;
+	void* a = &val_a;
+	int val_b = 2;
+	void* b = &val_b;
 	q.enqueue(&q, &a);
 	TEST_ASSERT(q.size_fn(&q) == 1);
 	q.enqueue(&q, &b);
@@ -170,7 +177,9 @@ test_queue_ptr_free(void* mp)
 	ec_status_t st = ec_queue_ptr_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	int val_a = 5;
-	void *a = &val_a, b = 6;
+	void* a = &val_a;
+	int val_b = 6;
+	void* b = &val_b;
 	q.enqueue(&q, &a);
 	q.enqueue(&q, &b);
 	q.free_fn(&q);
@@ -189,7 +198,10 @@ test_queue_ptr_iterators(void* mp)
 	TEST_ASSERT(st == EC_OK);
 
 	int val_v1 = 1;
-	void *v1 = &val_v1, v2 = 2, v3 = 3;
+	void* v1 = &val_v1;
+	int val_v2 = 2, val_v3 = 3;
+	void* v2 = &val_v2;
+	void* v3 = &val_v3;
 	q.enqueue(&q, &v1);
 	q.enqueue(&q, &v2);
 	q.enqueue(&q, &v3);
@@ -240,9 +252,15 @@ test_queue_ptr_zip_iterators(void* mp)
 	TEST_ASSERT(st == EC_OK);
 
 	int val_a = 10;
-	void *a = &val_a, b = 20, c = 30;
+	void* a = &val_a;
+	int val_b = 20, val_c = 30;
+	void* b = &val_b;
+	void* c = &val_c;
 	int val_d = 100;
-	void *d = &val_d, e = 200, f = 300;
+	void* d = &val_d;
+	int val_e = 200, val_f = 300;
+	void* e = &val_e;
+	void* f = &val_f;
 	q1.enqueue(&q1, &a);
 	q1.enqueue(&q1, &b);
 	q1.enqueue(&q1, &c);
@@ -282,20 +300,17 @@ void
 test_queue_ptr_init_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_init_neg_null
-\n");
+	printf("test_queue_ptr_init_neg_null\n");
 	ec_status_t st = ec_queue_ptr_init(NULL, mp);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_ptr_init_neg_null
-\n");
+	printf("pass: test_queue_ptr_init_neg_null\n");
 }
 
 void
 test_queue_ptr_enqueue_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_enqueue_neg_null
-\n");
+	printf("test_queue_ptr_enqueue_neg_null\n");
 	ec_queue_ptr_t q;
 	ec_status_t st = ec_queue_ptr_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
@@ -304,16 +319,14 @@ test_queue_ptr_enqueue_neg_null(void* mp)
 	st = q.enqueue(NULL, &a);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	q.free_fn(&q);
-	printf("pass: test_queue_ptr_enqueue_neg_null
-\n");
+	printf("pass: test_queue_ptr_enqueue_neg_null\n");
 }
 
 void
 test_queue_ptr_peek_neg_empty(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_peek_neg_empty
-\n");
+	printf("test_queue_ptr_peek_neg_empty\n");
 	ec_queue_ptr_t q;
 	ec_status_t st = ec_queue_ptr_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
@@ -323,16 +336,14 @@ test_queue_ptr_peek_neg_empty(void* mp)
 	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
 	q.free_fn(&q);
 	EC_FREE(peek_val);
-	printf("pass: test_queue_ptr_peek_neg_empty
-\n");
+	printf("pass: test_queue_ptr_peek_neg_empty\n");
 }
 
 void
 test_queue_ptr_peek_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_peek_neg_null
-\n");
+	printf("test_queue_ptr_peek_neg_null\n");
 	ec_queue_ptr_t q;
 	ec_status_t st = ec_queue_ptr_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
@@ -342,43 +353,37 @@ test_queue_ptr_peek_neg_null(void* mp)
 	st = q.peek(NULL, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	q.free_fn(&q);
-	printf("pass: test_queue_ptr_peek_neg_null
-\n");
+	printf("pass: test_queue_ptr_peek_neg_null\n");
 }
 
 void
 test_queue_ptr_dequeue_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_dequeue_neg_null
-\n");
+	printf("test_queue_ptr_dequeue_neg_null\n");
 	void** out = malloc(sizeof(int));
 	TEST_ASSERT(out != NULL);
-	ec_status_t ec_status_t st = ec_queue_ptr_dequeue(NULL, (void**)&out);
+	ec_status_t st = ec_queue_ptr_dequeue(NULL, (void**)&out);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	EC_FREE(out);
-	printf("pass: test_queue_ptr_dequeue_neg_null
-\n");
+	printf("pass: test_queue_ptr_dequeue_neg_null\n");
 }
 
 void
 test_queue_ptr_free_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_free_neg_null
-\n");
+	printf("test_queue_ptr_free_neg_null\n");
 	ec_status_t st = ec_queue_ptr_free_fn(NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_ptr_free_neg_null
-\n");
+	printf("pass: test_queue_ptr_free_neg_null\n");
 }
 
 void
 test_queue_ptr_iter_replace_neg_no_prev(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_iter_replace_neg_no_prev
-\n");
+	printf("test_queue_ptr_iter_replace_neg_no_prev\n");
 	ec_queue_ptr_t q;
 	ec_status_t st = ec_queue_ptr_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
@@ -389,37 +394,35 @@ test_queue_ptr_iter_replace_neg_no_prev(void* mp)
 	st = q.iter_replace(&it, &new_val, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	q.free_fn(&q);
-	printf("pass: test_queue_ptr_iter_replace_neg_no_prev
-\n");
+	printf("pass: test_queue_ptr_iter_replace_neg_no_prev\n");
 }
 
 void
 test_queue_ptr_iter_replace_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_iter_replace_neg_null
-\n");
+	printf("test_queue_ptr_iter_replace_neg_null\n");
 	int val_new = 99;
 	void* new_val = &val_new;
 	ec_status_t st = ec_queue_ptr_iter_replace(NULL, &new_val, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_ptr_iter_replace_neg_null
-\n");
+	printf("pass: test_queue_ptr_iter_replace_neg_null\n");
 }
 
 void
 test_queue_ptr_zip_iter_next_neg_mismatch(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_zip_iter_next_neg_mismatch
-\n");
+	printf("test_queue_ptr_zip_iter_next_neg_mismatch\n");
 	ec_queue_ptr_t q1, q2;
 	ec_status_t st = ec_queue_ptr_init(&q1, mp);
 	TEST_ASSERT(st == EC_OK);
 	st = ec_queue_ptr_init(&q2, mp);
 	TEST_ASSERT(st == EC_OK);
 	int val_a = 10;
-	void* a = &val_a, b = 20;
+	void* a = &val_a;
+	int val_b = 20;
+	void* b = &val_b;
 	q1.enqueue(&q1, &a);
 	q1.enqueue(&q1, &b);
 	int val_d = 100;
@@ -430,7 +433,7 @@ test_queue_ptr_zip_iter_next_neg_mismatch(void* mp)
 	void* out1 = malloc(sizeof(int));
 	void* out2 = malloc(sizeof(int));
 	TEST_ASSERT(out1 != NULL && out2 != NULL);
-	ec_status_t st = q1.zip_iter_next(&zit, &out1, &out2);
+	st = q1.zip_iter_next(&zit, &out1, &out2);
 	TEST_ASSERT(st == EC_OK);
 	st = q1.zip_iter_next(&zit, &out1, &out2);
 	TEST_ASSERT(st == EC_ITER_END);
@@ -438,20 +441,17 @@ test_queue_ptr_zip_iter_next_neg_mismatch(void* mp)
 	q2.free_fn(&q2);
 	EC_FREE(out1);
 	EC_FREE(out2);
-	printf("pass: test_queue_ptr_zip_iter_next_neg_mismatch
-\n");
+	printf("pass: test_queue_ptr_zip_iter_next_neg_mismatch\n");
 }
 
 void
 test_queue_ptr_zip_iter_next_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_ptr_zip_iter_next_neg_null
-\n");
+	printf("test_queue_ptr_zip_iter_next_neg_null\n");
 	ec_status_t st = ec_queue_ptr_zip_iter_next(NULL, NULL, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_ptr_zip_iter_next_neg_null
-\n");
+	printf("pass: test_queue_ptr_zip_iter_next_neg_null\n");
 }
 
 int

@@ -79,7 +79,8 @@ cmp_dbl(const void* a, const void* b)
 static bool
 is_even(const void* x)
 {
-	return ((*(double*)x) % 2) == 0;
+	double val = *(double*)x;
+	return (long long)val % 2 == 0;
 }
 static void
 inc_dbl(void* x)
@@ -662,7 +663,7 @@ test_slist_dbl_filter(void* mp)
 	ec_slist_dbl_t l;
 	ec_slist_dbl_init(&l, mp);
 	double arr[6] = { 10, 15, 20, 25, 30, 35 };
-	for (double i = 0; i < 6; i++)
+	for (int i = 0; i < 6; i++)
 		l.add(&l, &arr[i]);
 	ec_slist_dbl_t* fl = NULL;
 	ec_status_t s = l.filter(&l, is_even, &fl);
@@ -681,7 +682,7 @@ test_slist_dbl_filter_mut(void* mp)
 	ec_slist_dbl_t l;
 	ec_slist_dbl_init(&l, mp);
 	double arr[6] = { 10, 15, 20, 25, 30, 35 };
-	for (double i = 0; i < 6; i++)
+	for (int i = 0; i < 6; i++)
 		l.add(&l, &arr[i]);
 	ec_status_t s = l.filter_mut(&l, is_even);
 	TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 3);
@@ -1090,7 +1091,7 @@ test_slist_dbl_iter_index(void* mp)
 	ec_slist_dbl_iter_t it;
 	l.iter_init(&it, &l);
 	void* out;
-	size_t idx = 0;
+	size_t idx = 1;  // iter_index is 1-based after first iter_next
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
 			TEST_ASSERT(l.iter_index(&it) == idx);
@@ -1183,7 +1184,7 @@ test_slist_dbl_zip_iter_not_supported(void* mp)
 	printf("pass: test_slist_dbl_zip_iter_not_supported\n");
 }
 
-double
+int
 main(void)
 {
 	printf("Starting ec_slist_dbl tests...\n");

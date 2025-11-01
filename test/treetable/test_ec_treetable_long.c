@@ -80,13 +80,13 @@ test_add_get_remove(void* mp)
 	printf("test_add_get_remove\n");
 	ec_treetable_long_t t;
 	ec_treetable_long_init(&t, mp, NULL);
-	long k1 = 1L0L, v1 = 1L0L0, k2 = 2L0L, v2 = 2L0L0;
+	long k1 = 10L, v1 = 100L, k2 = 20L, v2 = 200L;
 	t.add(&t, &k1, &v1);
 	t.add(&t, &k2, &v2);
 	TASSERT(t.size_fn(&t) == 2L);
 	long outv;
 	ec_status_t s1 = t.get(&t, &k1, &outv);
-	TASSERT(s1 == EC_OK && outv == 1L0L0);
+	TASSERT(s1 == EC_OK && outv == 100L);
 	long bad = 999L;
 	TASSERT(t.get(&t, &bad, &outv) == EC_ERR_NOT_FOUND);
 
@@ -107,16 +107,16 @@ test_get_first_last(void* mp)
 	printf("test_get_first_last\n");
 	ec_treetable_long_t t;
 	ec_treetable_long_init(&t, mp, NULL);
-	long k1 = 1L0L, v1 = 1L0L0, k2 = 5L, v2 = 5L0L, k3 = 2L0L, v3 = 2L0L0;
+	long k1 = 10L, v1 = 100L, k2 = 5L, v2 = 50L, k3 = 20L, v3 = 200L;
 	t.add(&t, &k1, &v1);
 	t.add(&t, &k2, &v2);
 	t.add(&t, &k3, &v3);
 
 	long first_k, first_v, last_k, last_v;
 	TASSERT(t.get_first_key(&t, &first_k) == EC_OK && first_k == 5L);
-	TASSERT(t.get_first_value(&t, &first_v) == EC_OK && first_v == 5L0L);
-	TASSERT(t.get_last_key(&t, &last_k) == EC_OK && last_k == 2L0L);
-	TASSERT(t.get_last_value(&t, &last_v) == EC_OK && last_v == 2L0L0);
+	TASSERT(t.get_first_value(&t, &first_v) == EC_OK && first_v == 50L);
+	TASSERT(t.get_last_key(&t, &last_k) == EC_OK && last_k == 20L);
+	TASSERT(t.get_last_value(&t, &last_v) == EC_OK && last_v == 200L);
 
 	ec_treetable_long_t empty;
 	ec_treetable_long_init(&empty, mp, NULL);
@@ -169,8 +169,8 @@ test_greater_lesser(void* mp)
 			t.add(&t, &i, &val);
 		}
 	long ask = 3L, kO, vO; // keys=1..5
-	TASSERT(t.get_greater_than(&t, &ask, &kO, &vO) == EC_OK && kO == 4L && vO == 1L0L4);
-	TASSERT(t.get_lesser_than(&t, &ask, &kO, &vO) == EC_OK && kO == 2L && vO == 1L0L2);
+	TASSERT(t.get_greater_than(&t, &ask, &kO, &vO) == EC_OK && kO == 4L && vO == 104L);
+	TASSERT(t.get_lesser_than(&t, &ask, &kO, &vO) == EC_OK && kO == 2L && vO == 102L);
 	long big = 999L, smol = 0L;
 	TASSERT(t.get_greater_than(&t, &big, &kO, &vO) == EC_ERR_NOT_FOUND);
 	TASSERT(t.get_lesser_than(&t, &smol, &kO, &vO) == EC_ERR_NOT_FOUND);
@@ -185,14 +185,14 @@ test_contains(void* mp)
 	printf("test_contains\n");
 	ec_treetable_long_t t;
 	ec_treetable_long_init(&t, mp, NULL);
-	long k1 = 1L0L, v1 = 1L0L0;
+	long k1 = 10L, v1 = 100L;
 	t.add(&t, &k1, &v1);
 	TASSERT(t.contains_key(&t, &k1) == EC_OK);
 	long bad = 999L;
 	TASSERT(t.contains_key(&t, &bad) == EC_ERR_NOT_FOUND);
-	long vCheck = 1L0L0;
+	long vCheck = 100L;
 	TASSERT(t.contains_value(&t, &vCheck) == EC_OK);
-	long vBad = 5L55L;
+	long vBad = 555L;
 	TASSERT(t.contains_value(&t, &vBad) == EC_ERR_NOT_FOUND);
 	t.remove_all(&t);
 	printf("pass:test_contains\n");
@@ -220,7 +220,7 @@ test_custom_compare(void* mp)
 	long k, v;
 	t.iter_init(&t, &it);
 	ec_status_t s = t.iter_next(&it, &k, &v);
-	TASSERT(s == EC_OK && k == 4L && v == 1L0L4);
+	TASSERT(s == EC_OK && k == 4L && v == 104L);
 	t.remove_all(&t);
 	printf("pass:test_custom_compare\n");
 }
@@ -273,7 +273,7 @@ test_foreach(void* mp)
 	printf("test_foreach\n");
 	ec_treetable_long_t t;
 	ec_treetable_long_init(&t, mp, NULL);
-	for (long i = 1L0L; i < 15; i++)
+	for (long i = 10L; i < 15; i++)
 		{
 			long vv = i * 10;
 			t.add(&t, &i, &vv);
@@ -292,15 +292,15 @@ test_big_random(void* mp)
 	ec_treetable_long_t t;
 	ec_treetable_long_init(&t, mp, NULL);
 	srand((unsigned)time(NULL));
-	const long N = 1L0L00;
-	long* vals = (long*)malloc(sizeof(int) * N);
+	const long N = 100L;
+	long* vals = (long*)malloc(sizeof(long) * N);
 	for (long i = 0L; i < N; i++)
 		{
 			vals[i] = rand() % 5000;
 			long v = vals[i] * 10;
 			t.add(&t, &vals[i], &v);
 		}
-	TASSERT(t.size_fn(&t) <= 1L0L00);
+	TASSERT(t.size_fn(&t) <= 100L);
 	for (long i = 0L; i < 50; i++)
 		{
 			long idx = rand() % N;
@@ -320,7 +320,7 @@ test_invalid_args(void* mp)
 	printf("test_invalid_args\n");
 	ec_treetable_long_t t;
 	ec_treetable_long_init(&t, mp, NULL);
-	long k = 1L0L, v = 1L0L0, out_k, out_v;
+	long k = 10L, v = 100L, out_k, out_v;
 
 	TASSERT(ec_treetable_long_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
 	TASSERT(t.add(NULL, &k, &v) == EC_ERR_INVALID_ARG);

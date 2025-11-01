@@ -74,7 +74,7 @@ stamp(void)
 		}
 }
 
-static int static int
+static int
 cmp_recp(const void* a, const void* b)
 {
 	return ((*(rec_t**)a)->id - (*(rec_t**)b)->id);
@@ -117,7 +117,8 @@ cb_recp(void* x)
 
 // Tests
 
-slist_int_add(void* mp)
+void
+test_slist_recp_add(void* mp)
 {
 	stamp();
 	printf("test_slist_recp_add\n");
@@ -130,4 +131,27 @@ slist_int_add(void* mp)
 	TEST_ASSERT(l.size_fn(&l) == 2);
 	l.free_fn(&l);
 	printf("pass: test_slist_recp_add\n");
+}
+
+int
+main(void)
+{
+	printf("Starting ec_slist_recp tests...\n");
+#ifdef EC_USE_MEMPOOL
+	ec_mempool_conf_t conf = { 64, 100, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2.0f, NULL, NULL, NULL };
+	ec_mempool_t pool;
+	ec_status_t st = ec_mempool_init(&pool, &conf);
+	TEST_ASSERT(st == EC_OK);
+	void* mp = &pool;
+#else
+	void* mp = NULL;
+#endif
+
+	test_slist_recp_add(mp);
+
+#ifdef EC_USE_MEMPOOL
+	ec_mempool_destroy((ec_mempool_t*)mp);
+#endif
+	printf("All ec_slist_recp tests passed.\n");
+	return 0;
 }

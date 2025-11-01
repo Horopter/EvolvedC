@@ -148,7 +148,7 @@ test_hashmap_long_remove_all(void* mp)
 			hm.add(&hm, &k, &v);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t ec_status_t st = hm.remove_all(&hm);
+	ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
@@ -196,6 +196,18 @@ test_hashmap_long_get_keys_values(void* mp)
 	hm.remove_all(&hm);
 	printf("pass:test_hashmap_long_get_keys_values\n");
 }
+static void
+foreach_key_long(long k)
+{
+	(void)k;
+}
+
+static void
+foreach_val_long(long v)
+{
+	(void)v;
+}
+
 static void
 test_hashmap_long_foreach(void* mp)
 {
@@ -287,16 +299,6 @@ test_hashmap_long_rehash(void* mp)
 		}
 	hm.remove_all(&hm);
 	printf("pass:test_hashmap_long_rehash\n");
-}
-static void
-foreach_key_long(long k)
-{
-	(void)k;
-}
-static void
-foreach_val_long(long v)
-{
-	(void)v;
 }
 static void
 test_hashmap_long_invalid_args(void* mp)

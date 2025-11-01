@@ -125,7 +125,7 @@ test_stack_rec_pop(void* mp)
 	TEST_ASSERT(st == EC_OK && out->id == 3);
 	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_OK && out->id == 2);
-	ec_status_t st = s.pop(&s, (void**)&out);
+	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_OK && out->id == 1);
 	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
@@ -220,7 +220,7 @@ test_stack_rec_zip_iterators(void* mp)
 			count++;
 		}
 	TEST_ASSERT(count == 3);
-	ec_status_t st = s1.zip_iter_replace(&zit, &a, &d, NULL, NULL);
+	st = s1.zip_iter_replace(&zit, &a, &d, NULL, NULL);
 	TEST_ASSERT(st == EC_ERR_NOT_SUPPORTED);
 	s1.free_fn(&s1);
 	s2.free_fn(&s2);
@@ -310,7 +310,7 @@ main(void)
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_conf_t conf = { 64, 100, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2.0f, NULL, NULL, NULL };
 	ec_mempool_t pool;
-	ec_status_t st = ec_mempool_init(&pool, &conf);
+	st = ec_mempool_init(&pool, &conf);
 	TEST_ASSERT(st == EC_OK);
 	void* mp = &pool;
 #else

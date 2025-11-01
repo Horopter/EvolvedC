@@ -108,11 +108,11 @@ test_insert_pos_middle(void)
 	ec_vector_ull_t vec;
 	ec_vector_ull_init(&vec, 3, NULL);
 	vec.push(&vec, 1);
-	vec.push(&vec, 3);
-	assert(vec.insert(&vec, 3, 2000ULL) == EC_OK);
+	vec.push(&vec, 3);                             // Vector has size 2, valid indices: 0, 1, 2
+	assert(vec.insert(&vec, 2, 2000ULL) == EC_OK); // Insert at index 2 (end)
 	assert(vec.size_fn(&vec) == 3);
 	unsigned long long val;
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2000ULL);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 2000ULL);
 	vec.free_fn(&vec);
 }
 
@@ -121,8 +121,8 @@ test_insert_pos_end(void)
 {
 	ec_vector_ull_t vec;
 	ec_vector_ull_init(&vec, 3, NULL);
-	vec.push(&vec, 1);
-	assert(vec.insert(&vec, 3, 2000ULL) == EC_OK);
+	vec.push(&vec, 1);                             // Vector has size 1, valid indices: 0, 1, 2
+	assert(vec.insert(&vec, 1, 2000ULL) == EC_OK); // Insert at index 1 (end)
 	assert(vec.size_fn(&vec) == 2);
 	vec.free_fn(&vec);
 }
@@ -154,8 +154,8 @@ test_remove_at_pos(void)
 	assert(vec.remove_at(&vec, 1) == EC_OK);
 	assert(vec.size_fn(&vec) == 2);
 	unsigned long long val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1000ULL);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 3000ULL);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1ULL);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 3ULL);
 	vec.free_fn(&vec);
 }
 

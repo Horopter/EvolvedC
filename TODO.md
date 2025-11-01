@@ -13,7 +13,7 @@ Create comprehensive tests for all data structures, ensuring full method coverag
 - [x] **array** - `test/array/` - ✅ COMPLETE: 13 test files covering all data types
 - [x] **buffer** - `test/buffer/` - ✅ COMPLETE: 15 test files covering all data types
 - [x] **deque** - `test/deque/` - ✅ COMPLETE: 14 test files covering all data types
-- [x] **dlist** (doubly linked list) - `test/dlist/` - ✅ COMPLETE: 15 test files covering all data types
+- [x] **dlist** (doubly linked list) - `test/dlist/` - ✅ COMPLETE: 14 test files covering all data types
 - [ ] **ds** (disjoint set) - `test/ds/` - ⚠️ IN PROGRESS: 14 test files, expand coverage
 - [ ] **graph** - `test/graph/` - ⚠️ IN PROGRESS: 13 test files, expand coverage
 - [ ] **hashmap** - `test/hashmap/` - ⚠️ IN PROGRESS: 15 test files, expand coverage

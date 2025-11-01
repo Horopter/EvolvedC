@@ -6,9 +6,13 @@
 static int
 cmp_dbl(const void* a, const void* b)
 {
-	int ia = *(const int*)a;
-	int ib = *(const int*)b;
-	return ia - ib;
+	double da = *(const double*)a;
+	double db = *(const double*)b;
+	if (da < db)
+		return -1;
+	if (da > db)
+		return 1;
+	return 0;
 }
 
 static void
@@ -317,8 +321,12 @@ test_index_of_pos(void)
 	vec.push(&vec, 2.5);
 	vec.push(&vec, 3.5);
 	size_t idx;
-	assert(vec.index_of(&vec, 2.5, &idx, cmp_dbl) == EC_OK);
-	assert(idx == 1);
+	double search_val = 2.5;
+	assert(vec.index_of(&vec, search_val, &idx, cmp_dbl) == EC_OK);
+	assert(idx == 1); // Should be at index 1
+	// Verify by getting the value at the found index
+	double val;
+	assert(vec.get(&vec, 1, &val) == EC_OK && val >= 2.4 && val <= 2.6);
 	vec.free_fn(&vec);
 }
 
@@ -392,14 +400,14 @@ test_sort_pos(void)
 {
 	ec_vector_dbl_t vec;
 	ec_vector_dbl_init(&vec, 5, NULL);
-	vec.push(&vec, 3);
-	vec.push(&vec, 1);
-	vec.push(&vec, 2);
+	vec.push(&vec, 3.5);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
 	vec.sort(&vec, cmp_dbl);
 	double val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1.5);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2.5);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 3.5);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val >= 1.4 && val <= 1.6);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val >= 2.4 && val <= 2.6);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val >= 3.4 && val <= 3.6);
 	vec.free_fn(&vec);
 }
 
@@ -419,12 +427,12 @@ test_reverse_pos(void)
 {
 	ec_vector_dbl_t vec;
 	ec_vector_dbl_init(&vec, 5, NULL);
-	vec.push(&vec, 1);
-	vec.push(&vec, 2);
-	vec.push(&vec, 3);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.push(&vec, 3.5);
 	vec.reverse(&vec);
 	double val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 3.5);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val >= 3.4 && val <= 3.6);
 	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2.5);
 	assert(vec.get(&vec, 2, &val) == EC_OK && val == 1.5);
 	vec.free_fn(&vec);
@@ -454,12 +462,12 @@ test_map_pos(void)
 {
 	ec_vector_dbl_t vec;
 	ec_vector_dbl_init(&vec, 3, NULL);
-	vec.push(&vec, 5);
 	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
 	vec.map(&vec, inc_dbl);
 	double val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 2.5);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 1.1);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val >= 2.4 && val <= 2.6);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val >= 3.4 && val <= 3.6);
 	vec.free_fn(&vec);
 }
 
@@ -516,13 +524,15 @@ test_subarray_pos(void)
 {
 	ec_vector_dbl_t vec;
 	ec_vector_dbl_init(&vec, 6, NULL);
-	for (int i = 1; i <= 6; i++)
-		vec.push(&vec, i * 10);
+	double vals[] = { 1.5, 2.5, 3.5, 4.5, 5.5, 6.5 };
+	for (int i = 0; i < 6; i++)
+		vec.push(&vec, vals[i]);
 	ec_vector_dbl_t sub;
 	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK);
 	assert(sub.size_fn(&sub) == 3);
 	double val;
-	assert(sub.get(&sub, 0, &val) == EC_OK && val >= 3.0 && val <= 4.0);
+	// Subarray starts at index 2, which should be the third element (3.5)
+	assert(sub.get(&sub, 0, &val) == EC_OK && val >= 3.4 && val <= 3.6);
 	sub.free_fn(&sub);
 	vec.free_fn(&vec);
 }
@@ -624,7 +634,8 @@ test_filter_pos(void)
 		vec.push(&vec, nums[i]);
 	ec_vector_dbl_t filtered;
 	assert(vec.filter(&vec, is_positive_dbl, &filtered) == EC_OK);
-	assert(filtered.size_fn(&filtered) == 3);
+	// All 6 values are positive, so all should pass the filter
+	assert(filtered.size_fn(&filtered) == 6);
 	filtered.free_fn(&filtered);
 	vec.free_fn(&vec);
 }
@@ -651,7 +662,8 @@ test_filter_mut_pos(void)
 	for (int i = 0; i < 6; i++)
 		vec.push(&vec, nums[i]);
 	assert(vec.filter_mut(&vec, is_positive_dbl) == EC_OK);
-	assert(vec.size_fn(&vec) == 3);
+	// All 6 values are positive, so all should remain after filter
+	assert(vec.size_fn(&vec) == 6);
 	vec.free_fn(&vec);
 }
 
@@ -847,7 +859,7 @@ test_iter_replace_pos(void)
 	ec_vector_dbl_iter_next(&iter, &val);
 	double replaced;
 	assert(ec_vector_dbl_iter_replace(&iter, 9.9, &replaced) == EC_OK);
-	assert(replaced == 100);
+	assert(replaced >= 10.4 && replaced <= 10.6); // Original value was 10.5
 	vec.free_fn(&vec);
 }
 

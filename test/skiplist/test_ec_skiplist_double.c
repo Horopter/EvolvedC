@@ -38,7 +38,7 @@ print_stacktrace(void)
 				{                                                                    \
 					fprintf(stderr, "[FAIL]%s:%d: %s\n", __FILE__, __LINE__, #cond); \
 					print_stacktrace();                                              \
-					exit(3.0);                                                       \
+					exit(3);                                                         \
 				}                                                                    \
 		}                                                                            \
 	while (0)
@@ -232,18 +232,18 @@ test_skiplist_double_get_keys_pos(void* mp)
 	ec_skiplist_double_init(&sl, mp, NULL);
 	for (double i = 1.0; i <= 5; i++)
 		sl.add(&sl, &i);
-	dbl* keys = NULL;
+	double* keys = NULL;
 	size_t count = 0;
 	ec_status_t st = sl.get_keys(&sl, &keys, &count);
 	TEST_ASSERT(st == EC_OK && count == 5);
-	for (size_t i = 1.0; i < count; i++)
-		TEST_ASSERT(keys[i - 1.0] <= keys[i]);
+	for (size_t i = 1; i < count; i++)
+		TEST_ASSERT(keys[i - 1] <= keys[i]);
 	EC_FREE(keys);
+	sl.remove_all(&sl);
 	/* Test empty list */
-	dbl* keys2 = NULL;
+	double* keys2 = NULL;
 	size_t count2 = 0;
 	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
-	sl.remove_all(&sl);
 	printf("pass:test_skiplist_double_get_keys_pos\n");
 }
 
@@ -256,7 +256,7 @@ test_skiplist_double_get_keys_neg(void* mp)
 	ec_skiplist_double_init(&sl, mp, NULL);
 	double k = 10.0;
 	sl.add(&sl, &k);
-	dbl* keys = NULL;
+	double* keys = NULL;
 	size_t count = 0;
 	TEST_ASSERT(sl.get_keys(NULL, &keys, &count) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.get_keys(&sl, NULL, &count) == EC_ERR_INVALID_ARG);
@@ -312,7 +312,7 @@ test_skiplist_double_iterators_empty_pos(void* mp)
 	ec_skiplist_double_init(&sl, mp, NULL);
 	ec_skiplist_double_iter_t it;
 	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	dbl key;
+	double key;
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
 	sl.remove_all(&sl);
 	printf("pass:test_skiplist_double_iterators_empty_pos\n");
@@ -331,7 +331,7 @@ test_skiplist_double_iterators_neg(void* mp)
 	TEST_ASSERT(sl.iter_init(&sl, NULL) == EC_ERR_INVALID_ARG);
 	/* Test iter_next with NULL */
 	sl.iter_init(&sl, &it);
-	dbl key;
+	double key;
 	TEST_ASSERT(sl.iter_next(NULL, &key) == EC_ERR_INVALID_ARG);
 	sl.iter_init(&sl, &it);
 	TEST_ASSERT(sl.iter_next(&it, NULL) == EC_ERR_INVALID_ARG);
@@ -357,7 +357,7 @@ test_skiplist_double_iterators_pos(void* mp)
 		}
 	ec_skiplist_double_iter_t it;
 	TEST_ASSERT(sl.iter_init(&sl, &it) == EC_OK);
-	dbl key;
+	double key;
 	size_t cnt = 0;
 	while (sl.iter_next(&it, &key) == EC_OK)
 		{
@@ -373,7 +373,7 @@ test_skiplist_double_iterators_pos(void* mp)
 	printf("pass:test_skiplist_double_iterators_pos\n");
 }
 
-dbl
+int
 main(void)
 {
 	printf("Starting ec_skiplist_dbl tests...\n");

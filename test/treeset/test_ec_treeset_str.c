@@ -90,7 +90,9 @@ test_treeset_str_add_pos(void* mp)
 	printf("test_treeset_str_add_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char *k1 = "a", k2 = "b", k3 = "y";
+	const char* k1 = "a";
+	const char* k2 = "b";
+	const char* k3 = "y";
 	TEST_ASSERT(s.add(&s, &k1) == EC_OK);
 	TEST_ASSERT(s.add(&s, &k2) == EC_OK);
 	TEST_ASSERT(s.add(&s, &k3) == EC_OK);
@@ -123,7 +125,9 @@ test_treeset_str_remove_pos(void* mp)
 	printf("test_treeset_str_remove_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char *k1 = "a", k2 = "b", k3 = "y";
+	const char* k1 = "a";
+	const char* k2 = "b";
+	const char* k3 = "y";
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
@@ -189,7 +193,9 @@ test_treeset_str_remove_first_pos(void* mp)
 	printf("test_treeset_str_remove_first_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char *k1 = "a", k2 = "x", k3 = "y";
+	const char* k1 = "a";
+	const char* k2 = "x";
+	const char* k3 = "y";
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
@@ -223,7 +229,9 @@ test_treeset_str_remove_last_pos(void* mp)
 	printf("test_treeset_str_remove_last_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char *k1 = "a", k2 = "x", k3 = "y";
+	const char* k1 = "a";
+	const char* k2 = "x";
+	const char* k3 = "y";
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
@@ -257,7 +265,9 @@ test_treeset_str_get_first_pos(void* mp)
 	printf("test_treeset_str_get_first_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char *k1 = "a", k2 = "x", k3 = "y";
+	const char* k1 = "a";
+	const char* k2 = "x";
+	const char* k3 = "y";
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
@@ -290,7 +300,9 @@ test_treeset_str_get_last_pos(void* mp)
 	printf("test_treeset_str_get_last_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char *k1 = "a", k2 = "x", k3 = "y";
+	const char* k1 = "a";
+	const char* k2 = "x";
+	const char* k3 = "y";
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
@@ -326,7 +338,8 @@ test_treeset_str_get_greater_than_pos(void* mp)
 	const char* arr5[] = { "1", "2", "3", "4", "5" };
 	for (int i = 0; i < 5; i++)
 		s.add(&s, &arr5[i]);
-	const char *ask = "b", out;
+	const char* ask = "b";
+	const char* out;
 	TEST_ASSERT(s.get_greater_than(&s, &ask, &out) == EC_OK);
 	TEST_ASSERT(out != NULL);
 	s.remove_all(&s);
@@ -342,7 +355,8 @@ test_treeset_str_get_greater_than_neg(void* mp)
 	ec_treeset_str_init(&s, mp, NULL);
 	const char* k = "a";
 	s.add(&s, &k);
-	const char *ask = "z", out;
+	const char* ask = "z";
+	const char* out;
 	TEST_ASSERT(s.get_greater_than(NULL, &ask, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_greater_than(&s, NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_greater_than(&s, &ask, NULL) == EC_ERR_INVALID_ARG);
@@ -358,10 +372,11 @@ test_treeset_str_get_lesser_than_pos(void* mp)
 	printf("test_treeset_str_get_lesser_than_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char* arr5[] = { "1", "2", "3", "4", "5" };
+	const char* arr5[] = { "a", "b", "c", "d", "e" };
 	for (int i = 0; i < 5; i++)
 		s.add(&s, &arr5[i]);
-	const char *ask = "b", out;
+	const char* ask = "c";
+	const char* out;
 	TEST_ASSERT(s.get_lesser_than(&s, &ask, &out) == EC_OK);
 	TEST_ASSERT(out != NULL);
 	s.remove_all(&s);
@@ -377,7 +392,8 @@ test_treeset_str_get_lesser_than_neg(void* mp)
 	ec_treeset_str_init(&s, mp, NULL);
 	const char* k = "a";
 	s.add(&s, &k);
-	const char *ask = "b", out;
+	const char* ask = "a";
+	const char* out;
 	TEST_ASSERT(s.get_lesser_than(NULL, &ask, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_lesser_than(&s, NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_lesser_than(&s, &ask, NULL) == EC_ERR_INVALID_ARG);
@@ -393,7 +409,8 @@ test_treeset_str_contains_pos(void* mp)
 	printf("test_treeset_str_contains_pos\n");
 	ec_treeset_str_t s;
 	ec_treeset_str_init(&s, mp, NULL);
-	const char *k1 = "a", k2 = "b";
+	const char* k1 = "a";
+	const char* k2 = "b";
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	TEST_ASSERT(s.contains(&s, &k1) == EC_OK);

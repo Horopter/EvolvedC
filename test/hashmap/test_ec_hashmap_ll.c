@@ -148,7 +148,7 @@ test_hashmap_ll_remove_all(void* mp)
 			hm.add(&hm, &k, &v);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t ec_status_t st = hm.remove_all(&hm);
+	ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
@@ -298,12 +298,11 @@ test_hashmap_ll_rehash(void* mp)
 	hm.remove_all(&hm);
 	printf("pass:test_hashmap_ll_rehash\n");
 }
+
 static void
-foreach_val_ll(long long v)
+test_hashmap_ll_invalid_args(void* mp)
 {
-	(void)v;
-}
-stamp();
+	stamp();
 	printf("test_hashmap_ll_invalid_args\n");
 	ec_hashmap_ll_t hm;
 	ec_hashmap_ll_init(&hm, mp);

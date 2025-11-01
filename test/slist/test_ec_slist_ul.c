@@ -1183,7 +1183,7 @@ test_slist_ul_zip_iter_not_supported(void* mp)
 	printf("pass: test_slist_ul_zip_iter_not_supported\n");
 }
 
-unsigned long
+int
 main(void)
 {
 	printf("Starting ec_slist_ul tests...\n");

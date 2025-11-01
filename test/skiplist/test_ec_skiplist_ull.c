@@ -50,39 +50,39 @@ stamp(void)
 		{
 			char b[64];
 			strftime(b, sizeof(b), "[%Y-%m-%d %H:%M:%S]", m);
-			prullf("%s ", b);
+			printf("%s ", b);
 		}
 	else
-		prullf("[timeerr] ");
+		printf("[timeerr] ");
 }
 
 static void
 test_skiplist_ull_init_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_init_pos\n");
+	printf("test_skiplist_ull_init_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_status_t st = ec_skiplist_ull_init(&sl, mp, NULL);
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(sl.size == 0);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_init_pos\n");
+	printf("pass:test_skiplist_ull_init_pos\n");
 }
 
 static void
 test_skiplist_ull_init_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_init_neg\n");
+	printf("test_skiplist_ull_init_neg\n");
 	TEST_ASSERT(ec_skiplist_ull_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
-	prullf("pass:test_skiplist_ull_init_neg\n");
+	printf("pass:test_skiplist_ull_init_neg\n");
 }
 
 static void
 test_skiplist_ull_add_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_add_pos\n");
+	printf("test_skiplist_ull_add_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k1 = 10ULL, k2 = 20ULL;
@@ -93,28 +93,28 @@ test_skiplist_ull_add_pos(void* mp)
 	ull bad = 999ULL;
 	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_add_pos\n");
+	printf("pass:test_skiplist_ull_add_pos\n");
 }
 
 static void
 test_skiplist_ull_add_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_add_neg\n");
+	printf("test_skiplist_ull_add_neg\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k = 10ULL;
 	TEST_ASSERT(sl.add(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.add(&sl, NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_add_neg\n");
+	printf("pass:test_skiplist_ull_add_neg\n");
 }
 
 static void
 test_skiplist_ull_add_duplicate(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_add_duplicate\n");
+	printf("test_skiplist_ull_add_duplicate\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k = 42ULL;
@@ -124,14 +124,14 @@ test_skiplist_ull_add_duplicate(void* mp)
 	TEST_ASSERT(sl.size_fn(&sl) == 1ULL);
 	TEST_ASSERT(sl.contains(&sl, &k) == EC_OK);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_add_duplicate\n");
+	printf("pass:test_skiplist_ull_add_duplicate\n");
 }
 
 static void
 test_skiplist_ull_remove_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_remove_pos\n");
+	printf("test_skiplist_ull_remove_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k1 = 1ULL, k2 = 2ULL, k3 = 3ULL;
@@ -143,14 +143,14 @@ test_skiplist_ull_remove_pos(void* mp)
 	TEST_ASSERT(sl.size_fn(&sl) == 2ULL);
 	TEST_ASSERT(sl.remove_f(&sl, &k2) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_remove_pos\n");
+	printf("pass:test_skiplist_ull_remove_pos\n");
 }
 
 static void
 test_skiplist_ull_remove_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_remove_neg\n");
+	printf("test_skiplist_ull_remove_neg\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k = 10ULL;
@@ -160,14 +160,14 @@ test_skiplist_ull_remove_neg(void* mp)
 	ull bad = 999ULL;
 	TEST_ASSERT(sl.remove_f(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_remove_neg\n");
+	printf("pass:test_skiplist_ull_remove_neg\n");
 }
 
 static void
 test_skiplist_ull_remove_all_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_remove_all_pos\n");
+	printf("test_skiplist_ull_remove_all_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	for (ull i = 0; i < 10ULL; i++)
@@ -175,40 +175,40 @@ test_skiplist_ull_remove_all_pos(void* mp)
 	TEST_ASSERT(sl.size_fn(&sl) == 10ULL);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
 	TEST_ASSERT(sl.remove_all(&sl) == EC_OK && sl.size_fn(&sl) == 0);
-	prullf("pass:test_skiplist_ull_remove_all_pos\n");
+	printf("pass:test_skiplist_ull_remove_all_pos\n");
 }
 
 static void
 test_skiplist_ull_remove_all_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_remove_all_neg\n");
+	printf("test_skiplist_ull_remove_all_neg\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	TEST_ASSERT(sl.remove_all(NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_remove_all_neg\n");
+	printf("pass:test_skiplist_ull_remove_all_neg\n");
 }
 
 static void
 test_skiplist_ull_contains_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_contains_pos\n");
+	printf("test_skiplist_ull_contains_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k = 999ULL;
 	sl.add(&sl, &k);
 	TEST_ASSERT(sl.contains(&sl, &k) == EC_OK);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_contains_pos\n");
+	printf("pass:test_skiplist_ull_contains_pos\n");
 }
 
 static void
 test_skiplist_ull_contains_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_contains_neg\n");
+	printf("test_skiplist_ull_contains_neg\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k = 10ULL;
@@ -218,14 +218,14 @@ test_skiplist_ull_contains_neg(void* mp)
 	ull bad = 1000ULL;
 	TEST_ASSERT(sl.contains(&sl, &bad) == EC_ERR_NOT_FOUND);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_contains_neg\n");
+	printf("pass:test_skiplist_ull_contains_neg\n");
 }
 
 static void
 test_skiplist_ull_get_keys_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_get_keys_pos\n");
+	printf("test_skiplist_ull_get_keys_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	for (ull i = 1ULL; i <= 5; i++)
@@ -242,14 +242,14 @@ test_skiplist_ull_get_keys_pos(void* mp)
 	size_t count2 = 0;
 	TEST_ASSERT(sl.get_keys(&sl, &keys2, &count2) == EC_OK && count2 == 0);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_get_keys_pos\n");
+	printf("pass:test_skiplist_ull_get_keys_pos\n");
 }
 
 static void
 test_skiplist_ull_get_keys_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_get_keys_neg\n");
+	printf("test_skiplist_ull_get_keys_neg\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k = 10ULL;
@@ -260,7 +260,7 @@ test_skiplist_ull_get_keys_neg(void* mp)
 	TEST_ASSERT(sl.get_keys(&sl, NULL, &count) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.get_keys(&sl, &keys, NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_get_keys_neg\n");
+	printf("pass:test_skiplist_ull_get_keys_neg\n");
 }
 
 static void
@@ -273,7 +273,7 @@ static void
 test_skiplist_ull_foreach_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_foreach_pos\n");
+	printf("test_skiplist_ull_foreach_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	for (ull i = 0; i < 5; i++)
@@ -283,14 +283,14 @@ test_skiplist_ull_foreach_pos(void* mp)
 		}
 	TEST_ASSERT(sl.foreach_key(&sl, foreach_key_ull) == EC_OK);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_foreach_pos\n");
+	printf("pass:test_skiplist_ull_foreach_pos\n");
 }
 
 static void
 test_skiplist_ull_foreach_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_foreach_neg\n");
+	printf("test_skiplist_ull_foreach_neg\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ull k = 10ULL;
@@ -298,14 +298,14 @@ test_skiplist_ull_foreach_neg(void* mp)
 	TEST_ASSERT(sl.foreach_key(NULL, foreach_key_ull) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.foreach_key(&sl, NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_foreach_neg\n");
+	printf("pass:test_skiplist_ull_foreach_neg\n");
 }
 
 static void
 test_skiplist_ull_iterators_empty_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_iterators_empty_pos\n");
+	printf("test_skiplist_ull_iterators_empty_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ec_skiplist_ull_iter_t it;
@@ -313,14 +313,14 @@ test_skiplist_ull_iterators_empty_pos(void* mp)
 	ull key;
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_iterators_empty_pos\n");
+	printf("pass:test_skiplist_ull_iterators_empty_pos\n");
 }
 
 static void
 test_skiplist_ull_iterators_neg(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_iterators_neg\n");
+	printf("test_skiplist_ull_iterators_neg\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	ec_skiplist_ull_iter_t it;
@@ -338,14 +338,14 @@ test_skiplist_ull_iterators_neg(void* mp)
 	TEST_ASSERT(sl.iter_remove(&it) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(sl.iter_remove(NULL) == EC_ERR_INVALID_ARG);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_iterators_neg\n");
+	printf("pass:test_skiplist_ull_iterators_neg\n");
 }
 
 static void
 test_skiplist_ull_iterators_pos(void* mp)
 {
 	stamp();
-	prullf("test_skiplist_ull_iterators_pos\n");
+	printf("test_skiplist_ull_iterators_pos\n");
 	ec_skiplist_ull_t sl;
 	ec_skiplist_ull_init(&sl, mp, NULL);
 	for (ull i = 0; i < 5; i++)
@@ -368,13 +368,13 @@ test_skiplist_ull_iterators_pos(void* mp)
 	TEST_ASSERT(sl.iter_next(&it, &key) == EC_OK);
 	TEST_ASSERT(sl.iter_remove(&it) == EC_OK && sl.size_fn(&sl) == 4);
 	sl.remove_all(&sl);
-	prullf("pass:test_skiplist_ull_iterators_pos\n");
+	printf("pass:test_skiplist_ull_iterators_pos\n");
 }
 
 ull
 main(void)
 {
-	prullf("Starting ec_skiplist_ull tests...\n");
+	printf("Starting ec_skiplist_ull tests...\n");
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_conf_t conf = { 64, 100ULL, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2ULL.0f, NULL, NULL, NULL };
 	ec_mempool_t pool;
@@ -408,6 +408,6 @@ main(void)
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
 
-	prullf("All ec_skiplist_ull tests passed.\n");
+	printf("All ec_skiplist_ull tests passed.\n");
 	return 0;
 }

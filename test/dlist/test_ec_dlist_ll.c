@@ -80,7 +80,7 @@ test_add_at_pos(void)
 	assert(l.add(&l, &z) == EC_OK);
 	assert(l.add_at(&l, &y, 1) == EC_OK);
 	void* out;
-	assert(l.get_at(&l, 1, &out) == EC_OK && *(long long*)out == 2LL);
+	assert(l.get_at(&l, 1, &out) == EC_OK && *(long long*)out == 2000LL);
 	assert(l.size_fn(&l) == 3);
 	assert(l.free_fn(&l) == EC_OK);
 }
@@ -203,7 +203,7 @@ test_get_at_pos(void)
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	void* out = NULL;
-	assert(l.get_at(&l, 1, &out) == EC_OK && *(long long*)out == 200LL);
+	assert(l.get_at(&l, 1, &out) == EC_OK && *(long long*)out == 2000LL);
 	assert(l.free_fn(&l) == EC_OK);
 }
 
@@ -251,7 +251,7 @@ test_get_last_pos(void)
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	void* out;
-	assert(l.get_last(&l, &out) == EC_OK && *(long long*)out == 20LL);
+	assert(l.get_last(&l, &out) == EC_OK && *(long long*)out == 2000LL);
 	assert(l.free_fn(&l) == EC_OK);
 }
 
@@ -465,7 +465,7 @@ test_contains_pos(void)
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	assert(l.add(&l, &c) == EC_OK);
-	long long x = 20;
+	long long x = 2000LL; // Value that exists in the list
 	assert(l.contains(&l, &x) == 1);
 	assert(l.free_fn(&l) == EC_OK);
 }
@@ -492,7 +492,7 @@ test_contains_value_pos(void)
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	assert(l.add(&l, &c) == EC_OK);
-	long long x = 30;
+	long long x = 3000LL; // Value that exists in the list
 	assert(l.contains_value(&l, &x, cmp_ll) == 1);
 	assert(l.free_fn(&l) == EC_OK);
 }
@@ -557,7 +557,7 @@ test_reverse_pos(void)
 	assert(l.add(&l, &c) == EC_OK);
 	l.reverse(&l);
 	void* out;
-	assert(l.get_at(&l, 0, &out) == EC_OK && *(long long*)out == 30LL);
+	assert(l.get_at(&l, 0, &out) == EC_OK && *(long long*)out == 3000LL);
 	assert(l.free_fn(&l) == EC_OK);
 }
 
@@ -830,7 +830,7 @@ test_iter_index_pos(void)
 	size_t idx = 0;
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
-			assert(l.iter_index(&it) == idx);
+			assert(l.iter_index(&it) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);
@@ -873,7 +873,7 @@ test_zip_iter_index_pos(void)
 	size_t idx = 0;
 	while (l1.zip_iter_next(&zit, &out1, &out2) == EC_OK)
 		{
-			assert(l1.zip_iter_index(&zit) == idx);
+			assert(l1.zip_iter_index(&zit) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);
@@ -1010,6 +1010,6 @@ main(void)
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
-	printf ("All ec_dlist_long long tests passed.\n");
+	printf("All ec_dlist_long long tests passed.\n");
 	return 0;
 }

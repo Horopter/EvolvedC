@@ -224,9 +224,13 @@ test_expand(void* mp)
 }
 
 static int
-ptr_cmp(const void** a, const void** b)
+ptr_cmp(const void* a, const void* b)
 {
-	return (a == b) ? 0 : ((a < b) ? -1 : 1);
+	// Compare the void* values stored in the buffer
+	// a and b are const void* pointers to the buffer elements
+	const void* va = *(const void**)a;
+	const void* vb = *(const void**)b;
+	return (va == vb) ? 0 : ((va < vb) ? -1 : 1);
 }
 static void
 test_custom_compare(void* mp)
@@ -234,13 +238,13 @@ test_custom_compare(void* mp)
 	stamp();
 	printf("test_custom_compare\n");
 	ec_ringbuf_ptr_t rb;
-	ec_ringbuf_ptr_init(&rb, mp, 4, (int (*)(const void**, const void**))ptr_cmp);
+	ec_ringbuf_ptr_init(&rb, mp, 4, ptr_cmp);
 	int x = 10, y = 5, z = 20;
 	void *a = &x, *b = &y, *c = &z;
 	rb.push(&rb, &a);
 	rb.push(&rb, &b);
 	rb.push(&rb, &c);
-	void* val = &y;
+	void* val = b;  // b = &y, so b is in the buffer
 	TASSERT(rb.contains(&rb, &val) == EC_OK);
 	int w = 99;
 	void* bad = &w;

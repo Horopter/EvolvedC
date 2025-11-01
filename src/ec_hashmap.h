@@ -112,7 +112,7 @@
 		ec_hashmap_##NAME##_entry_t* e = m->table[idx];                                                                       \
 		while (e)                                                                                                             \
 			{                                                                                                                 \
-				if (e->key == tmp_key)                                                                                        \
+				if (memcmp(&e->key, &tmp_key, sizeof(TYPE)) == 0)                                                             \
 					{                                                                                                         \
 						e->value = tmp_val;                                                                                   \
 						EC_MUTEX_UNLOCK(m->lock);                                                                             \
@@ -145,7 +145,7 @@
 		ec_hashmap_##NAME##_entry_t* e = m->table[idx];                                                                       \
 		while (e)                                                                                                             \
 			{                                                                                                                 \
-				if (e->key == tmp_key)                                                                                        \
+				if (memcmp(&e->key, &tmp_key, sizeof(TYPE)) == 0)                                                             \
 					{                                                                                                         \
 						*out = (TYPE*)EC_MALLOC(sizeof(TYPE));                                                                \
 						if (!*out)                                                                                            \
@@ -173,7 +173,7 @@
 		ec_hashmap_##NAME##_entry_t* prev = NULL;                                                                             \
 		while (e)                                                                                                             \
 			{                                                                                                                 \
-				if (e->key == tmp_key)                                                                                        \
+				if (memcmp(&e->key, &tmp_key, sizeof(TYPE)) == 0)                                                             \
 					{                                                                                                         \
 						if (!prev)                                                                                            \
 							m->table[idx] = e->next;                                                                          \
@@ -200,7 +200,7 @@
 		ec_hashmap_##NAME##_entry_t* e = m->table[idx];                                                                       \
 		while (e)                                                                                                             \
 			{                                                                                                                 \
-				if (e->key == tmp_key)                                                                                        \
+				if (memcmp(&e->key, &tmp_key, sizeof(TYPE)) == 0)                                                             \
 					{                                                                                                         \
 						EC_MUTEX_UNLOCK(m->lock);                                                                             \
 						return EC_OK;                                                                                         \

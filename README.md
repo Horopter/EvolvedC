@@ -113,13 +113,24 @@ Before submitting, please review the **Evolved-C Core Design Principles**.
   - `array`: 13 test files covering all data types
   - `buffer`: 15 test files covering all data types
   - `deque`: 14 test files covering all data types
-  - `dlist`: 15 test files covering all data types
+  - `dlist`: 14 test files covering all data types
   - `queue`: 13 test files covering all data types
   - `slist`: 13 test files covering all data types
   - `timer`: 1 comprehensive test file
   - `trie`: 7 test files covering all language types
 - **In Progress Test Coverage** (⚠️):
-  - `ds`, `graph`, `hashmap`, `hashset`, `heap`, `log`, `ringbuffer`, `skiplist`, `stack`, `treeset`, `treetable`, `vector`: Multiple test files created, coverage expansion ongoing
+  - `ds`: 14 test files, coverage expansion ongoing
+  - `graph`: 13 test files, coverage expansion ongoing
+  - `hashmap`: 15 test files, coverage expansion ongoing
+  - `hashset`: 14 test files, coverage expansion ongoing
+  - `heap`: 13 test files, coverage expansion ongoing
+  - `log`: 14 test files, coverage expansion ongoing
+  - `ringbuffer`: 12 test files, coverage expansion ongoing
+  - `skiplist`: 15 test files, coverage expansion ongoing
+  - `stack`: 14 test files, coverage expansion ongoing
+  - `treeset`: 15 test files, coverage expansion ongoing
+  - `treetable`: 11 test files, coverage expansion ongoing
+  - `vector`: 13 test files, coverage expansion ongoing
 - Expanded `vector` coverage across many data types by mirroring `int` tests to: `double`, `long`, `unsigned long`, `long long`, `unsigned long long`, `uint32_t`, `uint64_t`, `const char*`, and `void*`.
 - Added and strengthened tests for `array`, `buffer`, and `deque`; ensured per-method coverage and iterator/zip-iterator checks where available.
 - Removed all meta tests and relocation stubs; each data structure now has independent, explicit tests.
@@ -130,6 +141,7 @@ Before submitting, please review the **Evolved-C Core Design Principles**.
 - Improved `test/run_tests.sh` to build into `test/build/`, accept optional targets, and clean generated outputs.
 - Introduced CI workflow (`.github/workflows/ci.yml`) with cross-platform builds, formatting check (non-blocking), and robust path resolution on runners.
 - Updated `.gitignore` to exclude build artifacts and IDE files.
+- Cleaned up temporary files (`.tmp`, `.o`), duplicate test files, and outdated coverage analysis documents.
 
 
 ## 📋 TODO

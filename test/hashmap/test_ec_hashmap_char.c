@@ -235,7 +235,7 @@ test_hashmap_ch_iterators_empty(void* mp)
 	ec_hashmap_ch_init(&hm, mp);
 	ec_hashmap_ch_iter_t it;
 	ec_status_t ist = hm.iter_init(&hm, &it);
-	ec_status_t TEST_ASSERT(ist == EC_OK);
+	TEST_ASSERT(ist == EC_OK);
 	char k, v;
 	TEST_ASSERT(hm.iter_next(&it, &k, &v) == EC_ERR_OUT_OF_BOUNDS);
 	TEST_ASSERT(hm.iter_remove(&it) == EC_ERR_INVALID_ARG);

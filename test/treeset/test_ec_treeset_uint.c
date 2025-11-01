@@ -89,7 +89,7 @@ test_treeset_uint_add_pos(void* mp)
 	printf("test_treeset_uint_add_pos\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned unsigned int k1 = 10U, k2 = 20U, k3 = 15U;
+	unsigned int k1 = 10U, k2 = 20U, k3 = 15U;
 	TEST_ASSERT(s.add(&s, &k1) == EC_OK);
 	TEST_ASSERT(s.add(&s, &k2) == EC_OK);
 	TEST_ASSERT(s.add(&s, &k3) == EC_OK);
@@ -108,7 +108,7 @@ test_treeset_uint_add_neg(void* mp)
 	printf("test_treeset_uint_add_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int k = 10U;
+	unsigned int k = 10U;
 	TEST_ASSERT(s.add(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.add(&s, NULL) == EC_ERR_INVALID_ARG);
 	s.remove_all(&s);
@@ -122,7 +122,7 @@ test_treeset_uint_remove_pos(void* mp)
 	printf("test_treeset_uint_remove_pos\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned unsigned int k1 = 10U, k2 = 20U, k3 = 15U;
+	unsigned int k1 = 10U, k2 = 20U, k3 = 15U;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
@@ -141,11 +141,11 @@ test_treeset_uint_remove_neg(void* mp)
 	printf("test_treeset_uint_remove_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int k = 10U;
+	unsigned int k = 10U;
 	s.add(&s, &k);
 	TEST_ASSERT(s.remove(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.remove(&s, NULL) == EC_ERR_INVALID_ARG);
-	unsigned unsigned int bad = 999U;
+	unsigned int bad = 999U;
 	TEST_ASSERT(s.remove(&s, &bad) == EC_ERR_NOT_FOUND);
 	s.remove_all(&s);
 	printf("pass:test_treeset_uint_remove_neg\n");
@@ -187,12 +187,12 @@ test_treeset_uint_remove_first_pos(void* mp)
 	printf("test_treeset_uint_remove_first_pos\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
+	unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
 	TEST_ASSERT(s.size_fn(&s) == 3);
-	unsigned unsigned int first;
+	unsigned int first;
 	TEST_ASSERT(s.get_first(&s, &first) == EC_OK);
 	TEST_ASSERT(s.remove_first(&s) == EC_OK);
 	TEST_ASSERT(s.size_fn(&s) == 2);
@@ -221,12 +221,12 @@ test_treeset_uint_remove_last_pos(void* mp)
 	printf("test_treeset_uint_remove_last_pos\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
+	unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
 	TEST_ASSERT(s.size_fn(&s) == 3);
-	unsigned unsigned int last;
+	unsigned int last;
 	TEST_ASSERT(s.get_last(&s, &last) == EC_OK);
 	TEST_ASSERT(s.remove_last(&s) == EC_OK);
 	TEST_ASSERT(s.size_fn(&s) == 2);
@@ -255,11 +255,11 @@ test_treeset_uint_get_first_pos(void* mp)
 	printf("test_treeset_uint_get_first_pos\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
+	unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
-	unsigned unsigned int out;
+	unsigned int out;
 	TEST_ASSERT(s.get_first(&s, &out) == EC_OK);
 	TEST_ASSERT(out == 5U);
 	s.remove_all(&s);
@@ -273,7 +273,7 @@ test_treeset_uint_get_first_neg(void* mp)
 	printf("test_treeset_uint_get_first_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int out;
+	unsigned int out;
 	TEST_ASSERT(s.get_first(NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_first(&s, NULL) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_first(&s, &out) == EC_ERR_NOT_FOUND);
@@ -288,11 +288,11 @@ test_treeset_uint_get_last_pos(void* mp)
 	printf("test_treeset_uint_get_last_pos\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
+	unsigned int k1 = 10U, k2 = 5U, k3 = 15U;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	s.add(&s, &k3);
-	unsigned unsigned int out;
+	unsigned int out;
 	TEST_ASSERT(s.get_last(&s, &out) == EC_OK);
 	TEST_ASSERT(out == 15U);
 	s.remove_all(&s);
@@ -306,7 +306,7 @@ test_treeset_uint_get_last_neg(void* mp)
 	printf("test_treeset_uint_get_last_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int out;
+	unsigned int out;
 	TEST_ASSERT(s.get_last(NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_last(&s, NULL) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_last(&s, &out) == EC_ERR_NOT_FOUND);
@@ -323,7 +323,7 @@ test_treeset_uint_get_greater_than_pos(void* mp)
 	ec_treeset_uint_init(&s, mp, NULL);
 	for (unsigned int i = 1; i <= 5U; i++)
 		s.add(&s, &i);
-	unsigned unsigned int ask = 3, out;
+	unsigned int ask = 3, out;
 	TEST_ASSERT(s.get_greater_than(&s, &ask, &out) == EC_OK);
 	TEST_ASSERT(out == 4);
 	s.remove_all(&s);
@@ -337,9 +337,9 @@ test_treeset_uint_get_greater_than_neg(void* mp)
 	printf("test_treeset_uint_get_greater_than_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int k = 10U;
+	unsigned int k = 10U;
 	s.add(&s, &k);
-	unsigned unsigned int ask = 999U, out;
+	unsigned int ask = 999U, out;
 	TEST_ASSERT(s.get_greater_than(NULL, &ask, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_greater_than(&s, NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_greater_than(&s, &ask, NULL) == EC_ERR_INVALID_ARG);
@@ -357,7 +357,7 @@ test_treeset_uint_get_lesser_than_pos(void* mp)
 	ec_treeset_uint_init(&s, mp, NULL);
 	for (unsigned int i = 1; i <= 5U; i++)
 		s.add(&s, &i);
-	unsigned unsigned int ask = 3, out;
+	unsigned int ask = 3, out;
 	TEST_ASSERT(s.get_lesser_than(&s, &ask, &out) == EC_OK);
 	TEST_ASSERT(out == 2);
 	s.remove_all(&s);
@@ -371,9 +371,9 @@ test_treeset_uint_get_lesser_than_neg(void* mp)
 	printf("test_treeset_uint_get_lesser_than_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int k = 10U;
+	unsigned int k = 10U;
 	s.add(&s, &k);
-	unsigned unsigned int ask = 0, out;
+	unsigned int ask = 0, out;
 	TEST_ASSERT(s.get_lesser_than(NULL, &ask, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_lesser_than(&s, NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_lesser_than(&s, &ask, NULL) == EC_ERR_INVALID_ARG);
@@ -389,7 +389,7 @@ test_treeset_uint_contains_pos(void* mp)
 	printf("test_treeset_uint_contains_pos\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned unsigned int k1 = 10U, k2 = 20U;
+	unsigned int k1 = 10U, k2 = 20U;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
 	TEST_ASSERT(s.contains(&s, &k1) == EC_OK);
@@ -405,18 +405,18 @@ test_treeset_uint_contains_neg(void* mp)
 	printf("test_treeset_uint_contains_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int k = 10U;
+	unsigned int k = 10U;
 	s.add(&s, &k);
 	TEST_ASSERT(s.contains(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.contains(&s, NULL) == EC_ERR_INVALID_ARG);
-	unsigned unsigned int bad = 999U;
+	unsigned int bad = 999U;
 	TEST_ASSERT(s.contains(&s, &bad) == EC_ERR_NOT_FOUND);
 	s.remove_all(&s);
 	printf("pass:test_treeset_uint_contains_neg\n");
 }
 
 static void
-foreach_key_uint(unsigned unsigned int k)
+foreach_key_uint(unsigned int k)
 {
 	(void)k;
 }
@@ -442,7 +442,7 @@ test_treeset_uint_foreach_neg(void* mp)
 	printf("test_treeset_uint_foreach_neg\n");
 	ec_treeset_uint_t s;
 	ec_treeset_uint_init(&s, mp, NULL);
-	unsigned unsigned int k = 10U;
+	unsigned int k = 10U;
 	s.add(&s, &k);
 	TEST_ASSERT(s.foreach (NULL, foreach_key_uint) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.foreach (&s, NULL) == EC_ERR_INVALID_ARG);
@@ -459,7 +459,7 @@ test_treeset_uint_iterators_empty_pos(void* mp)
 	ec_treeset_uint_init(&s, mp, NULL);
 	ec_treeset_uint_iter_t it;
 	TEST_ASSERT(s.iter_init(&s, &it) == EC_OK);
-	unsigned unsigned unsigned int key;
+	unsigned int key;
 	TEST_ASSERT(s.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
 	s.remove_all(&s);
 	printf("pass:test_treeset_uint_iterators_empty_pos\n");
@@ -476,7 +476,7 @@ test_treeset_uint_iterators_neg(void* mp)
 	TEST_ASSERT(s.iter_init(NULL, &it) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.iter_init(&s, NULL) == EC_ERR_INVALID_ARG);
 	s.iter_init(&s, &it);
-	unsigned unsigned unsigned int key;
+	unsigned int key;
 	TEST_ASSERT(s.iter_next(NULL, &key) == EC_ERR_INVALID_ARG);
 	s.iter_init(&s, &it);
 	TEST_ASSERT(s.iter_next(&it, NULL) == EC_ERR_INVALID_ARG);
@@ -498,7 +498,7 @@ test_treeset_uint_iterators_pos(void* mp)
 		s.add(&s, &i);
 	ec_treeset_uint_iter_t it;
 	TEST_ASSERT(s.iter_init(&s, &it) == EC_OK);
-	unsigned unsigned unsigned int key;
+	unsigned int key;
 	size_t cnt = 0;
 	while (s.iter_next(&it, &key) == EC_OK)
 		{

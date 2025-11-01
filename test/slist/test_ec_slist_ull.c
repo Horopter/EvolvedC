@@ -1183,7 +1183,8 @@ test_slist_ull_zip_iter_not_supported(void* mp)
 	printf("pass: test_slist_ull_zip_iter_not_supported\n");
 }
 
-unsigned int main(void)
+int
+main(void)
 {
 	printf("Starting ec_slist_ull tests...\n");
 #ifdef EC_USE_MEMPOOL

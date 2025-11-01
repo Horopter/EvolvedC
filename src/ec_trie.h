@@ -286,12 +286,14 @@
 		return EC_OK;                                                                                                                                                       \
 	}
 /* Replace numeric expansions with typical language-coded expansions for char strings. Example: English, Chinese, Korean, Telugu, etc. */
-EC_TRIE_DEF(const char*, en)
-EC_TRIE_DEF(const char*, zh)
-EC_TRIE_DEF(const char*, ko)
-EC_TRIE_DEF(const char*, te)
-EC_TRIE_DEF(const char*, hi)
-EC_TRIE_DEF(const char*, kn)
-EC_TRIE_DEF(const char*, any)
+/* Use char* as TYPE to avoid duplicate const (macro adds const in function parameters) */
+typedef char* ec_trie_str_t;
+EC_TRIE_DEF(ec_trie_str_t, en)
+EC_TRIE_DEF(ec_trie_str_t, zh)
+EC_TRIE_DEF(ec_trie_str_t, ko)
+EC_TRIE_DEF(ec_trie_str_t, te)
+EC_TRIE_DEF(ec_trie_str_t, hi)
+EC_TRIE_DEF(ec_trie_str_t, kn)
+EC_TRIE_DEF(ec_trie_str_t, any)
 
 #endif

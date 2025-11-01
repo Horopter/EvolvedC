@@ -1090,7 +1090,7 @@ test_slist_ll_iter_index(void* mp)
 	ec_slist_ll_iter_t it;
 	l.iter_init(&it, &l);
 	void* out;
-	size_t idx = 0L;
+	size_t idx = 1;  // iter_index is 1-based after first iter_next
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
 			TEST_ASSERT(l.iter_index(&it) == idx);
@@ -1183,7 +1183,8 @@ test_slist_ll_zip_iter_not_supported(void* mp)
 	printf("pass: test_slist_ll_zip_iter_not_supported\n");
 }
 
-int main(void)
+int
+main(void)
 {
 	printf("Starting ec_slist_ll tests...\n");
 #ifdef EC_USE_MEMPOOL

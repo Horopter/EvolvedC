@@ -106,10 +106,10 @@ test_slist_uint_add(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_add\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_status_t s = ec_slist_uint_init(&l, mp);
 	TEST_ASSERT(s == EC_OK);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	TEST_ASSERT(l.size_fn(&l) == 2U);
@@ -122,9 +122,9 @@ test_slist_uint_add_at(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_add_at\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int x = 1U, y = 2U, z = 3U;
+	unsigned int x = 1U, y = 2U, z = 3U;
 	l.add(&l, &x);
 	l.add(&l, &z);
 	ec_status_t st = l.add_at(&l, &y, 1U);
@@ -143,11 +143,11 @@ test_slist_uint_remove(void* mp)
 	stamp();
 	printf("test_slist_uint_remove\n");
 
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_status_t init_status = ec_slist_uint_init(&l, mp);
 	TEST_ASSERT(init_status == EC_OK);
 
-	unsigned unsigned int a = 10U, b = 20U, c = 30U;
+	unsigned int a = 10U, b = 20U, c = 30U;
 	ec_status_t add_status_a = l.add(&l, &a);
 	ec_status_t add_status_b = l.add(&l, &b);
 	ec_status_t add_status_c = l.add(&l, &c);
@@ -156,7 +156,7 @@ test_slist_uint_remove(void* mp)
 	TEST_ASSERT(add_status_b == EC_OK);
 	TEST_ASSERT(add_status_c == EC_OK);
 
-	unsigned unsigned int v = 20U;
+	unsigned int v = 20U;
 
 	ec_status_t s = l.remove_fn(&l, &v);
 
@@ -173,9 +173,9 @@ test_slist_uint_remove_first(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_first\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 11U, b = 22U;
+	unsigned int a = 11U, b = 22U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	ec_status_t s = l.remove_first(&l);
@@ -189,9 +189,9 @@ test_slist_uint_remove_last(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_last\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 33U, b = 44U;
+	unsigned int a = 33U, b = 44U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	ec_status_t s = l.remove_last(&l);
@@ -205,9 +205,9 @@ test_slist_uint_remove_at(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_at\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U, c = 30U;
+	unsigned int a = 10U, b = 20U, c = 30U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.add(&l, &c);
@@ -222,9 +222,9 @@ test_slist_uint_get_at(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_get_at\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 100U, b = 200U;
+	unsigned int a = 100U, b = 200U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	void* out = NULL;
@@ -241,9 +241,9 @@ test_slist_uint_get_first(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_get_first\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 777U;
+	unsigned int a = 777U;
 	l.add(&l, &a);
 	void* out = NULL;
 	ec_status_t s = l.get_first(&l, &out);
@@ -257,9 +257,9 @@ test_slist_uint_get_last(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_get_last\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	void* out;
@@ -274,10 +274,10 @@ test_slist_uint_splice(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_splice\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	unsigned unsigned int a = 10U, b = 20U, c = 30U, d = 40U;
+	unsigned int a = 10U, b = 20U, c = 30U, d = 40U;
 	l1.add(&l1, &a);
 	l1.add(&l1, &b);
 	l2.add(&l2, &c);
@@ -294,10 +294,10 @@ test_slist_uint_splice_at(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_splice_at\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	unsigned unsigned int a = 1U, b = 2U, c = 3U, d = 4U, e = 5U;
+	unsigned int a = 1U, b = 2U, c = 3U, d = 4U, e = 5U;
 	l1.add(&l1, &a);
 	l1.add(&l1, &b);
 	l1.add(&l1, &c);
@@ -315,10 +315,10 @@ test_slist_uint_add_all(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_add_all\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l2.add(&l2, &a);
 	l2.add(&l2, &b);
 	ec_status_t s = l1.add_all(&l1, &l2);
@@ -333,10 +333,10 @@ test_slist_uint_add_all_at(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_add_all_at\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	unsigned unsigned int a = 10U, b = 30U, c = 20U, d = 25U;
+	unsigned int a = 10U, b = 30U, c = 20U, d = 25U;
 	l1.add(&l1, &a);
 	l1.add(&l1, &b);
 	l2.add(&l2, &c);
@@ -354,7 +354,7 @@ test_slist_uint_sublist(void* mp)
 	stamp();
 	printf("test_slist_uint_sublist\n");
 
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_status_t init_status = ec_slist_uint_init(&l, mp);
 	if (init_status != EC_OK)
 		{
@@ -363,7 +363,7 @@ test_slist_uint_sublist(void* mp)
 		}
 
 	// Adding elements: 10U, 20U, 30U, 40U, 50U
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int v = (i + 1U) * 10U;
 			ec_status_t add_status = l.add(&l, &v);
@@ -375,7 +375,7 @@ test_slist_uint_sublist(void* mp)
 		}
 
 	// Creating sublist from index 1U to 4U (should contain 20U, 30U, 40U)
-	ec_slist_uuint_t* sub = NULL;
+	ec_slist_uint_t* sub = NULL;
 	ec_status_t sublist_status = l.sublist(&l, 1U, 4U, &sub);
 	if (sublist_status != EC_OK)
 		{
@@ -434,14 +434,14 @@ test_slist_uint_copy_shallow(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_copy_shallow\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 1U; i <= 3U; i++)
+	for (unsigned int i = 1U; i <= 3U; i++)
 		{
 			unsigned int v = i;
 			l.add(&l, &v);
 		}
-	ec_slist_uuint_t* cp = NULL;
+	ec_slist_uint_t* cp = NULL;
 	ec_status_t s = l.copy_shallow(&l, &cp);
 	TEST_ASSERT(s == EC_OK && cp->size == 3U);
 	cp->free_fn(cp);
@@ -464,14 +464,14 @@ test_slist_uint_copy_deep(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_copy_deep\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 1U; i <= 3U; i++)
+	for (unsigned int i = 1U; i <= 3U; i++)
 		{
 			unsigned int v = i * 10U;
 			l.add(&l, &v);
 		}
-	ec_slist_uuint_t* cp = NULL;
+	ec_slist_uint_t* cp = NULL;
 	ec_status_t s = l.copy_deep(&l, dupe_uint, &cp);
 	TEST_ASSERT(s == EC_OK && cp->size_fn(cp) == 3U);
 	cp->free_fn(cp);
@@ -485,9 +485,9 @@ test_slist_uint_replace_at(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_replace_at\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 5U, b = 10U, c = 99U;
+	unsigned int a = 5U, b = 10U, c = 99U;
 	void* out = NULL;
 	l.add(&l, &a);
 	l.add(&l, &b);
@@ -504,13 +504,13 @@ test_slist_uint_contains(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_contains\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U, c = 30U;
+	unsigned int a = 10U, b = 20U, c = 30U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.add(&l, &c);
-	unsigned unsigned int x = 20U;
+	unsigned int x = 20U;
 	size_t r = l.contains(&l, &x);
 	TEST_ASSERT(r == 1U);
 	l.free_fn(&l);
@@ -522,13 +522,13 @@ test_slist_uint_contains_value(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_contains_value\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U, c = 30U;
+	unsigned int a = 10U, b = 20U, c = 30U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.add(&l, &c);
-	unsigned unsigned int x = 30U;
+	unsigned int x = 30U;
 	size_t r = l.contains_value(&l, &x, cmp_uint);
 	TEST_ASSERT(r == 1U);
 	l.free_fn(&l);
@@ -540,14 +540,14 @@ test_slist_uint_index_of(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_index_of\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 1U; i <= 5U; i++)
+	for (unsigned int i = 1U; i <= 5U; i++)
 		{
 			unsigned int v = i * 10U;
 			l.add(&l, &v);
 		}
-	unsigned unsigned int x = 40U;
+	unsigned int x = 40U;
 	size_t idx;
 	ec_status_t s = l.index_of(&l, &x, cmp_uint, &idx);
 	TEST_ASSERT(s == EC_OK && idx == 3U);
@@ -560,9 +560,9 @@ test_slist_uint_to_array(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_to_array\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 1U, b = 2U, c = 3U;
+	unsigned int a = 1U, b = 2U, c = 3U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.add(&l, &c);
@@ -580,9 +580,9 @@ test_slist_uint_reverse(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_reverse\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U, c = 30U;
+	unsigned int a = 10U, b = 20U, c = 30U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.add(&l, &c);
@@ -599,9 +599,9 @@ test_slist_uint_sort(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_sort\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 30U, b = 10U, c = 20U;
+	unsigned int a = 30U, b = 10U, c = 20U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.add(&l, &c);
@@ -619,9 +619,9 @@ test_slist_uint_foreach(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_foreach\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 5U, b = 6U;
+	unsigned int a = 5U, b = 6U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.foreach (&l, inc_uint);
@@ -637,17 +637,17 @@ test_slist_uint_reduce(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_reduce\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 1U; i <= 4U; i++)
+	for (unsigned int i = 1U; i <= 4U; i++)
 		{
 			unsigned int v = i;
 			l.add(&l, &v);
 		}
-	unsigned unsigned int sum = 0U;
+	unsigned int sum = 0U;
 	ec_status_t s = l.reduce(&l, add_uints, &sum);
 	TEST_ASSERT(s == EC_OK && sum == 10U);
-	unsigned unsigned int prod = 0U;
+	unsigned int prod = 0U;
 	s = l.reduce(&l, mul_uints, &prod);
 	TEST_ASSERT(s == EC_OK && prod == 24U);
 	l.free_fn(&l);
@@ -659,12 +659,12 @@ test_slist_uint_filter(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_filter\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 	unsigned int arr[6U] = { 10U, 15U, 20U, 25U, 30U, 35U };
-	for (unsigned unsigned int i = 0U; i < 6U; i++)
+	for (unsigned int i = 0U; i < 6U; i++)
 		l.add(&l, &arr[i]);
-	ec_slist_uuint_t* fl = NULL;
+	ec_slist_uint_t* fl = NULL;
 	ec_status_t s = l.filter(&l, is_even, &fl);
 	TEST_ASSERT(s == EC_OK && fl->size_fn(fl) == 3U);
 	fl->free_fn(fl);
@@ -678,10 +678,10 @@ test_slist_uint_filter_mut(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_filter_mut\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 	unsigned int arr[6U] = { 10U, 15U, 20U, 25U, 30U, 35U };
-	for (unsigned unsigned int i = 0U; i < 6U; i++)
+	for (unsigned int i = 0U; i < 6U; i++)
 		l.add(&l, &arr[i]);
 	ec_status_t s = l.filter_mut(&l, is_even);
 	TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 3U);
@@ -695,11 +695,11 @@ test_slist_uint_iterators(void* mp)
 	stamp();
 	printf("test_slist_uint_iterators\n");
 
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 
 	// Add initial values to the list: 100U, 101U, 102U, 103U, 104U
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int v = i + 100U;
 			l.add(&l, &v);
@@ -733,12 +733,12 @@ test_slist_uint_iterators(void* mp)
 	TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 4U); // List size should be reduced to 4U
 
 	// Add a new element (999U) at the current iterator position
-	unsigned unsigned int x = 999U;
+	unsigned int x = 999U;
 	s = l.iter_add(&it, &x);
 	TEST_ASSERT(s == EC_OK && l.size_fn(&l) == 5U); // List size should now be back to 5U
 
 	// Replace the current node's value with 777U
-	unsigned unsigned int y = 777U;
+	unsigned int y = 777U;
 	s = l.iter_replace(&it, &y, NULL);
 	TEST_ASSERT(s == EC_OK); // Replacement should succeed
 
@@ -753,10 +753,10 @@ test_slist_uint_zip_iterators(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_zip_iterators\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int aa = i + 1U, bb = (i + 1U) * 10U;
 			l1.add(&l1, &aa);
@@ -784,9 +784,9 @@ test_slist_uint_add_at_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_add_at_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int x = 1U, y = 2U;
+	unsigned int x = 1U, y = 2U;
 	l.add(&l, &x);
 	ec_status_t s = l.add_at(&l, &y, 10U);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
@@ -799,12 +799,12 @@ test_slist_uint_remove_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l.add(&l, &a);
 	l.add(&l, &b);
-	unsigned unsigned int v = 99U;
+	unsigned int v = 99U;
 	ec_status_t s = l.remove_fn(&l, &v);
 	TEST_ASSERT(s == EC_ERR_NOT_FOUND);
 	l.free_fn(&l);
@@ -816,7 +816,7 @@ test_slist_uint_remove_first_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_first_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 	ec_status_t s = l.remove_first(&l);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
@@ -829,7 +829,7 @@ test_slist_uint_remove_last_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_last_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 	ec_status_t s = l.remove_last(&l);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
@@ -842,9 +842,9 @@ test_slist_uint_remove_at_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_at_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U;
+	unsigned int a = 10U;
 	l.add(&l, &a);
 	ec_status_t s = l.remove_at(&l, 5U);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
@@ -857,7 +857,7 @@ test_slist_uint_get_first_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_get_first_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 	void* out = NULL;
 	ec_status_t s = l.get_first(&l, &out);
@@ -871,7 +871,7 @@ test_slist_uint_get_last_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_get_last_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 	void* out = NULL;
 	ec_status_t s = l.get_last(&l, &out);
@@ -885,7 +885,7 @@ test_slist_uint_splice_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_splice_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
 	ec_status_t s = l.splice(&l, NULL);
 	TEST_ASSERT(s == EC_ERR_INVALID_ARG);
@@ -898,10 +898,10 @@ test_slist_uint_splice_at_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_splice_at_neg\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	unsigned unsigned int a = 10U;
+	unsigned int a = 10U;
 	l1.add(&l1, &a);
 	ec_status_t s = l1.splice_at(&l1, &l2, 10U);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
@@ -915,12 +915,12 @@ test_slist_uint_sublist_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_sublist_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l.add(&l, &a);
 	l.add(&l, &b);
-	ec_slist_uuint_t* sub = NULL;
+	ec_slist_uint_t* sub = NULL;
 	ec_status_t s = l.sublist(&l, 1U, 10U, &sub);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
 	l.free_fn(&l);
@@ -932,9 +932,9 @@ test_slist_uint_replace_at_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_replace_at_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 99U;
+	unsigned int a = 10U, b = 99U;
 	l.add(&l, &a);
 	ec_status_t s = l.replace_at(&l, &b, 10U);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
@@ -947,12 +947,12 @@ test_slist_uint_contains_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_contains_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l.add(&l, &a);
 	l.add(&l, &b);
-	unsigned unsigned int x = 99U;
+	unsigned int x = 99U;
 	size_t r = l.contains(&l, &x);
 	TEST_ASSERT(r == 0U);
 	l.free_fn(&l);
@@ -964,14 +964,14 @@ test_slist_uint_index_of_neg(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_index_of_neg\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 1U; i <= 5U; i++)
+	for (unsigned int i = 1U; i <= 5U; i++)
 		{
 			unsigned int v = i * 10U;
 			l.add(&l, &v);
 		}
-	unsigned unsigned int x = 99U;
+	unsigned int x = 99U;
 	size_t idx;
 	ec_status_t s = l.index_of(&l, &x, cmp_uint, &idx);
 	TEST_ASSERT(s == EC_ERR_NOT_FOUND);
@@ -985,9 +985,9 @@ test_slist_uint_add_first(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_add_first\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l.add(&l, &b);
 	l.add_first(&l, &a);
 	void* out;
@@ -1002,9 +1002,9 @@ test_slist_uint_add_last(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_add_last\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l.add(&l, &a);
 	l.add_last(&l, &b);
 	void* out;
@@ -1019,9 +1019,9 @@ test_slist_uint_remove_all(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_all\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int v = i + 10U;
 			l.add(&l, &v);
@@ -1043,9 +1043,9 @@ test_slist_uint_remove_all_cb(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_remove_all_cb\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int v = i + 10U;
 			l.add(&l, &v);
@@ -1061,9 +1061,9 @@ test_slist_uint_sort_in_place(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_sort_in_place\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	unsigned unsigned int a = 30U, b = 10U, c = 20U;
+	unsigned int a = 30U, b = 10U, c = 20U;
 	l.add(&l, &a);
 	l.add(&l, &b);
 	l.add(&l, &c);
@@ -1080,9 +1080,9 @@ test_slist_uint_iter_index(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_iter_index\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int v = i + 10U;
 			l.add(&l, &v);
@@ -1105,9 +1105,9 @@ test_slist_uint_diter(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_diter\n");
-	ec_slist_uuint_t l;
+	ec_slist_uint_t l;
 	ec_slist_uint_init(&l, mp);
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int v = i + 10U;
 			l.add(&l, &v);
@@ -1132,10 +1132,10 @@ test_slist_uint_zip_iter_index(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_zip_iter_index\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	for (unsigned unsigned int i = 0U; i < 5U; i++)
+	for (unsigned int i = 0U; i < 5U; i++)
 		{
 			unsigned int aa = i + 1U, bb = (i + 1U) * 10U;
 			l1.add(&l1, &aa);
@@ -1160,17 +1160,17 @@ test_slist_uint_zip_iter_not_supported(void* mp)
 {
 	stamp();
 	printf("test_slist_uint_zip_iter_not_supported\n");
-	ec_slist_uuint_t l1, l2;
+	ec_slist_uint_t l1, l2;
 	ec_slist_uint_init(&l1, mp);
 	ec_slist_uint_init(&l2, mp);
-	unsigned unsigned int a = 10U, b = 20U;
+	unsigned int a = 10U, b = 20U;
 	l1.add(&l1, &a);
 	l2.add(&l2, &b);
 	ec_slist_uint_zip_iter_t zit;
 	l1.zip_iter_init(&zit, &l1, &l2);
 	void *out1, *out2;
 	l1.zip_iter_next(&zit, &out1, &out2);
-	unsigned unsigned int x = 99U, y = 88U;
+	unsigned int x = 99U, y = 88U;
 	void *o1, *o2;
 	ec_status_t s = l1.zip_iter_add(&zit, &x, &y);
 	TEST_ASSERT(s == EC_ERR_NOT_SUPPORTED);
@@ -1183,10 +1183,10 @@ test_slist_uint_zip_iter_not_supported(void* mp)
 	printf("pass: test_slist_uint_zip_iter_not_supported\n");
 }
 
-unsigned int
+int
 main(void)
 {
-	printf("Starting ec_slist_uunsigned int tests...\n");
+	printf("Starting ec_slist_uint tests...\n");
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_conf_t conf = { 64U, 100U, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8U, 0U, 2.0f, NULL, NULL, NULL };
 	ec_mempool_t pool;
@@ -1254,6 +1254,6 @@ main(void)
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
-	printf("All ec_slist_uunsigned int tests passed.\n");
-	return 0U;
+	printf("All ec_slist_uint tests passed.\n");
+	return 0;
 }

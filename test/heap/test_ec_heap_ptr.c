@@ -42,9 +42,10 @@ stamp(void)
 static int
 ptr_comparator(const void** a, const void** b)
 {
-	uintptr_t pa = (uintptr_t)*a;
-	uintptr_t pb = (uintptr_t)*b;
-	return (pa > pb) - (pa < pb);
+	// Compare the integer values pointed to, not the pointer addresses
+	int va = *(int*)*a;
+	int vb = *(int*)*b;
+	return (va > vb) - (va < vb);
 }
 
 void

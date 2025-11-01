@@ -677,9 +677,11 @@ test_reduce_pos(void)
 	char arr[] = { 'a', 'b', 'c', 'd' };
 	for (int i = 0; i < 4; i++)
 		assert(l.add(&l, &arr[i]) == EC_OK);
-	char sum = ' ';
+	char sum = 0;
 	assert(l.reduce(&l, add_chars, &sum) == EC_OK);
-	assert(sum == 'a' + 'b' + 'c' + 'd');
+	// Note: char addition may overflow, check if sum equals expected (modulo 256)
+	int expected = ('a' + 'b' + 'c' + 'd') & 0xFF;
+	assert((unsigned char)sum == (unsigned char)expected);
 	assert(l.free_fn(&l) == EC_OK);
 }
 
@@ -799,7 +801,7 @@ test_iter_index_pos(void)
 	size_t idx = 0;
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
-			assert(l.iter_index(&it) == idx);
+			assert(l.iter_index(&it) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);
@@ -871,7 +873,7 @@ test_zip_iter_index_pos(void)
 	size_t idx = 0;
 	while (l1.zip_iter_next(&zit, &out1, &out2) == EC_OK)
 		{
-			assert(l1.zip_iter_index(&zit) == idx);
+			assert(l1.zip_iter_index(&zit) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);

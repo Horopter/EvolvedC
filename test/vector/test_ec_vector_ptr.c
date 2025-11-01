@@ -557,7 +557,7 @@ test_subarray_pos(void)
 	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK);
 	assert(sub.size_fn(&sub) == 3);
 	void* val;
-	assert(sub.get(&sub, 0, &val) == EC_OK && val == ptr_30);
+	assert(sub.get(&sub, 0, &val) == EC_OK && val == ptrs[2]);
 	sub.free_fn(&sub);
 	vec.free_fn(&vec);
 }
@@ -660,7 +660,7 @@ test_filter_pos(void)
 		vec.push(&vec, &nums[i]);
 	ec_vector_ptr_t filtered;
 	assert(vec.filter(&vec, is_valid_ptr, &filtered) == EC_OK);
-	assert(filtered.size_fn(&filtered) == 3);
+	assert(filtered.size_fn(&filtered) == 6); // All pointers are valid
 	filtered.free_fn(&filtered);
 	vec.free_fn(&vec);
 }
@@ -679,7 +679,7 @@ test_filter_neg_null(void)
 }
 
 static void
-	test_filter_mut_pos(void)
+test_filter_mut_pos(void)
 {
 	ec_vector_ptr_t vec;
 	ec_vector_ptr_init(&vec, 6, NULL);
@@ -687,7 +687,7 @@ static void
 	for (int i = 0; i < 6; i++)
 		vec.push(&vec, &nums[i]);
 	assert(vec.filter_mut(&vec, is_valid_ptr) == EC_OK);
-	assert(vec.size_fn(&vec) == 3);
+	assert(vec.size_fn(&vec) == 6); // All pointers are valid
 	vec.free_fn(&vec);
 }
 
@@ -997,8 +997,10 @@ test_zip_iter_remove_pos(void)
 	ec_vector_ptr_t vec1, vec2;
 	ec_vector_ptr_init(&vec1, 5, NULL);
 	ec_vector_ptr_init(&vec2, 5, NULL);
-	int v1 = 1; vec1.push(&vec1, &v1);
-	int v10 = 10; vec2.push(&vec2, &v10);
+	int v1 = 1;
+	vec1.push(&vec1, &v1);
+	int v10 = 10;
+	vec2.push(&vec2, &v10);
 	ec_vector_ptr_zip_iter_t zip;
 	ec_vector_ptr_zip_iter_init(&zip, &vec1, &vec2);
 	void *a, *b;
@@ -1057,8 +1059,10 @@ test_zip_iter_replace_pos(void)
 	ec_vector_ptr_t vec1, vec2;
 	ec_vector_ptr_init(&vec1, 5, NULL);
 	ec_vector_ptr_init(&vec2, 5, NULL);
-	int v1 = 1; vec1.push(&vec1, &v1);
-	int v10 = 10; vec2.push(&vec2, &v10);
+	int v1 = 1;
+	vec1.push(&vec1, &v1);
+	int v10 = 10;
+	vec2.push(&vec2, &v10);
 	ec_vector_ptr_zip_iter_t zip;
 	ec_vector_ptr_zip_iter_init(&zip, &vec1, &vec2);
 	void *a, *b;

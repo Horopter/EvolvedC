@@ -67,8 +67,8 @@ test_treeset_ulong_init_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_init_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_status_t st = ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_status_t st = ec_treeset_ulong_init(&s, mp, NULL);
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(s.size_fn(&s) == 0);
 	s.remove_all(&s);
@@ -80,7 +80,7 @@ test_treeset_ulong_init_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_init_neg\n");
-	TEST_ASSERT(ec_treeset_ulongong_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
+	TEST_ASSERT(ec_treeset_ulong_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
 	printf("pass:test_treeset_ulong_init_neg\n");
 }
 
@@ -89,8 +89,8 @@ test_treeset_ulong_add_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_add_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k1 = 10UL, k2 = 20UL, k3 = 15UL;
 	TEST_ASSERT(s.add(&s, &k1) == EC_OK);
 	TEST_ASSERT(s.add(&s, &k2) == EC_OK);
@@ -108,8 +108,8 @@ test_treeset_ulong_add_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_add_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k = 10UL;
 	TEST_ASSERT(s.add(NULL, &k) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.add(&s, NULL) == EC_ERR_INVALID_ARG);
@@ -122,8 +122,8 @@ test_treeset_ulong_remove_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k1 = 10UL, k2 = 20UL, k3 = 15UL;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
@@ -141,8 +141,8 @@ test_treeset_ulong_remove_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k = 10UL;
 	s.add(&s, &k);
 	TEST_ASSERT(s.remove(NULL, &k) == EC_ERR_INVALID_ARG);
@@ -158,8 +158,8 @@ test_treeset_ulong_remove_all_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_all_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	for (unsigned long i = 0; i < 10UL; i++)
 		s.add(&s, &i);
 	TEST_ASSERT(s.size_fn(&s) == 10UL);
@@ -175,8 +175,8 @@ test_treeset_ulong_remove_all_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_all_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	TEST_ASSERT(s.remove_all(NULL) == EC_ERR_INVALID_ARG);
 	s.remove_all(&s);
 	printf("pass:test_treeset_ulong_remove_all_neg\n");
@@ -187,8 +187,8 @@ test_treeset_ulong_remove_first_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_first_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k1 = 10UL, k2 = 5UL, k3 = 15UL;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
@@ -208,8 +208,8 @@ test_treeset_ulong_remove_first_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_first_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	TEST_ASSERT(s.remove_first(NULL) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.remove_first(&s) == EC_ERR_NOT_FOUND);
 	s.remove_all(&s);
@@ -221,8 +221,8 @@ test_treeset_ulong_remove_last_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_last_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k1 = 10UL, k2 = 5UL, k3 = 15UL;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
@@ -242,8 +242,8 @@ test_treeset_ulong_remove_last_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_remove_last_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	TEST_ASSERT(s.remove_last(NULL) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.remove_last(&s) == EC_ERR_NOT_FOUND);
 	s.remove_all(&s);
@@ -255,8 +255,8 @@ test_treeset_ulong_get_first_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_first_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k1 = 10UL, k2 = 5UL, k3 = 15UL;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
@@ -273,8 +273,8 @@ test_treeset_ulong_get_first_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_first_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long out;
 	TEST_ASSERT(s.get_first(NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_first(&s, NULL) == EC_ERR_INVALID_ARG);
@@ -288,8 +288,8 @@ test_treeset_ulong_get_last_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_last_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k1 = 10UL, k2 = 5UL, k3 = 15UL;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
@@ -306,8 +306,8 @@ test_treeset_ulong_get_last_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_last_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long out;
 	TEST_ASSERT(s.get_last(NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_last(&s, NULL) == EC_ERR_INVALID_ARG);
@@ -321,8 +321,8 @@ test_treeset_ulong_get_greater_than_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_greater_than_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	for (unsigned long i = 1; i <= 5UL; i++)
 		s.add(&s, &i);
 	unsigned long ask = 3, out;
@@ -337,8 +337,8 @@ test_treeset_ulong_get_greater_than_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_greater_than_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k = 10UL;
 	s.add(&s, &k);
 	unsigned long ask = 999UL, out;
@@ -355,8 +355,8 @@ test_treeset_ulong_get_lesser_than_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_lesser_than_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	for (unsigned long i = 1; i <= 5UL; i++)
 		s.add(&s, &i);
 	unsigned long ask = 3, out;
@@ -371,8 +371,8 @@ test_treeset_ulong_get_lesser_than_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_get_lesser_than_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k = 10UL;
 	s.add(&s, &k);
 	unsigned long ask = 0, out;
@@ -389,8 +389,8 @@ test_treeset_ulong_contains_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_contains_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k1 = 10UL, k2 = 20UL;
 	s.add(&s, &k1);
 	s.add(&s, &k2);
@@ -405,8 +405,8 @@ test_treeset_ulong_contains_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_contains_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k = 10UL;
 	s.add(&s, &k);
 	TEST_ASSERT(s.contains(NULL, &k) == EC_ERR_INVALID_ARG);
@@ -428,8 +428,8 @@ test_treeset_ulong_foreach_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_foreach_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	for (unsigned long i = 0; i < 5UL; i++)
 		s.add(&s, &i);
 	TEST_ASSERT(s.foreach (&s, foreach_key_ulong) == EC_OK);
@@ -442,8 +442,8 @@ test_treeset_ulong_foreach_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_foreach_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	unsigned long k = 10UL;
 	s.add(&s, &k);
 	TEST_ASSERT(s.foreach (NULL, foreach_key_ulong) == EC_ERR_INVALID_ARG);
@@ -457,9 +457,9 @@ test_treeset_ulong_iterators_empty_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_iterators_empty_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
-	ec_treeset_ulongong_iter_t it;
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
+	ec_treeset_ulong_iter_t it;
 	TEST_ASSERT(s.iter_init(&s, &it) == EC_OK);
 	unsigned long key;
 	TEST_ASSERT(s.iter_next(&it, &key) == EC_ERR_OUT_OF_BOUNDS);
@@ -472,9 +472,9 @@ test_treeset_ulong_iterators_neg(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_iterators_neg\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
-	ec_treeset_ulongong_iter_t it;
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
+	ec_treeset_ulong_iter_t it;
 	TEST_ASSERT(s.iter_init(NULL, &it) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.iter_init(&s, NULL) == EC_ERR_INVALID_ARG);
 	s.iter_init(&s, &it);
@@ -494,11 +494,11 @@ test_treeset_ulong_iterators_pos(void* mp)
 {
 	stamp();
 	printf("test_treeset_ulong_iterators_pos\n");
-	ec_treeset_ulongong_t s;
-	ec_treeset_ulongong_init(&s, mp, NULL);
+	ec_treeset_ulong_t s;
+	ec_treeset_ulong_init(&s, mp, NULL);
 	for (unsigned long i = 0; i < 5UL; i++)
 		s.add(&s, &i);
-	ec_treeset_ulongong_iter_t it;
+	ec_treeset_ulong_iter_t it;
 	TEST_ASSERT(s.iter_init(&s, &it) == EC_OK);
 	unsigned long key;
 	size_t cnt = 0;

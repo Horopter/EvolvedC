@@ -86,7 +86,7 @@ test_queue_recp_enqueue(void* mp)
 	TEST_ASSERT(st == EC_OK && q.size_fn(&q) == 2);
 	rec_t** peek_val = malloc(sizeof(rec_t*));
 	TEST_ASSERT(peek_val != NULL);
-	ec_status_t st = q.peek(&q, (void**)&peek_val);
+	st = q.peek(&q, (void**)&peek_val);
 	TEST_ASSERT(st == EC_OK && (*peek_val)->id == 10);
 	q.free_fn(&q);
 	EC_FREE(peek_val);
@@ -132,7 +132,7 @@ test_queue_recp_dequeue(void* mp)
 	TEST_ASSERT(st == EC_OK);
 	st = q.enqueue(&q, &b);
 	TEST_ASSERT(st == EC_OK);
-	ec_status_t st = q.enqueue(&q, &c);
+	st = q.enqueue(&q, &c);
 	TEST_ASSERT(st == EC_OK);
 
 	rec_t** dequeue_val = malloc(sizeof(rec_t*));
@@ -164,7 +164,8 @@ test_queue_recp_size(void* mp)
 	TEST_ASSERT(st == EC_OK);
 	TEST_ASSERT(q.size_fn(&q) == 0);
 	rec_t rec_a = { 1 };
-	rec_t *a = &rec_a, b = 2;
+	rec_t rec_b = { 2 };
+	rec_t *a = &rec_a, *b = &rec_b;
 	q.enqueue(&q, &a);
 	TEST_ASSERT(q.size_fn(&q) == 1);
 	q.enqueue(&q, &b);
@@ -182,7 +183,8 @@ test_queue_recp_free(void* mp)
 	ec_status_t st = ec_queue_recp_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	rec_t rec_a = { 5 };
-	rec_t *a = &rec_a, b = 6;
+	rec_t rec_b = { 6 };
+	rec_t *a = &rec_a, *b = &rec_b;
 	q.enqueue(&q, &a);
 	q.enqueue(&q, &b);
 	q.free_fn(&q);
@@ -309,38 +311,33 @@ void
 test_queue_recp_init_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_init_neg_null
-\n");
+	printf("test_queue_recp_init_neg_null\n");
 	ec_status_t st = ec_queue_recp_init(NULL, mp);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_recp_init_neg_null
-\n");
+	printf("pass: test_queue_recp_init_neg_null\n");
 }
 
 void
 test_queue_recp_enqueue_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_enqueue_neg_null
-\n");
+	printf("test_queue_recp_enqueue_neg_null\n");
 	ec_queue_recp_t q;
 	ec_status_t st = ec_queue_recp_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
-	rec_t rec_a = {10};
+	rec_t rec_a = { 10 };
 	rec_t* a = &rec_a;
 	st = q.enqueue(NULL, &a);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	q.free_fn(&q);
-	printf("pass: test_queue_recp_enqueue_neg_null
-\n");
+	printf("pass: test_queue_recp_enqueue_neg_null\n");
 }
 
 void
 test_queue_recp_peek_neg_empty(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_peek_neg_empty
-\n");
+	printf("test_queue_recp_peek_neg_empty\n");
 	ec_queue_recp_t q;
 	ec_status_t st = ec_queue_recp_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
@@ -350,108 +347,96 @@ test_queue_recp_peek_neg_empty(void* mp)
 	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
 	q.free_fn(&q);
 	EC_FREE(peek_val);
-	printf("pass: test_queue_recp_peek_neg_empty
-\n");
+	printf("pass: test_queue_recp_peek_neg_empty\n");
 }
 
 void
 test_queue_recp_peek_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_peek_neg_null
-\n");
+	printf("test_queue_recp_peek_neg_null\n");
 	ec_queue_recp_t q;
 	ec_status_t st = ec_queue_recp_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
-	rec_t rec_a = {10};
+	rec_t rec_a = { 10 };
 	rec_t* a = &rec_a;
 	q.enqueue(&q, &a);
 	st = q.peek(NULL, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	q.free_fn(&q);
-	printf("pass: test_queue_recp_peek_neg_null
-\n");
+	printf("pass: test_queue_recp_peek_neg_null\n");
 }
 
 void
 test_queue_recp_dequeue_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_dequeue_neg_null
-\n");
+	printf("test_queue_recp_dequeue_neg_null\n");
 	rec_t** out = malloc(sizeof(rec_t*));
 	TEST_ASSERT(out != NULL);
-	ec_status_t ec_status_t st = ec_queue_recp_dequeue(NULL, (void**)&out);
+	ec_status_t st = ec_queue_recp_dequeue(NULL, (void**)&out);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	EC_FREE(out);
-	printf("pass: test_queue_recp_dequeue_neg_null
-\n");
+	printf("pass: test_queue_recp_dequeue_neg_null\n");
 }
 
 void
 test_queue_recp_free_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_free_neg_null
-\n");
+	printf("test_queue_recp_free_neg_null\n");
 	ec_status_t st = ec_queue_recp_free_fn(NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_recp_free_neg_null
-\n");
+	printf("pass: test_queue_recp_free_neg_null\n");
 }
 
 void
 test_queue_recp_iter_replace_neg_no_prev(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_iter_replace_neg_no_prev
-\n");
+	printf("test_queue_recp_iter_replace_neg_no_prev\n");
 	ec_queue_recp_t q;
 	ec_status_t st = ec_queue_recp_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 	ec_queue_recp_iter_t it;
 	q.iter_init(&it, &q);
-	rec_t rec_new = {99};
+	rec_t rec_new = { 99 };
 	rec_t* new_val = &rec_new;
 	st = q.iter_replace(&it, &new_val, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
 	q.free_fn(&q);
-	printf("pass: test_queue_recp_iter_replace_neg_no_prev
-\n");
+	printf("pass: test_queue_recp_iter_replace_neg_no_prev\n");
 }
 
 void
 test_queue_recp_iter_replace_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_iter_replace_neg_null
-\n");
-	rec_t rec_new = {99};
+	printf("test_queue_recp_iter_replace_neg_null\n");
+	rec_t rec_new = { 99 };
 	rec_t* new_val = &rec_new;
 	ec_status_t st = ec_queue_recp_iter_replace(NULL, &new_val, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_recp_iter_replace_neg_null
-\n");
+	printf("pass: test_queue_recp_iter_replace_neg_null\n");
 }
 
 void
 test_queue_recp_zip_iter_next_neg_mismatch(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_zip_iter_next_neg_mismatch
-\n");
+	printf("test_queue_recp_zip_iter_next_neg_mismatch\n");
 	ec_queue_recp_t q1, q2;
 	ec_status_t st = ec_queue_recp_init(&q1, mp);
 	TEST_ASSERT(st == EC_OK);
 	st = ec_queue_recp_init(&q2, mp);
 	TEST_ASSERT(st == EC_OK);
-	rec_t rec_a = {10};
+	rec_t rec_a = { 10 };
 	rec_t* a = &rec_a;
-	rec_t rec_b = {20};
+	rec_t rec_b = { 20 };
 	rec_t* b = &rec_b;
 	q1.enqueue(&q1, &a);
 	q1.enqueue(&q1, &b);
-	rec_t rec_d = {100};
+	rec_t rec_d = { 100 };
 	rec_t* d = &rec_d;
 	q2.enqueue(&q2, &d);
 	ec_queue_recp_zip_iter_t zit;
@@ -459,7 +444,7 @@ test_queue_recp_zip_iter_next_neg_mismatch(void* mp)
 	rec_t** out1 = malloc(sizeof(rec_t*));
 	rec_t** out2 = malloc(sizeof(rec_t*));
 	TEST_ASSERT(out1 != NULL && out2 != NULL);
-	ec_status_t st = q1.zip_iter_next(&zit, (void**)&out1, (void**)&out2);
+	st = q1.zip_iter_next(&zit, (void**)&out1, (void**)&out2);
 	TEST_ASSERT(st == EC_OK);
 	st = q1.zip_iter_next(&zit, (void**)&out1, (void**)&out2);
 	TEST_ASSERT(st == EC_ITER_END);
@@ -467,20 +452,17 @@ test_queue_recp_zip_iter_next_neg_mismatch(void* mp)
 	q2.free_fn(&q2);
 	EC_FREE(out1);
 	EC_FREE(out2);
-	printf("pass: test_queue_recp_zip_iter_next_neg_mismatch
-\n");
+	printf("pass: test_queue_recp_zip_iter_next_neg_mismatch\n");
 }
 
 void
 test_queue_recp_zip_iter_next_neg_null(void* mp)
 {
 	stamp();
-	printf("test_queue_recp_zip_iter_next_neg_null
-\n");
+	printf("test_queue_recp_zip_iter_next_neg_null\n");
 	ec_status_t st = ec_queue_recp_zip_iter_next(NULL, NULL, NULL);
 	TEST_ASSERT(st == EC_ERR_INVALID_ARG);
-	printf("pass: test_queue_recp_zip_iter_next_neg_null
-\n");
+	printf("pass: test_queue_recp_zip_iter_next_neg_null\n");
 }
 
 int

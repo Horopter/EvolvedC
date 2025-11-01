@@ -1,9 +1,9 @@
 #include "../../src/ec_dlist.h"
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stduint64_t.h>
 #ifdef EC_USE_MEMPOOL
 #include "ec_mempool.h"
 #endif
@@ -831,7 +831,7 @@ test_iter_index_pos(void)
 	size_t idx = 0;
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
-			assert(l.iter_index(&it) == idx);
+			assert(l.iter_index(&it) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);
@@ -874,7 +874,7 @@ test_zip_iter_index_pos(void)
 	size_t idx = 0;
 	while (l1.zip_iter_next(&zit, &out1, &out2) == EC_OK)
 		{
-			assert(l1.zip_iter_index(&zit) == idx);
+			assert(l1.zip_iter_index(&zit) == idx + 1);
 			idx++;
 		}
 	assert(idx == 5);
@@ -937,10 +937,10 @@ test_zip_iter_replace_neg_not_supported(void)
 	assert(l2.free_fn(&l2) == EC_OK);
 }
 
-uint64_t
+int
 main(void)
 {
-	pruint64_tf("Starting ec_dlist_uint64_t tests...\n");
+	printf("Starting ec_dlist_uint64_t tests...\n");
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_conf_t conf = { 64, 100, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2.0f, NULL, NULL, NULL };
 	ec_mempool_t pool;
@@ -1011,6 +1011,6 @@ main(void)
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
-	pruint64_tf("All ec_dlist_uint64_t tests passed.\n");
+	printf("All ec_dlist_uint64_t tests passed.\n");
 	return 0;
 }

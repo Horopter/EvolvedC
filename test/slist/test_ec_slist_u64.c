@@ -1183,7 +1183,7 @@ test_slist_u64_zip_iter_not_supported(void* mp)
 	printf("pass: test_slist_u64_zip_iter_not_supported\n");
 }
 
-uint64_t
+int
 main(void)
 {
 	printf("Starting ec_slist_u64 tests...\n");

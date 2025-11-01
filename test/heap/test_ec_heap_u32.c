@@ -196,7 +196,7 @@ test_heap_invalid_args_neg(void* mp)
 	TEST_ASSERT(ec_heap_u32_init(&heap, 0, u32_comparator, mp) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(ec_heap_u32_init(&heap, 10, NULL, mp) == EC_ERR_INVALID_ARG);
 
-	st = ec_heap_u32_init(&heap, 10, u32_comparator, mp);
+	ec_status_t st = ec_heap_u32_init(&heap, 10, u32_comparator, mp);
 	TEST_ASSERT(st == EC_OK);
 
 	TEST_ASSERT(heap.insert(NULL, 42U) == EC_ERR_INVALID_ARG);

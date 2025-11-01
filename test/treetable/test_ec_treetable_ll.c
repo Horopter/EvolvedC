@@ -80,13 +80,13 @@ test_add_get_remove(void* mp)
 	printf("test_add_get_remove\n");
 	ec_treetable_ll_t t;
 	ec_treetable_ll_init(&t, mp, NULL);
-	long long k1 = 1LL, v1 = 1LL0, k2 = 2LL, v2 = 2LL0;
+	long long k1 = 1LL, v1 = 10LL, k2 = 2LL, v2 = 20LL;
 	t.add(&t, &k1, &v1);
 	t.add(&t, &k2, &v2);
 	TASSERT(t.size_fn(&t) == 2LL);
 	long long outv;
 	ec_status_t s1 = t.get(&t, &k1, &outv);
-	TASSERT(s1 == EC_OK && outv == 1LL0);
+	TASSERT(s1 == EC_OK && outv == 10LL);
 	long long bad = 999LL;
 	TASSERT(t.get(&t, &bad, &outv) == EC_ERR_NOT_FOUND);
 
@@ -107,16 +107,16 @@ test_get_first_last(void* mp)
 	printf("test_get_first_last\n");
 	ec_treetable_ll_t t;
 	ec_treetable_ll_init(&t, mp, NULL);
-	long long k1 = 1LL, v1 = 1LL0, k2 = 5LL, v2 = 5LL, k3 = 2LL, v3 = 2LL0;
+	long long k1 = 1LL, v1 = 10LL, k2 = 5LL, v2 = 5LL, k3 = 2LL, v3 = 20LL;
 	t.add(&t, &k1, &v1);
 	t.add(&t, &k2, &v2);
 	t.add(&t, &k3, &v3);
 
 	long long first_k, first_v, last_k, last_v;
-	TASSERT(t.get_first_key(&t, &first_k) == EC_OK && first_k == 5LL);
-	TASSERT(t.get_first_value(&t, &first_v) == EC_OK && first_v == 5LL);
-	TASSERT(t.get_last_key(&t, &last_k) == EC_OK && last_k == 2LL);
-	TASSERT(t.get_last_value(&t, &last_v) == EC_OK && last_v == 2LL0);
+	TASSERT(t.get_first_key(&t, &first_k) == EC_OK && first_k == 1LL);
+	TASSERT(t.get_first_value(&t, &first_v) == EC_OK && first_v == 10LL);
+	TASSERT(t.get_last_key(&t, &last_k) == EC_OK && last_k == 5LL);
+	TASSERT(t.get_last_value(&t, &last_v) == EC_OK && last_v == 5LL);
 
 	ec_treetable_ll_t empty;
 	ec_treetable_ll_init(&empty, mp, NULL);
@@ -169,8 +169,8 @@ test_greater_lesser(void* mp)
 			t.add(&t, &i, &val);
 		}
 	long long ask = 3LL, kO, vO; // keys=1..5
-	TASSERT(t.get_greater_than(&t, &ask, &kO, &vO) == EC_OK && kO == 4LL && vO == 1LL4);
-	TASSERT(t.get_lesser_than(&t, &ask, &kO, &vO) == EC_OK && kO == 2LL && vO == 1LL2);
+	TASSERT(t.get_greater_than(&t, &ask, &kO, &vO) == EC_OK && kO == 4LL && vO == 104LL);
+	TASSERT(t.get_lesser_than(&t, &ask, &kO, &vO) == EC_OK && kO == 2LL && vO == 102LL);
 	long long big = 999LL, smol = 0LL;
 	TASSERT(t.get_greater_than(&t, &big, &kO, &vO) == EC_ERR_NOT_FOUND);
 	TASSERT(t.get_lesser_than(&t, &smol, &kO, &vO) == EC_ERR_NOT_FOUND);
@@ -185,14 +185,14 @@ test_contains(void* mp)
 	printf("test_contains\n");
 	ec_treetable_ll_t t;
 	ec_treetable_ll_init(&t, mp, NULL);
-	long long k1 = 1LL, v1 = 1LL0;
+	long long k1 = 1LL, v1 = 10LL;
 	t.add(&t, &k1, &v1);
 	TASSERT(t.contains_key(&t, &k1) == EC_OK);
 	long long bad = 999LL;
 	TASSERT(t.contains_key(&t, &bad) == EC_ERR_NOT_FOUND);
-	long long vCheck = 1LL0;
+	long long vCheck = 10LL;
 	TASSERT(t.contains_value(&t, &vCheck) == EC_OK);
-	long long vBad = 5LL55LL;
+	long long vBad = 555LL;
 	TASSERT(t.contains_value(&t, &vBad) == EC_ERR_NOT_FOUND);
 	t.remove_all(&t);
 	printf("pass:test_contains\n");
@@ -220,7 +220,7 @@ test_custom_compare(void* mp)
 	long long k, v;
 	t.iter_init(&t, &it);
 	ec_status_t s = t.iter_next(&it, &k, &v);
-	TASSERT(s == EC_OK && k == 4LL && v == 1LL4);
+	TASSERT(s == EC_OK && k == 4LL && v == 104LL);
 	t.remove_all(&t);
 	printf("pass:test_custom_compare\n");
 }
@@ -240,7 +240,7 @@ test_iterators(void* mp)
 	ec_treetable_ll_iter_t it;
 	t.iter_init(&t, &it);
 	long long k, v;
-	size_t c = 0LL;
+	size_t c = 0;
 	while (t.iter_next(&it, &k, &v) == EC_OK)
 		{
 			TASSERT(k >= 0LL && k < 5);
@@ -292,15 +292,15 @@ test_big_random(void* mp)
 	ec_treetable_ll_t t;
 	ec_treetable_ll_init(&t, mp, NULL);
 	srand((unsigned)time(NULL));
-	const long long N = 1LL00;
-	long long* vals = (long long*)malloc(sizeof(int) * N);
+	const long long N = 100LL;
+	long long* vals = (long long*)malloc(sizeof(long long) * N);
 	for (long long i = 0LL; i < N; i++)
 		{
 			vals[i] = rand() % 5000;
 			long long v = vals[i] * 10;
 			t.add(&t, &vals[i], &v);
 		}
-	TASSERT(t.size_fn(&t) <= 1LL00);
+	TASSERT(t.size_fn(&t) <= 100LL);
 	for (long long i = 0LL; i < 50; i++)
 		{
 			long long idx = rand() % N;
@@ -320,7 +320,7 @@ test_invalid_args(void* mp)
 	printf("test_invalid_args\n");
 	ec_treetable_ll_t t;
 	ec_treetable_ll_init(&t, mp, NULL);
-	long long k = 1LL, v = 1LL0, out_k, out_v;
+	long long k = 1LL, v = 10LL, out_k, out_v;
 
 	TASSERT(ec_treetable_ll_init(NULL, mp, NULL) == EC_ERR_INVALID_ARG);
 	TASSERT(t.add(NULL, &k, &v) == EC_ERR_INVALID_ARG);

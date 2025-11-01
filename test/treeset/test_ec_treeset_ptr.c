@@ -163,9 +163,13 @@ test_treeset_ptr_remove_all_pos(void* mp)
 	printf("test_treeset_ptr_remove_all_pos\n");
 	ec_treeset_ptr_t s;
 	ec_treeset_ptr_init(&s, mp, NULL);
-	for (void* i = 0; i < (void*)10; i++)
-		s.add(&s, &i);
-	TEST_ASSERT(s.size_fn(&s) == (void*)10);
+	void* vals2[10];
+	for (int i = 0; i < 10; i++)
+		{
+			vals2[i] = (void*)(intptr_t)i;
+			s.add(&s, &vals2[i]);
+		}
+	TEST_ASSERT(s.size_fn(&s) == 10);
 	TEST_ASSERT(s.remove_all(&s) == EC_OK);
 	TEST_ASSERT(s.size_fn(&s) == 0);
 	TEST_ASSERT(s.remove_all(&s) == EC_OK);
@@ -334,9 +338,14 @@ test_treeset_ptr_get_greater_than_pos(void* mp)
 	printf("test_treeset_ptr_get_greater_than_pos\n");
 	ec_treeset_ptr_t s;
 	ec_treeset_ptr_init(&s, mp, NULL);
-	for (void* i = 1; i <= (void*)5; i++)
-		s.add(&s, &i);
-	void *ask = 3, out;
+	void* vals[5];
+	for (int i = 0; i < 5; i++)
+		{
+			int val = i + 1;
+			vals[i] = (void*)(intptr_t)val;
+			s.add(&s, &vals[i]);
+		}
+	void *ask = (void*)(intptr_t)3, *out;
 	TEST_ASSERT(s.get_greater_than(&s, &ask, &out) == EC_OK);
 	TEST_ASSERT(out != NULL);
 	s.remove_all(&s);
@@ -352,7 +361,7 @@ test_treeset_ptr_get_greater_than_neg(void* mp)
 	ec_treeset_ptr_init(&s, mp, NULL);
 	void* k = (void*)(uintptr_t)10;
 	s.add(&s, &k);
-	void *ask = (void*)999, out;
+	void *ask = (void*)(intptr_t)999, *out;
 	TEST_ASSERT(s.get_greater_than(NULL, &ask, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_greater_than(&s, NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_greater_than(&s, &ask, NULL) == EC_ERR_INVALID_ARG);
@@ -368,9 +377,14 @@ test_treeset_ptr_get_lesser_than_pos(void* mp)
 	printf("test_treeset_ptr_get_lesser_than_pos\n");
 	ec_treeset_ptr_t s;
 	ec_treeset_ptr_init(&s, mp, NULL);
-	for (void* i = 1; i <= (void*)5; i++)
-		s.add(&s, &i);
-	void *ask = 3, out;
+	void* vals3[5];
+	for (int i = 0; i < 5; i++)
+		{
+			int val = i + 1;
+			vals3[i] = (void*)(intptr_t)val;
+			s.add(&s, &vals3[i]);
+		}
+	void *ask = (void*)(intptr_t)3, *out;
 	TEST_ASSERT(s.get_lesser_than(&s, &ask, &out) == EC_OK);
 	TEST_ASSERT(out != NULL);
 	s.remove_all(&s);
@@ -386,7 +400,7 @@ test_treeset_ptr_get_lesser_than_neg(void* mp)
 	ec_treeset_ptr_init(&s, mp, NULL);
 	void* k = (void*)(uintptr_t)10;
 	s.add(&s, &k);
-	void *ask = 0, out;
+	void *ask = (void*)0, *out;
 	TEST_ASSERT(s.get_lesser_than(NULL, &ask, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_lesser_than(&s, NULL, &out) == EC_ERR_INVALID_ARG);
 	TEST_ASSERT(s.get_lesser_than(&s, &ask, NULL) == EC_ERR_INVALID_ARG);
@@ -442,8 +456,13 @@ test_treeset_ptr_foreach_pos(void* mp)
 	printf("test_treeset_ptr_foreach_pos\n");
 	ec_treeset_ptr_t s;
 	ec_treeset_ptr_init(&s, mp, NULL);
-	for (void* i = 0; i < (void*)5; i++)
-		s.add(&s, &i);
+	int x1 = 1, x2 = 2, x3 = 3, x4 = 4, x5 = 5;
+	void *i1 = &x1, *i2 = &x2, *i3 = &x3, *i4 = &x4, *i5 = &x5;
+	s.add(&s, &i1);
+	s.add(&s, &i2);
+	s.add(&s, &i3);
+	s.add(&s, &i4);
+	s.add(&s, &i5);
 	TEST_ASSERT(s.foreach (&s, foreach_key_ptr) == EC_OK);
 	s.remove_all(&s);
 	printf("pass:test_treeset_ptr_foreach_pos\n");
@@ -508,8 +527,13 @@ test_treeset_ptr_iterators_pos(void* mp)
 	printf("test_treeset_ptr_iterators_pos\n");
 	ec_treeset_ptr_t s;
 	ec_treeset_ptr_init(&s, mp, NULL);
-	for (void* i = 0; i < (void*)5; i++)
-		s.add(&s, &i);
+	int x1 = 1, x2 = 2, x3 = 3, x4 = 4, x5 = 5;
+	void *i1 = &x1, *i2 = &x2, *i3 = &x3, *i4 = &x4, *i5 = &x5;
+	s.add(&s, &i1);
+	s.add(&s, &i2);
+	s.add(&s, &i3);
+	s.add(&s, &i4);
+	s.add(&s, &i5);
 	ec_treeset_ptr_iter_t it;
 	TEST_ASSERT(s.iter_init(&s, &it) == EC_OK);
 	void* key;
@@ -519,7 +543,7 @@ test_treeset_ptr_iterators_pos(void* mp)
 			TEST_ASSERT(key != NULL);
 			cnt++;
 		}
-	TEST_ASSERT(cnt == (void*)5);
+	TEST_ASSERT(cnt == 5);
 	TEST_ASSERT(s.iter_init(&s, &it) == EC_OK);
 	TEST_ASSERT(s.iter_next(&it, &key) == EC_OK);
 	TEST_ASSERT(s.iter_remove(&it) == EC_OK && s.size_fn(&s) == 4);

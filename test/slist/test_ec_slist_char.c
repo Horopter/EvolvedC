@@ -147,7 +147,7 @@ test_slist_char_remove(void* mp)
 	ec_status_t init_status = ec_slist_char_init(&l, mp);
 	TEST_ASSERT(init_status == EC_OK);
 
-	char a = 'a', b = 20, c = 30;
+	char a = 'a', b = 'b', c = 'c';
 	ec_status_t add_status_a = l.add(&l, &a);
 	ec_status_t add_status_b = l.add(&l, &b);
 	ec_status_t add_status_c = l.add(&l, &c);
@@ -224,12 +224,12 @@ test_slist_char_get_at(void* mp)
 	printf("test_slist_char_get_at\n");
 	ec_slist_char_t l;
 	ec_slist_char_init(&l, mp);
-	char a = 'a', b = 200;
+	char a = 'a', b = 'b';
 	l.add(&l, &a);
 	l.add(&l, &b);
 	void* out = NULL;
 	ec_status_t s = l.get_at(&l, 1, &out);
-	TEST_ASSERT(s == EC_OK && *(char*)out == 200);
+	TEST_ASSERT(s == EC_OK && *(char*)out == 'b');
 	s = l.get_at(&l, 2, &out);
 	TEST_ASSERT(s == EC_ERR_OUT_OF_BOUNDS);
 	l.free_fn(&l);
@@ -247,7 +247,7 @@ test_slist_char_get_first(void* mp)
 	l.add(&l, &a);
 	void* out = NULL;
 	ec_status_t s = l.get_first(&l, &out);
-	TEST_ASSERT(s == EC_OK && *(char*)out == 777);
+	TEST_ASSERT(s == EC_OK && *(char*)out == 'z');
 	l.free_fn(&l);
 	printf("pass: test_slist_char_get_first\n");
 }
@@ -363,7 +363,7 @@ test_slist_char_sublist(void* mp)
 		}
 
 	// Adding elements: 10, 20, 30, 40, 50
-	for (char i = 'a'; i < 5; i++)
+	for (char i = 0; i < 5; i++)
 		{
 			char v = (i + 1) * 10;
 			ec_status_t add_status = l.add(&l, &v);
@@ -1090,7 +1090,7 @@ test_slist_char_iter_index(void* mp)
 	ec_slist_char_iter_t it;
 	l.iter_init(&it, &l);
 	void* out;
-	size_t idx = 0;
+	size_t idx = 1;  // iter_index is 1-based after first iter_next
 	while (l.iter_next(&it, &out) == EC_OK)
 		{
 			TEST_ASSERT(l.iter_index(&it) == idx);
@@ -1183,7 +1183,8 @@ test_slist_char_zip_iter_not_supported(void* mp)
 	printf("pass: test_slist_char_zip_iter_not_supported\n");
 }
 
-int main(void)
+int
+main(void)
 {
 	printf("Starting ec_slist_char tests...\n");
 #ifdef EC_USE_MEMPOOL

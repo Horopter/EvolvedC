@@ -76,7 +76,7 @@ test_hashmap_uint_add_get(void* mp)
 	printf("test_hashmap_uint_add_get\n");
 	ec_hashmap_uint_t hm;
 	ec_hashmap_uint_init(&hm, mp);
-	unsigned unsigned unsigned int k3 = 30UUU, v1 = 500, k2 = 200, v2 = 600;
+	unsigned int k1 = 100U, k2 = 200U, k3 = 30U, v1 = 100U, v2 = 200U;
 	hm.add(&hm, &k1, &v1);
 	hm.add(&hm, &k2, &v2);
 	unsigned int* out;
@@ -101,7 +101,7 @@ test_hashmap_uint_duplicate_keys(void* mp)
 	printf("test_hashmap_uint_duplicate_keys\n");
 	ec_hashmap_uint_t hm;
 	ec_hashmap_uint_init(&hm, mp);
-	int k = 1, v = 10, v2 = 99;
+	int k = 1, v = 10, v2 = 200;
 	hm.add(&hm, &k, &v);
 	unsigned int* out;
 	ec_status_t s = hm.get(&hm, &k, &out);
@@ -148,7 +148,7 @@ test_hashmap_uint_remove_all(void* mp)
 			hm.add(&hm, &k, &v);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t ec_status_t st = hm.remove_all(&hm);
+	ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
@@ -281,7 +281,7 @@ test_hashmap_uint_rehash(void* mp)
 	size_t th = (size_t)(ic * 0.75);
 	for (int i = 0; i < (int)(th + 2); i++)
 		{
-			int k = (unsigned int)i, v = (unsigned int)(i + 100)0;
+			int k = (unsigned int)i, v = (unsigned int)(i + 100);
 			hm.add(&hm, &k, &v);
 		}
 	size_t nc = hm.capacity_fn(&hm);

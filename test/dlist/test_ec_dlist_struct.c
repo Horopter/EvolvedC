@@ -1,10 +1,10 @@
+#include "../../src/ec_dlist.h"
+
 typedef struct
 {
 	int id;
 } rec_t;
 EC_DLIST_DEF(rec_t*, recp)
-
-#include "../../src/ec_dlist.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -111,7 +111,8 @@ test_add_at_neg_oob(void)
 	ec_dlist_recp_t l;
 	assert(ec_dlist_recp_init(&l, NULL) == EC_OK);
 	rec_t rec_x = { 1 };
-	rec_t *x = &rec_x, y = 2;
+	rec_t rec_y = { 2 };
+	rec_t *x = &rec_x, *y = &rec_y;
 	assert(l.add(&l, &x) == EC_OK);
 	assert(l.add_at(&l, &y, 5) == EC_ERR_OUT_OF_BOUNDS);
 	assert(l.free_fn(&l) == EC_OK);
@@ -131,9 +132,8 @@ test_remove_pos(void)
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	assert(l.add(&l, &c) == EC_OK);
-	rec_t rec_v = { 20 };
-	rec_t* v = &rec_v;
-	assert(l.remove_fn(&l, &v) == EC_OK);
+	// remove_fn uses pointer equality, so we need to pass the same pointer that was added
+	assert(l.remove_fn(&l, &b) == EC_OK);
 	assert(l.size_fn(&l) == 2);
 	assert(l.free_fn(&l) == EC_OK);
 }
@@ -245,7 +245,8 @@ test_get_at_pos(void)
 	ec_dlist_recp_t l;
 	assert(ec_dlist_recp_init(&l, NULL) == EC_OK);
 	rec_t rec_a = { 10 };
-	rec_t *a = &rec_a0, b = 200;
+	rec_t rec_b = { 200 };
+	rec_t *a = &rec_a, *b = &rec_b;
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	rec_t** out = NULL;
@@ -259,7 +260,8 @@ test_get_at_neg_oob(void)
 	ec_dlist_recp_t l;
 	assert(ec_dlist_recp_init(&l, NULL) == EC_OK);
 	rec_t rec_a = { 10 };
-	rec_t *a = &rec_a0, b = 200;
+	rec_t rec_b = { 200 };
+	rec_t *a = &rec_a, *b = &rec_b;
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.add(&l, &b) == EC_OK);
 	rec_t** out = NULL;
@@ -323,7 +325,8 @@ test_splice_pos(void)
 	assert(ec_dlist_recp_init(&l1, NULL) == EC_OK);
 	assert(ec_dlist_recp_init(&l2, NULL) == EC_OK);
 	rec_t rec_a = { 10 };
-	rec_t *a = &rec_a, b = 20, c = 30, d = 40;
+	rec_t rec_b = { 20 }, rec_c = { 30 }, rec_d = { 40 };
+	rec_t *a = &rec_a, *b = &rec_b, *c = &rec_c, *d = &rec_d;
 	assert(l1.add(&l1, &a) == EC_OK);
 	assert(l1.add(&l1, &b) == EC_OK);
 	assert(l2.add(&l2, &c) == EC_OK);
@@ -403,7 +406,10 @@ test_add_all_at_pos(void)
 	assert(ec_dlist_recp_init(&l1, NULL) == EC_OK);
 	assert(ec_dlist_recp_init(&l2, NULL) == EC_OK);
 	rec_t rec_a = { 10 };
-	rec_t *a = &rec_a, b = 30, c = 20, d = 25;
+	rec_t rec_b = { 30 };
+	rec_t rec_c = { 20 };
+	rec_t rec_d = { 25 };
+	rec_t *a = &rec_a, *b = &rec_b, *c = &rec_c, *d = &rec_d;
 	assert(l1.add(&l1, &a) == EC_OK);
 	assert(l1.add(&l1, &b) == EC_OK);
 	assert(l2.add(&l2, &c) == EC_OK);
@@ -434,7 +440,7 @@ test_sublist_pos(void)
 	for (size_t i = 0; i < 3; i++)
 		{
 			rec_t** out = NULL;
-			assert(sub->get_at(sub, i, &out) == EC_OK && (*(rec_t**)out)->id == exp[i]);
+			assert(sub->get_at(sub, i, (void**)&out) == EC_OK && (*(rec_t**)out)->id == exp[i]->id);
 		}
 	assert(sub->free_fn(sub) == EC_OK);
 	free(sub);
@@ -518,7 +524,8 @@ test_replace_at_neg_oob(void)
 	ec_dlist_recp_t l;
 	assert(ec_dlist_recp_init(&l, NULL) == EC_OK);
 	rec_t rec_a = { 5 };
-	rec_t *a = &rec_a, c = 99;
+	rec_t rec_c = { 99 };
+	rec_t *a = &rec_a, *c = &rec_c;
 	assert(l.add(&l, &a) == EC_OK);
 	assert(l.replace_at(&l, &c, 5) == EC_ERR_OUT_OF_BOUNDS);
 	assert(l.free_fn(&l) == EC_OK);
@@ -622,7 +629,7 @@ test_to_array_pos(void)
 	assert(l.add(&l, &c) == EC_OK);
 	void** arr = NULL;
 	assert(l.to_array(&l, &arr) == EC_OK);
-	assert((*(rec_t**)a)->idrr[0] == 1 && (*(rec_t**)a)->idrr[1] == 2 && (*(rec_t**)a)->idrr[2] == 3);
+	assert((*(rec_t**)arr)[0].id == 1 && (*(rec_t**)arr)[1].id == 2 && (*(rec_t**)arr)[2].id == 3);
 	free(arr);
 	assert(l.free_fn(&l) == EC_OK);
 }
@@ -1000,7 +1007,8 @@ test_zip_iter_add_neg_not_supported(void)
 	ec_dlist_recp_zip_iter_t zit;
 	l1.zip_iter_init(&zit, &l1, &l2);
 	rec_t rec_x = { 1 };
-	rec_t *x = &rec_x0, y = 20;
+	rec_t rec_y = { 20 };
+	rec_t *x = &rec_x, *y = &rec_y;
 	assert(l1.zip_iter_add(&zit, &x, &y) == EC_ERR_NOT_SUPPORTED);
 	assert(l1.free_fn(&l1) == EC_OK);
 	assert(l2.free_fn(&l2) == EC_OK);
@@ -1038,7 +1046,8 @@ test_zip_iter_replace_neg_not_supported(void)
 	void *out1, *out2;
 	assert(l1.zip_iter_next(&zit, &out1, &out2) == EC_OK);
 	rec_t rec_x = { 1 };
-	rec_t *x = &rec_x0, y = 20;
+	rec_t rec_y = { 20 };
+	rec_t *x = &rec_x, *y = &rec_y;
 	void *old1, *old2;
 	assert(l1.zip_iter_replace(&zit, &x, &y, &old1, &old2) == EC_ERR_NOT_SUPPORTED);
 	assert(l1.free_fn(&l1) == EC_OK);

@@ -76,7 +76,7 @@ test_hashmap_u32_add_get(void* mp)
 	printf("test_hashmap_u32_add_get\n");
 	ec_hashmap_u32_t hm;
 	ec_hashmap_u32_init(&hm, mp);
-	uint32_t k1 = 10U, v1 = 500, k2 = 200, v2 = 600;
+	uint32_t k1 = 10U, v1 = 100U, k2 = 200, v2 = 200U;
 	hm.add(&hm, &k1, &v1);
 	hm.add(&hm, &k2, &v2);
 	uint32_t* out;
@@ -101,7 +101,7 @@ test_hashmap_u32_duplicate_keys(void* mp)
 	printf("test_hashmap_u32_duplicate_keys\n");
 	ec_hashmap_u32_t hm;
 	ec_hashmap_u32_init(&hm, mp);
-	int k = 1, v = 10, v2 = 99;
+	int k = 1, v = 10, v2 = 200;
 	hm.add(&hm, &k, &v);
 	uint32_t* out;
 	ec_status_t s = hm.get(&hm, &k, &out);
@@ -121,7 +121,7 @@ test_hashmap_u32_remove(void* mp)
 	printf("test_hashmap_u32_remove\n");
 	ec_hashmap_u32_t hm;
 	ec_hashmap_u32_init(&hm, mp);
-	uint32_t k2 = 20U, v1 = 10, k2 = 2, v2 = 20, k3 = 3, v3 = 30;
+	uint32_t k1 = 1U, k2 = 2U, k3 = 3U, v1 = 10U, v2 = 20U, v3 = 30U;
 	hm.add(&hm, &k1, &v1);
 	hm.add(&hm, &k2, &v2);
 	hm.add(&hm, &k3, &v3);
@@ -144,11 +144,11 @@ test_hashmap_u32_remove_all(void* mp)
 	ec_hashmap_u32_init(&hm, mp);
 	for (int i = 0; i < 10; i++)
 		{
-			int k = (uint32_t)i, v = (uint32_t)(i + 100);
+			uint32_t k = (uint32_t)i, v = (uint32_t)(i + 100);
 			hm.add(&hm, &k, &v);
 		}
 	TEST_ASSERT(hm.size_fn(&hm) == 10);
-	ec_status_t ec_status_t st = hm.remove_all(&hm);
+	ec_status_t st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
 	st = hm.remove_all(&hm);
 	TEST_ASSERT(st == EC_OK && hm.size_fn(&hm) == 0);
@@ -245,15 +245,15 @@ test_hashmap_u32_iterators(void* mp)
 	printf("test_hashmap_u32_iterators\n");
 	ec_hashmap_u32_t hm;
 	ec_hashmap_u32_init(&hm, mp);
-	for (int i = 0; i < 5; i++)
-		{
-			int k = i + 100, v = i + 200;
-			hm.add(&hm, &k, &v);
-		}
+		for (int i = 0; i < 5; i++)
+			{
+				uint32_t k = (uint32_t)(i + 100), v = (uint32_t)(i + 200);
+				hm.add(&hm, &k, &v);
+			}
 	ec_hashmap_u32_iter_t it;
 	ec_status_t st = hm.iter_init(&hm, &it);
 	TEST_ASSERT(st == EC_OK);
-	int key, val;
+	uint32_t key, val;
 	size_t c = 0;
 	while (hm.iter_next(&it, &key, &val) == EC_OK)
 		{
@@ -281,17 +281,17 @@ test_hashmap_u32_rehash(void* mp)
 	size_t th = (size_t)(ic * 0.75);
 	for (int i = 0; i < (int)(th + 2); i++)
 		{
-			int k = (uint32_t)i, v = (uint32_t)(i + 100)0;
+			uint32_t k = (uint32_t)i, v = (uint32_t)(i + 100);
 			hm.add(&hm, &k, &v);
 		}
 	size_t nc = hm.capacity_fn(&hm);
 	TEST_ASSERT(nc == ic * 2);
 	for (int i = 0; i < (int)(th + 2); i++)
 		{
-			int* kval = NULL;
-			int k = i;
+			uint32_t* kval = NULL;
+			uint32_t k = (uint32_t)i;
 			ec_status_t s = hm.get(&hm, &k, &kval);
-			TEST_ASSERT(s == EC_OK && *kval == i + 1000);
+			TEST_ASSERT(s == EC_OK && *kval == (uint32_t)(i + 100));
 			free(kval);
 		}
 	hm.remove_all(&hm);

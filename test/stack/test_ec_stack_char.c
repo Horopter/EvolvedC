@@ -120,7 +120,7 @@ test_stack_char_pop(void* mp)
 	TEST_ASSERT(st == EC_OK && *out == 'z');
 	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_OK && *out == 'y');
-	ec_status_t st = s.pop(&s, (void**)&out);
+	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_OK && *out == 'x');
 	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
@@ -215,7 +215,7 @@ test_stack_char_zip_iterators(void* mp)
 			count++;
 		}
 	TEST_ASSERT(count == 3);
-	ec_status_t st = s1.zip_iter_replace(&zit, &a, &d, NULL, NULL);
+	st = s1.zip_iter_replace(&zit, &a, &d, NULL, NULL);
 	TEST_ASSERT(st == EC_ERR_NOT_SUPPORTED);
 	s1.free_fn(&s1);
 	s2.free_fn(&s2);

@@ -5,8 +5,8 @@
 #ifdef __linux__
 #include <execinfo.h>
 #endif
-#include <stdint.h>
 #include "../../src/ec_stack.h"
+#include <stdint.h>
 #ifdef EC_USE_MEMPOOL
 #include "ec_mempool.h"
 #endif
@@ -123,7 +123,7 @@ test_stack_ptr_pop(void* mp)
 	TEST_ASSERT(st == EC_OK && *out == p3);
 	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_OK && *out == p2);
-	ec_status_t st = s.pop(&s, (void**)&out);
+	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_OK && *out == p1);
 	st = s.pop(&s, (void**)&out);
 	TEST_ASSERT(st == EC_ERR_OUT_OF_BOUNDS);
@@ -223,7 +223,7 @@ test_stack_ptr_zip_iterators(void* mp)
 			count++;
 		}
 	TEST_ASSERT(count == 3);
-	ec_status_t st = s1.zip_iter_replace(&zit, &p1, &p4, NULL, NULL);
+	st = s1.zip_iter_replace(&zit, &p1, &p4, NULL, NULL);
 	TEST_ASSERT(st == EC_ERR_NOT_SUPPORTED);
 	s1.free_fn(&s1);
 	s2.free_fn(&s2);

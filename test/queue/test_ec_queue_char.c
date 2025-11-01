@@ -114,7 +114,7 @@ test_queue_ch_dequeue(void* mp)
 	ec_queue_ch_t q;
 	ec_status_t st = ec_queue_ch_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
-	char a = 'a', b = 'b', c = 30;
+	char a = 'a', b = 'b', c = 'c';
 	st = q.enqueue(&q, &a);
 	TEST_ASSERT(st == EC_OK);
 	st = q.enqueue(&q, &b);
@@ -124,8 +124,8 @@ test_queue_ch_dequeue(void* mp)
 
 	char* dequeue_val = malloc(sizeof(char));
 	TEST_ASSERT(dequeue_val != NULL);
-	ec_status_t st = q.dequeue(&q, (void**)&dequeue_val);
-	TEST_ASSERT(st == EC_OK && *dequeue_val == 'a' && q.size_fn(&q) == 2);
+	ec_status_t st2 = q.dequeue(&q, (void**)&dequeue_val);
+	TEST_ASSERT(st2 == EC_OK && *dequeue_val == 'a' && q.size_fn(&q) == 2);
 
 	st = q.dequeue(&q, (void**)&dequeue_val);
 	TEST_ASSERT(st == EC_OK && *dequeue_val == 'b' && q.size_fn(&q) == 1);
@@ -185,7 +185,7 @@ test_queue_ch_iterators(void* mp)
 	ec_status_t st = ec_queue_ch_init(&q, mp);
 	TEST_ASSERT(st == EC_OK);
 
-	char v1 = 'x', v2 = 2, v3 = 3;
+	char v1 = 'x', v2 = 'y', v3 = 'z';
 	q.enqueue(&q, &v1);
 	q.enqueue(&q, &v2);
 	q.enqueue(&q, &v3);
@@ -234,8 +234,8 @@ test_queue_ch_zip_iterators(void* mp)
 	st = ec_queue_ch_init(&q2, mp);
 	TEST_ASSERT(st == EC_OK);
 
-	char a = 'a', b = 'b', c = 30;
-	char d = 'a', e = 200, f = 300;
+	char a = 'a', b = 'b', c = 'c';
+	char d = 'a', e = 'b', f = 'c';
 	q1.enqueue(&q1, &a);
 	q1.enqueue(&q1, &b);
 	q1.enqueue(&q1, &c);
@@ -400,7 +400,7 @@ test_queue_ch_zip_iter_next_neg_mismatch(void* mp)
 	void* out1 = malloc(sizeof(char));
 	void* out2 = malloc(sizeof(char));
 	TEST_ASSERT(out1 != NULL && out2 != NULL);
-	ec_status_t st = q1.zip_iter_next(&zit, &out1, &out2);
+	st = q1.zip_iter_next(&zit, &out1, &out2);
 	TEST_ASSERT(st == EC_OK);
 	st = q1.zip_iter_next(&zit, &out1, &out2);
 	TEST_ASSERT(st == EC_ITER_END);

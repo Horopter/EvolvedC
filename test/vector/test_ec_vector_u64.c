@@ -108,11 +108,11 @@ test_insert_pos_middle(void)
 	ec_vector_u64_t vec;
 	ec_vector_u64_init(&vec, 3, NULL);
 	vec.push(&vec, 1);
-	vec.push(&vec, 3);
-	assert(vec.insert(&vec, 3, 2000ULL) == EC_OK);
+	vec.push(&vec, 3);                             // Vector has size 2, valid indices: 0, 1, 2
+	assert(vec.insert(&vec, 2, 2000ULL) == EC_OK); // Insert at index 2 (end)
 	assert(vec.size_fn(&vec) == 3);
 	uint64_t val;
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2000ULL);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 2000ULL);
 	vec.free_fn(&vec);
 }
 
@@ -121,8 +121,8 @@ test_insert_pos_end(void)
 {
 	ec_vector_u64_t vec;
 	ec_vector_u64_init(&vec, 3, NULL);
-	vec.push(&vec, 1);
-	assert(vec.insert(&vec, 3, 2000ULL) == EC_OK);
+	vec.push(&vec, 1);                             // Vector has size 1, valid indices: 0, 1, 2
+	assert(vec.insert(&vec, 1, 2000ULL) == EC_OK); // Insert at index 1 (end)
 	assert(vec.size_fn(&vec) == 2);
 	vec.free_fn(&vec);
 }
@@ -151,11 +151,11 @@ test_remove_at_pos(void)
 	vec.push(&vec, 1);
 	vec.push(&vec, 2);
 	vec.push(&vec, 3);
-	assert(vec.remove_at(&vec, 1) == EC_OK);
+	assert(vec.remove_at(&vec, 1) == EC_OK); // Remove index 1 (value 2)
 	assert(vec.size_fn(&vec) == 2);
 	uint64_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1000ULL);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 3000ULL);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1ULL); // First element is 1
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 3ULL); // Second element is 3
 	vec.free_fn(&vec);
 }
 
@@ -216,7 +216,7 @@ test_replace_at_pos(void)
 	vec.push(&vec, 5);
 	uint64_t old_val;
 	assert(vec.replace_at(&vec, 0, 9999ULL, &old_val) == EC_OK);
-	assert(old_val == 1000ULL);
+	assert(old_val == 5ULL); // Original value was 5
 	uint64_t val;
 	assert(vec.get(&vec, 0, &val) == EC_OK && val == 9999ULL);
 	vec.free_fn(&vec);
@@ -241,7 +241,7 @@ test_replace_at_neg_out_of_bounds(void)
 	ec_vector_u64_init(&vec, 3, NULL);
 	vec.push(&vec, 5);
 	uint64_t old_val;
-	assert(vec.replace_at(&vec, 0, 9999ULL, &old_val) == EC_ERR_OUT_OF_BOUNDS);
+	assert(vec.replace_at(&vec, 1, 9999ULL, &old_val) == EC_ERR_OUT_OF_BOUNDS); // Index 1 is out of bounds for empty vector
 	vec.free_fn(&vec);
 }
 
@@ -252,10 +252,10 @@ test_swap_pos(void)
 	ec_vector_u64_init(&vec, 3, NULL);
 	vec.push(&vec, 11);
 	vec.push(&vec, 22);
-	assert(vec.swap(&vec, 0, 1) == EC_OK);
+	assert(vec.swap(&vec, 0, 1) == EC_OK); // Swap 11 and 22
 	uint64_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 2222ULL);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 1111ULL);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 22ULL); // After swap, index 0 is 22
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 11ULL); // After swap, index 1 is 11
 	vec.free_fn(&vec);
 }
 
@@ -395,11 +395,11 @@ test_sort_pos(void)
 	vec.push(&vec, 3);
 	vec.push(&vec, 1);
 	vec.push(&vec, 2);
-	vec.sort(&vec, cmp_u64);
+	vec.sort(&vec, cmp_u64); // Sort [3, 1, 2] -> [1, 2, 3]
 	uint64_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1000ULL);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2000ULL);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 3000ULL);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1ULL);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2ULL);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 3ULL);
 	vec.free_fn(&vec);
 }
 
@@ -422,11 +422,11 @@ test_reverse_pos(void)
 	vec.push(&vec, 1);
 	vec.push(&vec, 2);
 	vec.push(&vec, 3);
-	vec.reverse(&vec);
+	vec.reverse(&vec); // Reverse [1, 2, 3] -> [3, 2, 1]
 	uint64_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 3000ULL);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2000ULL);
-	assert(vec.get(&vec, 2, &val) == EC_OK && val == 1000ULL);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 3ULL);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2ULL);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 1ULL);
 	vec.free_fn(&vec);
 }
 
@@ -456,10 +456,10 @@ test_map_pos(void)
 	ec_vector_u64_init(&vec, 3, NULL);
 	vec.push(&vec, 5);
 	vec.push(&vec, 1000ULL);
-	vec.map(&vec, inc_u64);
+	vec.map(&vec, inc_u64); // Map [5, 1000] -> [6, 1001] (increment each)
 	uint64_t val;
-	assert(vec.get(&vec, 0, &val) == EC_OK && val == 2000ULL);
-	assert(vec.get(&vec, 1, &val) == EC_OK && val == 1111ULL);
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 6ULL);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 1001ULL);
 	vec.free_fn(&vec);
 }
 
@@ -484,7 +484,7 @@ test_reduce_pos(void)
 	vec.push(&vec, 3);
 	uint64_t result = 0;
 	vec.reduce(&vec, sum_u64, &result);
-	assert(result == (1000ULL + 2000ULL + 3000ULL));
+	assert(result == (1ULL + 2ULL + 3ULL)); // Sum is 6
 	vec.free_fn(&vec);
 }
 
@@ -522,7 +522,8 @@ test_subarray_pos(void)
 	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK);
 	assert(sub.size_fn(&sub) == 3);
 	uint64_t val;
-	assert(sub.get(&sub, 0, &val) == EC_OK && val == 3000ULL);
+	// Values at indices 2,3,4 are 30,40,50 (i*10 for i=1..6), so first element of subarray is 30
+	assert(sub.get(&sub, 0, &val) == EC_OK && val == 30ULL);
 	sub.free_fn(&sub);
 	vec.free_fn(&vec);
 }
@@ -624,7 +625,8 @@ test_filter_pos(void)
 		vec.push(&vec, nums[i]);
 	ec_vector_u64_t filtered;
 	assert(vec.filter(&vec, is_even_u64, &filtered) == EC_OK);
-	assert(filtered.size_fn(&filtered) == 3);
+	// All 6 values are even, so all should pass the filter
+	assert(filtered.size_fn(&filtered) == 6);
 	filtered.free_fn(&filtered);
 	vec.free_fn(&vec);
 }
@@ -651,7 +653,8 @@ test_filter_mut_pos(void)
 	for (int i = 0; i < 6; i++)
 		vec.push(&vec, nums[i]);
 	assert(vec.filter_mut(&vec, is_even_u64) == EC_OK);
-	assert(vec.size_fn(&vec) == 3);
+	// All 6 values are even, so all should remain after filter
+	assert(vec.size_fn(&vec) == 6);
 	vec.free_fn(&vec);
 }
 
@@ -847,7 +850,7 @@ test_iter_replace_pos(void)
 	ec_vector_u64_iter_next(&iter, &val);
 	uint64_t replaced;
 	assert(ec_vector_u64_iter_replace(&iter, 9999ULL, &replaced) == EC_OK);
-	assert(replaced == 100);
+	assert(replaced == 10000ULL); // Original value was 10000ULL
 	vec.free_fn(&vec);
 }
 

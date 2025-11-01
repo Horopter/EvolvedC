@@ -32,8 +32,7 @@ add_ulls(void* a, void* b, void* out)
 }
 
 static void
-    mul_unsigned long
-    longs(void* a, void* b, void* out)
+mul_unsigned_long_longs(void* a, void* b, void* out)
 {
 	*(unsigned long long*)out = (*(unsigned long long*)a) * (*(unsigned long long*)b);
 }
@@ -943,9 +942,10 @@ test_zip_iter_replace_neg_not_supported(void)
 	assert(l2.free_fn(&l2) == EC_OK);
 }
 
-unsigned int main(void)
+int
+main(void)
 {
-	prunsigned long longf("Starting ec_dlist_unsigned long long tests...\n");
+	printf("Starting ec_dlist_unsigned long long tests...\n");
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_conf_t conf = { 64, 100, EC_MEMPOOL_DYNAMIC, EC_THREAD_UNSAFE, 8, 0, 2.0f, NULL, NULL, NULL };
 	ec_mempool_t pool;
@@ -1016,6 +1016,6 @@ unsigned int main(void)
 #ifdef EC_USE_MEMPOOL
 	ec_mempool_destroy((ec_mempool_t*)mp);
 #endif
-	prunsigned long longf("All ec_dlist_unsigned long long tests passed.\n");
+	printf("All ec_dlist_unsigned long long tests passed.\n");
 	return 0;
 }

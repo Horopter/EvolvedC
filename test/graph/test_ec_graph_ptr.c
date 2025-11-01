@@ -4,9 +4,9 @@
 #ifdef __linux__
 #include <execinfo.h>
 #endif
-#include <stdint.h>
 #include "../../src/ec_graph.h"
 #include <stdbool.h>
+#include <stdint.h>
 #ifdef EC_USE_MEMPOOL
 #include "ec_mempool.h"
 #endif
