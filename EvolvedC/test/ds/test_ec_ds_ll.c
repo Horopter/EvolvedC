@@ -1,0 +1,145 @@
+#include "../../src/ec_ds.h"
+#include <assert.h>
+#include <stdio.h>
+
+static void
+test_make_set_pos(void)
+{
+	long long a = 1000LL, b = 2000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nb = ec_ds_ll_make_set(&b, NULL);
+	assert(na && nb);
+}
+
+static void
+test_find_pos(void)
+{
+	long long a = 1000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	assert(ec_ds_ll_find(na) == na);
+}
+
+static void
+test_union_by_rank_pos(void)
+{
+	long long a = 1000LL, b = 2000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nb = ec_ds_ll_make_set(&b, NULL);
+	ec_ds_ll_union_by_rank(na, nb);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nb));
+}
+
+static void
+test_union_same_set_idempotent(void)
+{
+	long long a = 1000LL, b = 2000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nb = ec_ds_ll_make_set(&b, NULL);
+	ec_ds_ll_union_by_rank(na, nb);
+	ec_ds_ll_union_by_rank(na, nb);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nb));
+}
+
+static void
+test_union_by_rank_weighted_pos(void)
+{
+	long long a = 1000LL, c = 3000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nc = ec_ds_ll_make_set(&c, NULL);
+	ec_ds_ll_union_by_rank_weighted(nc, na, 2.0);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nc));
+}
+
+static void
+test_calc_connected_pos(void)
+{
+	long long a = 1000LL, c = 3000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nc = ec_ds_ll_make_set(&c, NULL);
+	ec_ds_ll_union_by_rank_weighted(nc, na, 2.0);
+	double v1 = ec_ds_ll_calc(na, nc);
+	assert(v1 != -1.0);
+}
+
+static void
+test_union_by_size_pos(void)
+{
+	long long a = 1000LL, b = 2000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nb = ec_ds_ll_make_set(&b, NULL);
+	ec_ds_ll_union_by_size(na, nb);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nb));
+}
+
+static void
+test_union_by_size_idempotent(void)
+{
+	long long a = 1000LL, b = 2000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nb = ec_ds_ll_make_set(&b, NULL);
+	ec_ds_ll_union_by_size(na, nb);
+	ec_ds_ll_union_by_size(na, nb);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nb));
+}
+
+static void
+test_union_by_size_weighted_pos(void)
+{
+	long long a = 1000LL, c = 3000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nc = ec_ds_ll_make_set(&c, NULL);
+	ec_ds_ll_union_by_size_weighted(nc, na, 2.0);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nc));
+}
+
+static void
+test_union_by_size_weighted_idempotent(void)
+{
+	long long a = 1000LL, c = 3000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nc = ec_ds_ll_make_set(&c, NULL);
+	ec_ds_ll_union_by_size_weighted(nc, na, 2.0);
+	ec_ds_ll_union_by_size_weighted(nc, na, 3.0);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nc));
+}
+
+static void
+test_union_by_rank_weighted_idempotent(void)
+{
+	long long a = 1000LL, b = 2000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nb = ec_ds_ll_make_set(&b, NULL);
+	ec_ds_ll_union_by_rank_weighted(na, nb, 2.0);
+	ec_ds_ll_union_by_rank_weighted(na, nb, 3.0);
+	assert(ec_ds_ll_find(na) == ec_ds_ll_find(nb));
+}
+
+static void
+test_calc_not_connected_neg(void)
+{
+	long long a = 1000LL, d = 4000LL;
+	ec_ds_ll_node_t* na = ec_ds_ll_make_set(&a, NULL);
+	ec_ds_ll_node_t* nd = ec_ds_ll_make_set(&d, NULL);
+	double v2 = ec_ds_ll_calc(na, nd);
+	assert(v2 == -1.0);
+}
+
+int
+main(void)
+{
+	printf("Starting ec_ds_ll tests...\n");
+	test_make_set_pos();
+	test_find_pos();
+	test_union_by_rank_pos();
+	test_union_same_set_idempotent();
+	test_union_by_rank_weighted_pos();
+	test_union_by_rank_weighted_idempotent();
+	test_union_by_size_pos();
+	test_union_by_size_idempotent();
+	test_union_by_size_weighted_pos();
+	test_union_by_size_weighted_idempotent();
+	test_calc_connected_pos();
+	test_calc_not_connected_neg();
+	printf("All ec_ds_ll tests passed.\n");
+	return 0;
+}

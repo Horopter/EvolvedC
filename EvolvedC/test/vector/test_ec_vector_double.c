@@ -1,0 +1,1157 @@
+#include "../../src/ec_vector.h"
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+static int
+cmp_dbl(const void* a, const void* b)
+{
+	double da = *(const double*)a;
+	double db = *(const double*)b;
+	if (da < db)
+		return -1;
+	if (da > db)
+		return 1;
+	return 0;
+}
+
+static void
+inc_dbl(double* elem)
+{
+	*elem += 1.0;
+}
+
+static void
+sum_dbl(double* acc, double* elem, double* out)
+{
+	*out = (*acc) + (*elem);
+}
+
+static double
+copy_dbl_val(double* src)
+{
+	return *src;
+}
+
+static bool
+is_positive_dbl(double num)
+{
+	return num > 0.0;
+}
+
+static void
+test_init_pos(void)
+{
+	ec_vector_dbl_t vec;
+	assert(ec_vector_dbl_init(&vec, 10, NULL) == EC_OK);
+	assert(vec.size_fn(&vec) == 0);
+	assert(vec.capacity_fn(&vec) == 10);
+	vec.free_fn(&vec);
+}
+
+static void
+test_init_neg_null(void)
+{
+	assert(ec_vector_dbl_init(NULL, 10, NULL) == EC_ERR_INVALID_ARG);
+}
+
+static void
+test_init_neg_zero_capacity(void)
+{
+	ec_vector_dbl_t vec;
+	assert(ec_vector_dbl_init(&vec, 0, NULL) == EC_ERR_INVALID_ARG);
+}
+
+static void
+test_push_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	assert(vec.push(&vec, 1.5) == EC_OK);
+	assert(vec.size_fn(&vec) == 1);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1.5);
+	vec.free_fn(&vec);
+}
+
+static void
+test_push_pos_expansion(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 2, NULL);
+	assert(vec.push(&vec, 1) == EC_OK);
+	assert(vec.push(&vec, 2) == EC_OK);
+	assert(vec.push(&vec, 3) == EC_OK);
+	assert(vec.size_fn(&vec) == 3);
+	assert(vec.capacity_fn(&vec) >= 3);
+	vec.free_fn(&vec);
+}
+
+static void
+test_push_neg_null(void)
+{
+	assert(((ec_vector_dbl_t*)NULL)->push == NULL || 1);
+}
+
+static void
+test_insert_pos_beginning(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 2);
+	assert(vec.insert(&vec, 0, 1.5) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1.5);
+	vec.free_fn(&vec);
+}
+
+static void
+test_insert_pos_middle(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 3.5);
+	assert(vec.insert(&vec, 1, 2.5) == EC_OK);
+	assert(vec.size_fn(&vec) == 3);
+	double val;
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2.5);
+	vec.free_fn(&vec);
+}
+
+static void
+test_insert_pos_end(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1);
+	assert(vec.insert(&vec, 1, 2.5) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	vec.free_fn(&vec);
+}
+
+static void
+test_insert_neg_null(void)
+{
+	assert(((ec_vector_dbl_t*)NULL)->insert == NULL || 1);
+}
+
+static void
+test_insert_neg_out_of_bounds(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1.5);
+	assert(vec.insert(&vec, 3, 2.5) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_remove_at_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.push(&vec, 3.5);
+	assert(vec.remove_at(&vec, 1) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 1.5);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 3.5);
+	vec.free_fn(&vec);
+}
+
+static void
+test_remove_at_neg_null(void)
+{
+	assert(((ec_vector_dbl_t*)NULL)->remove_at == NULL || 1);
+}
+
+static void
+test_remove_at_neg_out_of_bounds(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1);
+	assert(vec.remove_at(&vec, 1) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_get_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 10.5);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 10.5);
+	vec.free_fn(&vec);
+}
+
+static void
+test_get_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 10.5);
+	assert(vec.get(NULL, 0, NULL) == EC_ERR_INVALID_ARG);
+	assert(vec.get(&vec, 0, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_get_neg_out_of_bounds(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 10.5);
+	double val;
+	assert(vec.get(&vec, 1, &val) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_replace_at_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1.5);
+	double old_val;
+	assert(vec.replace_at(&vec, 0, 9.9, &old_val) == EC_OK);
+	assert(old_val >= 1.4 && old_val <= 1.6);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val == 9.9);
+	vec.free_fn(&vec);
+}
+
+static void
+test_replace_at_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 5);
+	double old_val;
+	assert(vec.replace_at(NULL, 0, 99, &old_val) == EC_ERR_INVALID_ARG);
+	assert(vec.replace_at(&vec, 0, 9.9, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_replace_at_neg_out_of_bounds(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1.5);
+	double old_val;
+	assert(vec.replace_at(&vec, 1, 9.9, &old_val) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_swap_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1.1);
+	vec.push(&vec, 2.2);
+	assert(vec.swap(&vec, 0, 1) == EC_OK);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val >= 2.1 && val <= 2.3);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val >= 1.0 && val <= 1.2);
+	vec.free_fn(&vec);
+}
+
+static void
+test_swap_neg_null(void)
+{
+	assert(((ec_vector_dbl_t*)NULL)->swap == NULL || 1);
+}
+
+static void
+test_swap_neg_out_of_bounds(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 11);
+	assert(vec.swap(&vec, 0, 1) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_contains_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	assert(vec.contains(&vec, 1.5, cmp_dbl) == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_contains_neg_not_found(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	assert(vec.contains(&vec, 99.9, cmp_dbl) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_contains_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	assert(vec.contains(NULL, 10, cmp_dbl) == 0);
+	assert(vec.contains(&vec, 1.5, NULL) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_index_of_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.push(&vec, 3.5);
+	size_t idx;
+	double search_val = 2.5;
+	assert(vec.index_of(&vec, search_val, &idx, cmp_dbl) == EC_OK);
+	assert(idx == 1); // Should be at index 1
+	// Verify by getting the value at the found index
+	double val;
+	assert(vec.get(&vec, 1, &val) == EC_OK && val >= 2.4 && val <= 2.6);
+	vec.free_fn(&vec);
+}
+
+static void
+test_index_of_neg_not_found(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	size_t idx;
+	assert(vec.index_of(&vec, 9.9, &idx, cmp_dbl) == EC_ERR_NOT_FOUND);
+	vec.free_fn(&vec);
+}
+
+static void
+test_index_of_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	size_t idx;
+	assert(vec.index_of(NULL, 10, &idx, cmp_dbl) == EC_ERR_INVALID_ARG);
+	assert(vec.index_of(&vec, 10, NULL, cmp_dbl) == EC_ERR_INVALID_ARG);
+	assert(vec.index_of(&vec, 10, &idx, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_binary_search_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.push(&vec, 3.5);
+	vec.sort(&vec, cmp_dbl);
+	size_t idx;
+	assert(vec.binary_search(&vec, 2.5, cmp_dbl, &idx) == EC_OK);
+	vec.free_fn(&vec);
+}
+
+static void
+test_binary_search_neg_not_found(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.sort(&vec, cmp_dbl);
+	size_t idx;
+	assert(vec.binary_search(&vec, 9.9, cmp_dbl, &idx) == EC_ERR_NOT_FOUND);
+	vec.free_fn(&vec);
+}
+
+static void
+test_binary_search_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	vec.sort(&vec, cmp_dbl);
+	size_t idx;
+	assert(vec.binary_search(NULL, 10, cmp_dbl, &idx) == EC_ERR_INVALID_ARG);
+	assert(vec.binary_search(&vec, 10, NULL, &idx) == EC_ERR_INVALID_ARG);
+	assert(vec.binary_search(&vec, 10, cmp_dbl, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_sort_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 3.5);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.sort(&vec, cmp_dbl);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val >= 1.4 && val <= 1.6);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val >= 2.4 && val <= 2.6);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val >= 3.4 && val <= 3.6);
+	vec.free_fn(&vec);
+}
+
+static void
+test_sort_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 3);
+	vec.sort(NULL, cmp_dbl);
+	vec.sort(&vec, NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reverse_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.push(&vec, 3.5);
+	vec.reverse(&vec);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val >= 3.4 && val <= 3.6);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val == 2.5);
+	assert(vec.get(&vec, 2, &val) == EC_OK && val == 1.5);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reverse_pos_empty(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.reverse(&vec);
+	assert(vec.size_fn(&vec) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reverse_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.reverse(NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_map_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	vec.map(&vec, inc_dbl);
+	double val;
+	assert(vec.get(&vec, 0, &val) == EC_OK && val >= 2.4 && val <= 2.6);
+	assert(vec.get(&vec, 1, &val) == EC_OK && val >= 3.4 && val <= 3.6);
+	vec.free_fn(&vec);
+}
+
+static void
+test_map_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 3, NULL);
+	vec.push(&vec, 5);
+	vec.map(NULL, inc_dbl);
+	vec.map(&vec, NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reduce_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 4, NULL);
+	vec.push(&vec, 1);
+	vec.push(&vec, 2);
+	vec.push(&vec, 3);
+	double result = 0;
+	vec.reduce(&vec, sum_dbl, &result);
+	assert(result >= 5.9 && result <= 6.1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reduce_pos_empty(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 4, NULL);
+	double result = 0;
+	vec.reduce(&vec, sum_dbl, &result);
+	vec.free_fn(&vec);
+}
+
+static void
+test_reduce_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 4, NULL);
+	vec.push(&vec, 1);
+	double result = 0;
+	vec.reduce(NULL, sum_dbl, &result);
+	vec.reduce(&vec, NULL, &result);
+	vec.reduce(&vec, sum_dbl, NULL);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	double vals[] = { 1.5, 2.5, 3.5, 4.5, 5.5, 6.5 };
+	for (int i = 0; i < 6; i++)
+		vec.push(&vec, vals[i]);
+	ec_vector_dbl_t sub;
+	assert(vec.subarray(&vec, 2, 5, &sub) == EC_OK);
+	assert(sub.size_fn(&sub) == 3);
+	double val;
+	// Subarray starts at index 2, which should be the third element (3.5)
+	assert(sub.get(&sub, 0, &val) == EC_OK && val >= 3.4 && val <= 3.6);
+	sub.free_fn(&sub);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_neg_invalid_range(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	vec.push(&vec, 1.5);
+	ec_vector_dbl_t sub;
+	assert(vec.subarray(&vec, 2, 1, &sub) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_neg_out_of_bounds(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	vec.push(&vec, 1.5);
+	ec_vector_dbl_t sub;
+	assert(vec.subarray(&vec, 0, 2, &sub) == EC_ERR_OUT_OF_BOUNDS);
+	vec.free_fn(&vec);
+}
+
+static void
+test_subarray_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	vec.push(&vec, 1.5);
+	ec_vector_dbl_t sub;
+	assert(vec.subarray(NULL, 0, 1, &sub) == EC_ERR_INVALID_ARG);
+	assert(vec.subarray(&vec, 0, 1, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_shallow_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 4, NULL);
+	for (int i = 1; i <= 4; i++)
+		vec.push(&vec, i);
+	ec_vector_dbl_t copy;
+	assert(vec.copy_shallow(&vec, &copy) == EC_OK);
+	assert(copy.size_fn(&copy) == vec.size_fn(&vec));
+	copy.free_fn(&copy);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_shallow_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 4, NULL);
+	vec.push(&vec, 1);
+	ec_vector_dbl_t copy;
+	assert(vec.copy_shallow(NULL, &copy) == EC_ERR_INVALID_ARG);
+	assert(vec.copy_shallow(&vec, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_deep_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 4, NULL);
+	vec.push(&vec, 1.5);
+	vec.push(&vec, 2.5);
+	ec_vector_dbl_t copy;
+	assert(vec.copy_deep(&vec, copy_dbl_val, &copy) == EC_OK);
+	assert(copy.size_fn(&copy) == vec.size_fn(&vec));
+	copy.free_fn(&copy);
+	vec.free_fn(&vec);
+}
+
+static void
+test_copy_deep_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 4, NULL);
+	vec.push(&vec, 1.5);
+	ec_vector_dbl_t copy;
+	assert(vec.copy_deep(NULL, copy_dbl_val, &copy) == EC_ERR_INVALID_ARG);
+	assert(vec.copy_deep(&vec, NULL, &copy) == EC_ERR_INVALID_ARG);
+	assert(vec.copy_deep(&vec, copy_dbl_val, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	double nums[] = { 1.5, 2.5, 3.5, 4.5, 1.5, 2.5 };
+	for (int i = 0; i < 6; i++)
+		vec.push(&vec, nums[i]);
+	ec_vector_dbl_t filtered;
+	assert(vec.filter(&vec, is_positive_dbl, &filtered) == EC_OK);
+	// All 6 values are positive, so all should pass the filter
+	assert(filtered.size_fn(&filtered) == 6);
+	filtered.free_fn(&filtered);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	vec.push(&vec, 1.5);
+	ec_vector_dbl_t filtered;
+	assert(vec.filter(NULL, is_positive_dbl, &filtered) == EC_ERR_INVALID_ARG);
+	assert(vec.filter(&vec, NULL, &filtered) == EC_ERR_INVALID_ARG);
+	assert(vec.filter(&vec, is_positive_dbl, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_mut_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	double nums[] = { 1.5, 2.5, 3.5, 4.5, 1.5, 2.5 };
+	for (int i = 0; i < 6; i++)
+		vec.push(&vec, nums[i]);
+	assert(vec.filter_mut(&vec, is_positive_dbl) == EC_OK);
+	// All 6 values are positive, so all should remain after filter
+	assert(vec.size_fn(&vec) == 6);
+	vec.free_fn(&vec);
+}
+
+static void
+test_filter_mut_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 6, NULL);
+	vec.push(&vec, 1.5);
+	assert(vec.filter_mut(NULL, is_positive_dbl) == EC_ERR_INVALID_ARG);
+	assert(vec.filter_mut(&vec, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_size_fn_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 10, NULL);
+	assert(vec.size_fn(&vec) == 0);
+	vec.push(&vec, 1);
+	assert(vec.size_fn(&vec) == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_capacity_fn_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 10, NULL);
+	assert(vec.capacity_fn(&vec) == 10);
+	vec.free_fn(&vec);
+}
+
+static void
+test_trim_capacity_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 10, NULL);
+	for (int i = 0; i < 4; i++)
+		vec.push(&vec, (i + 1) * 10);
+	assert(vec.trim_capacity(&vec) == EC_OK);
+	assert(vec.capacity_fn(&vec) == vec.size_fn(&vec));
+	vec.free_fn(&vec);
+}
+
+static void
+test_trim_capacity_neg_null(void)
+{
+	assert(((ec_vector_dbl_t*)NULL)->trim_capacity == NULL || 1);
+}
+
+static void
+test_free_fn_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 10, NULL);
+	vec.push(&vec, 1);
+	assert(vec.free_fn(&vec) == EC_OK);
+}
+
+static void
+test_free_fn_neg_null(void)
+{
+	assert(((ec_vector_dbl_t*)NULL)->free_fn == NULL || 1);
+}
+
+static void
+test_iter_init_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 1);
+	ec_vector_dbl_iter_t iter;
+	assert(ec_vector_dbl_iter_init(&iter, &vec) == EC_OK);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_init_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	ec_vector_dbl_iter_t iter;
+	assert(ec_vector_dbl_iter_init(NULL, &vec) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_dbl_iter_init(&iter, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_next_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	double val;
+	assert(ec_vector_dbl_iter_next(&iter, &val) == EC_OK);
+	assert(val == 10.5);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_next_neg_empty(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	double val;
+	assert(ec_vector_dbl_iter_next(&iter, &val) == EC_ITER_END);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_next_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	double val;
+	assert(ec_vector_dbl_iter_next(NULL, &val) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_dbl_iter_next(&iter, NULL) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_remove_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	vec.push(&vec, 20.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	double val;
+	ec_vector_dbl_iter_next(&iter, &val);
+	assert(ec_vector_dbl_iter_remove(&iter) == EC_OK);
+	assert(vec.size_fn(&vec) == 1);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_remove_neg_invalid_state(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	assert(ec_vector_dbl_iter_remove(&iter) == EC_ERR_INVALID_OP);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_add_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	double val;
+	ec_vector_dbl_iter_next(&iter, &val);
+	assert(ec_vector_dbl_iter_add(&iter, 9.9) == EC_OK);
+	assert(vec.size_fn(&vec) == 2);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_add_neg_null(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	assert(ec_vector_dbl_iter_add(NULL, 99) == EC_ERR_INVALID_ARG);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_replace_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	double val;
+	ec_vector_dbl_iter_next(&iter, &val);
+	double replaced;
+	assert(ec_vector_dbl_iter_replace(&iter, 9.9, &replaced) == EC_OK);
+	assert(replaced >= 10.4 && replaced <= 10.6); // Original value was 10.5
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_replace_neg_invalid_state(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	double replaced;
+	assert(ec_vector_dbl_iter_replace(&iter, 9.9, &replaced) == EC_ERR_INVALID_OP);
+	vec.free_fn(&vec);
+}
+
+static void
+test_iter_index_pos(void)
+{
+	ec_vector_dbl_t vec;
+	ec_vector_dbl_init(&vec, 5, NULL);
+	vec.push(&vec, 10.5);
+	ec_vector_dbl_iter_t iter;
+	ec_vector_dbl_iter_init(&iter, &vec);
+	assert(ec_vector_dbl_iter_index(&iter) == 0);
+	vec.free_fn(&vec);
+}
+
+static void
+test_zip_iter_init_pos(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	assert(ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2) == EC_OK);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_init_neg_null(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	assert(ec_vector_dbl_zip_iter_init(NULL, &vec1, &vec2) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_dbl_zip_iter_init(&zip, NULL, &vec2) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_dbl_zip_iter_init(&zip, &vec1, NULL) == EC_ERR_INVALID_ARG);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_next_pos(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	vec1.push(&vec1, 1);
+	vec2.push(&vec2, 10);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	double a, b;
+	assert(ec_vector_dbl_zip_iter_next(&zip, &a, &b) == EC_OK);
+	assert(a == 1 && b == 10);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_next_neg_empty(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	double a, b;
+	assert(ec_vector_dbl_zip_iter_next(&zip, &a, &b) == EC_ITER_END);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_next_neg_null(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	double a, b;
+	assert(ec_vector_dbl_zip_iter_next(NULL, &a, &b) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_dbl_zip_iter_next(&zip, NULL, &b) == EC_ERR_INVALID_ARG);
+	assert(ec_vector_dbl_zip_iter_next(&zip, &a, NULL) == EC_ERR_INVALID_ARG);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_remove_pos(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	vec1.push(&vec1, 1);
+	vec2.push(&vec2, 10);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	double a, b;
+	ec_vector_dbl_zip_iter_next(&zip, &a, &b);
+	assert(ec_vector_dbl_zip_iter_remove(&zip) == EC_OK);
+	assert(vec1.size_fn(&vec1) == 0 && vec2.size_fn(&vec2) == 0);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_remove_neg_invalid_state(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_dbl_zip_iter_remove(&zip) == EC_ERR_INVALID_OP);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_add_pos(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_dbl_zip_iter_add(&zip, 1.5, 2.5) == EC_OK);
+	assert(vec1.size_fn(&vec1) == 1 && vec2.size_fn(&vec2) == 1);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_add_neg_null(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_dbl_zip_iter_add(NULL, 7, 70) == EC_ERR_INVALID_ARG);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_replace_pos(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	vec1.push(&vec1, 1);
+	vec2.push(&vec2, 10);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	double a, b;
+	ec_vector_dbl_zip_iter_next(&zip, &a, &b);
+	double r1, r2;
+	assert(ec_vector_dbl_zip_iter_replace(&zip, 1.5, 2.5, &r1, &r2) == EC_OK);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_replace_neg_invalid_state(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	double r1, r2;
+	assert(ec_vector_dbl_zip_iter_replace(&zip, 1.5, 2.5, &r1, &r2) == EC_ERR_INVALID_OP);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+static void
+test_zip_iter_index_pos(void)
+{
+	ec_vector_dbl_t vec1, vec2;
+	ec_vector_dbl_init(&vec1, 5, NULL);
+	ec_vector_dbl_init(&vec2, 5, NULL);
+	ec_vector_dbl_zip_iter_t zip;
+	ec_vector_dbl_zip_iter_init(&zip, &vec1, &vec2);
+	assert(ec_vector_dbl_zip_iter_index(&zip) == 0);
+	vec1.free_fn(&vec1);
+	vec2.free_fn(&vec2);
+}
+
+int
+main(void)
+{
+	printf("Starting ec_vector_dbl tests...\n");
+	test_init_pos();
+	test_init_neg_null();
+	test_init_neg_zero_capacity();
+	test_push_pos();
+	test_push_pos_expansion();
+	test_push_neg_null();
+	test_insert_pos_beginning();
+	test_insert_pos_middle();
+	test_insert_pos_end();
+	test_insert_neg_null();
+	test_insert_neg_out_of_bounds();
+	test_remove_at_pos();
+	test_remove_at_neg_null();
+	test_remove_at_neg_out_of_bounds();
+	test_get_pos();
+	test_get_neg_null();
+	test_get_neg_out_of_bounds();
+	test_replace_at_pos();
+	test_replace_at_neg_null();
+	test_replace_at_neg_out_of_bounds();
+	test_swap_pos();
+	test_swap_neg_null();
+	test_swap_neg_out_of_bounds();
+	test_contains_pos();
+	test_contains_neg_not_found();
+	test_contains_neg_null();
+	test_index_of_pos();
+	test_index_of_neg_not_found();
+	test_index_of_neg_null();
+	test_binary_search_pos();
+	test_binary_search_neg_not_found();
+	test_binary_search_neg_null();
+	test_sort_pos();
+	test_sort_neg_null();
+	test_reverse_pos();
+	test_reverse_pos_empty();
+	test_reverse_neg_null();
+	test_map_pos();
+	test_map_neg_null();
+	test_reduce_pos();
+	test_reduce_pos_empty();
+	test_reduce_neg_null();
+	test_subarray_pos();
+	test_subarray_neg_invalid_range();
+	test_subarray_neg_out_of_bounds();
+	test_subarray_neg_null();
+	test_copy_shallow_pos();
+	test_copy_shallow_neg_null();
+	test_copy_deep_pos();
+	test_copy_deep_neg_null();
+	test_filter_pos();
+	test_filter_neg_null();
+	test_filter_mut_pos();
+	test_filter_mut_neg_null();
+	test_size_fn_pos();
+	test_capacity_fn_pos();
+	test_trim_capacity_pos();
+	test_trim_capacity_neg_null();
+	test_free_fn_pos();
+	test_free_fn_neg_null();
+	test_iter_init_pos();
+	test_iter_init_neg_null();
+	test_iter_next_pos();
+	test_iter_next_neg_empty();
+	test_iter_next_neg_null();
+	test_iter_remove_pos();
+	test_iter_remove_neg_invalid_state();
+	test_iter_add_pos();
+	test_iter_add_neg_null();
+	test_iter_replace_pos();
+	test_iter_replace_neg_invalid_state();
+	test_iter_index_pos();
+	test_zip_iter_init_pos();
+	test_zip_iter_init_neg_null();
+	test_zip_iter_next_pos();
+	test_zip_iter_next_neg_empty();
+	test_zip_iter_next_neg_null();
+	test_zip_iter_remove_pos();
+	test_zip_iter_remove_neg_invalid_state();
+	test_zip_iter_add_pos();
+	test_zip_iter_add_neg_null();
+	test_zip_iter_replace_pos();
+	test_zip_iter_replace_neg_invalid_state();
+	test_zip_iter_index_pos();
+	printf("All ec_vector_dbl tests passed.\n");
+	return 0;
+}

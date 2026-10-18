@@ -1,0 +1,232 @@
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#ifdef __linux__
+#include <unistd.h>
+#define DELETE_FILE(filename) unlink(filename)
+#elif defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#define DELETE_FILE(filename) DeleteFile(filename)
+#else
+#define DELETE_FILE(filename) remove(filename)
+#endif
+#include "../../src/ec_log.h"
+
+#define TEST_ASSERT(cond)                                                             \
+	do                                                                                \
+		{                                                                             \
+			if (!(cond))                                                              \
+				{                                                                     \
+					fprintf(stderr, "[FAIL] %s:%d: %s\n", __FILE__, __LINE__, #cond); \
+					exit(EXIT_FAILURE);                                               \
+				}                                                                     \
+		}                                                                             \
+	while (0)
+
+static void
+cleanup_logs(void)
+{
+	DELETE_FILE("test_log_u32.log");
+	DELETE_FILE("test_log_u32_neg.log");
+}
+static void
+test_log_init_pos(void)
+{
+	{
+		printf("[RUN] test_log_init_pos\n");
+		ec_log_pool_init();
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_INFO, true, "test_log_u32.log", NULL, NULL) == EC_OK);
+		TEST_ASSERT(logger != NULL);
+		TEST_ASSERT(logger->to_stdout == true);
+		TEST_ASSERT(logger->level == EC_LOG_INFO);
+		TEST_ASSERT(logger->file != NULL);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_init_pos\n");
+	}
+}
+static void
+test_log_init_neg(void)
+{
+	{
+		printf("[RUN] test_log_init_neg\n");
+		ec_log_pool_init();
+		TEST_ASSERT(ec_log_init(NULL, EC_LOG_INFO, true, "test_log_u32_neg.log", NULL, NULL) == EC_ERR_INVALID_ARG);
+		printf("[PASS] test_log_init_neg\n");
+	}
+}
+static void
+test_log_u32_values_pos(void)
+{
+	{
+		printf("[RUN] test_log_u32_values_pos\n");
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_DEBUG, true, "test_log_u32.log", NULL, NULL) == EC_OK);
+		uint32_t val1 = (uint32_t)42, val2 = (uint32_t)100, val3 = (uint32_t)0, val4 = (uint32_t)4294967295;
+		EC_LOG_INFO(logger, "Value: %" PRIu32, val1);
+		EC_LOG_INFO(logger, "Value: %" PRIu32, val2);
+		EC_LOG_INFO(logger, "Zero: %" PRIu32, val3);
+		EC_LOG_INFO(logger, "Max: %" PRIu32, val4);
+		EC_LOG_INFO(logger, "Multiple: %" PRIu32 ", %" PRIu32 ", %" PRIu32, val1, val2, val3);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_u32_values_pos\n");
+	}
+}
+static void
+test_log_u32_values_neg(void)
+{
+	{
+		printf("[RUN] test_log_u32_values_neg\n");
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_WARN, true, "test_log_u32.log", NULL, NULL) == EC_OK);
+		uint32_t val = (uint32_t)42;
+		EC_LOG_DEBUG(logger, "No: %" PRIu32, val);
+		EC_LOG_INFO(logger, "No: %" PRIu32, val);
+		EC_LOG_WARN(logger, "Yes: %" PRIu32, val);
+		EC_LOG_ERROR(logger, "Yes: %" PRIu32, val);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_u32_values_neg\n");
+	}
+}
+static void
+test_log_set_level_pos(void)
+{
+	{
+		printf("[RUN] test_log_set_level_pos\n");
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_ERROR, true, "test_log_u32.log", NULL, NULL) == EC_OK);
+		uint32_t val = (uint32_t)123;
+		EC_LOG_ERROR(logger, "Error: %" PRIu32, val);
+		ec_log_set_level(logger, EC_LOG_DEBUG);
+		EC_LOG_DEBUG(logger, "Debug: %" PRIu32, val);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_set_level_pos\n");
+	}
+}
+static void
+test_log_set_level_neg(void)
+{
+	{
+		printf("[RUN] test_log_set_level_neg\n");
+		ec_log_set_level(NULL, EC_LOG_DEBUG);
+		printf("[PASS] test_log_set_level_neg\n");
+	}
+}
+static void
+test_log_shutdown_pos(void)
+{
+	{
+		printf("[RUN] test_log_shutdown_pos\n");
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_INFO, true, "test_log_u32.log", NULL, NULL) == EC_OK);
+		uint32_t val = (uint32_t)999;
+		EC_LOG_INFO(logger, "Before: %" PRIu32, val);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_shutdown_pos\n");
+	}
+}
+static void
+test_log_shutdown_neg(void)
+{
+	{
+		printf("[RUN] test_log_shutdown_neg\n");
+		ec_log_shutdown(NULL);
+		printf("[PASS] test_log_shutdown_neg\n");
+	}
+}
+static void
+test_log_all_levels_u32(void)
+{
+	{
+		printf("[RUN] test_log_all_levels_u32\n");
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_DEBUG, true, "test_log_u32.log", NULL, NULL) == EC_OK);
+		uint32_t val = (uint32_t)42;
+		EC_LOG_DEBUG(logger, "DEBUG: %" PRIu32, val);
+		EC_LOG_INFO(logger, "INFO: %" PRIu32, val);
+		EC_LOG_WARN(logger, "WARN: %" PRIu32, val);
+		EC_LOG_ERROR(logger, "ERROR: %" PRIu32, val);
+		EC_LOG_FATAL(logger, "FATAL: %" PRIu32, val);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_all_levels_u32\n");
+	}
+}
+static int callback_called_u32 = 0;
+static int
+log_callback_u32(void* arg, ec_log_level_t level, const char* fmt, va_list args)
+{
+	{
+		(void)arg;
+		(void)level;
+		(void)fmt;
+		(void)args;
+		callback_called_u32++;
+		return 0;
+	}
+}
+static void
+test_log_callback_u32(void)
+{
+	{
+		printf("[RUN] test_log_callback_u32\n");
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_INFO, false, NULL, NULL, log_callback_u32) == EC_OK);
+		uint32_t val = (uint32_t)42;
+		EC_LOG_INFO(logger, "Callback: %" PRIu32, val);
+		TEST_ASSERT(callback_called_u32 > 0);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_callback_u32\n");
+	}
+}
+static void
+test_log_file_u32(void)
+{
+	{
+		printf("[RUN] test_log_file_u32\n");
+		ec_log_t* logger = NULL;
+		TEST_ASSERT(ec_log_init(&logger, EC_LOG_INFO, false, "test_log_u32.log", NULL, NULL) == EC_OK);
+		uint32_t val = (uint32_t)12345;
+		EC_LOG_INFO(logger, "File: %" PRIu32, val);
+		FILE* file = fopen("test_log_u32.log", "r");
+		TEST_ASSERT(file != NULL);
+		fclose(file);
+		ec_log_shutdown(logger);
+		printf("[PASS] test_log_file_u32\n");
+	}
+}
+static void
+test_log_duplicate_file_u32(void)
+{
+	{
+		printf("[RUN] test_log_duplicate_file_u32\n");
+		ec_log_t *logger1 = NULL, *logger2 = NULL;
+		TEST_ASSERT(ec_log_init(&logger1, EC_LOG_INFO, true, "test_log_u32.log", NULL, NULL) == EC_OK);
+		TEST_ASSERT(ec_log_init(&logger2, EC_LOG_INFO, true, "test_log_u32.log", NULL, NULL) == EC_ERR_INVALID_OP);
+		ec_log_shutdown(logger1);
+		printf("[PASS] test_log_duplicate_file_u32\n");
+	}
+}
+int
+main(void)
+{
+	{
+		printf("\nStarting `ec_log_u32` Tests...\n");
+		cleanup_logs();
+		test_log_init_pos();
+		test_log_init_neg();
+		test_log_u32_values_pos();
+		test_log_u32_values_neg();
+		test_log_set_level_pos();
+		test_log_set_level_neg();
+		test_log_shutdown_pos();
+		test_log_shutdown_neg();
+		test_log_all_levels_u32();
+		test_log_callback_u32();
+		test_log_file_u32();
+		test_log_duplicate_file_u32();
+		cleanup_logs();
+		printf("\nAll `ec_log_u32` tests passed successfully!\n");
+		return 0;
+	}
+}
